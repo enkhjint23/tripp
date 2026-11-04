@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Тал нутгаас Самуй руу</title>
+<title>Аяланаа хэдүүлээ, бужигнуулнаа</title>
 <meta name="description" content="Шинэ жилийн аялал: Улаанбаатар → Эрээн → Хөх хот → Шанхай → Ко Самуй → Бангкок. 2026.12.25 – 2027.01.03.">
 <meta name="theme-color" content="#121518" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
@@ -484,7 +484,7 @@ footer.foot{padding:16px 0 8px;color:var(--muted);font-size:12px;border-top:1px 
   <section class="hero" id="hero" aria-label="Аялал">
     <div class="hero-copy">
       <div class="dates" id="eyebrow"></div>
-      <h1>Тал нутгаас Самуй руу</h1>
+      <h1>Аяланаа хэдүүлээ, бужигнуулнаа</h1>
       <div class="count" id="count" aria-live="polite"></div>
       <div class="crew" id="crew"></div>
     </div>
@@ -1446,11 +1446,11 @@ function settingsDialog(){
     if(key.length<20){toast("API түлхүүрийг бүтнээр нь буулгана уу");return}
     b.disabled=true;b.textContent="Холбогдож байна…";const ok=await createTrip(url,key);redraw();toast(ok?"Аялал үүслээ. Одоо найзуудаа уриарай":"Холбогдсонгүй. Дээрх мэдэгдлийг харна уу")}
    if(b.hasAttribute("data-joinpaste")){const inv=parseInvite($("#pasteLink").value);if(!inv){toast("Энэ урилгын холбоос биш байна");return}b.disabled=true;b.textContent="Нэгдэж байна…";await joinTrip(inv);redraw()}
-   if(b.hasAttribute("data-invite")){const url=inviteURL();if(navigator.share){try{await navigator.share({title:"Тал нутгаас Самуй руу",text:"Манай аяллын төлөвлөгөөнд нэгдээрэй",url});return}catch(err){if(err.name==="AbortError")return}}copy(url,"Урилгын холбоос хуулагдлаа. Бүлэгтээ илгээгээрэй")}
+   if(b.hasAttribute("data-invite")){const url=inviteURL();if(navigator.share){try{await navigator.share({title:"Аяланаа хэдүүлээ, бужигнуулнаа",text:"Манай аяллын төлөвлөгөөнд нэгдээрэй",url});return}catch(err){if(err.name==="AbortError")return}}copy(url,"Урилгын холбоос хуулагдлаа. Бүлэгтээ илгээгээрэй")}
    if(b.hasAttribute("data-copyinvite"))copy(inviteURL(),"Урилгын холбоос хуулагдлаа. Бүлэгтээ илгээгээрэй");
    if(b.hasAttribute("data-syncnow")){b.disabled=true;await pull();await push().catch(()=>{});redraw();toast(SYNC.state==="live"?"Шинэчлэгдсэн":SYNC.msg||"Синк хийж чадсангүй")}
    if(b.hasAttribute("data-disconnect")){if(b.dataset.armed){disconnect();redraw();toast("Салгагдлаа. Таны мэдээлэл энэ утсанд үлдэнэ")}else{b.dataset.armed="1";b.textContent="Дахин дарж салгана"}}
-   if(b.hasAttribute("data-share")){const url=shareURL();if(navigator.share){try{await navigator.share({title:"Тал нутгаас Самуй руу",text:"Миний сүүлийн өөрчлөлтүүд",url});return}catch(err){if(err.name==="AbortError")return}}copy(url)}
+   if(b.hasAttribute("data-share")){const url=shareURL();if(navigator.share){try{await navigator.share({title:"Аяланаа хэдүүлээ, бужигнуулнаа",text:"Миний сүүлийн өөрчлөлтүүд",url});return}catch(err){if(err.name==="AbortError")return}}copy(url)}
    if(b.dataset.pcol){const p=person(b.dataset.pcol);p.color=b.dataset.c;p.ts=now();save();dirty("people",p.id);renderAllData();redraw()}
    if(b.hasAttribute("data-export")){const blob=new Blob([JSON.stringify(S,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="tal-samui-noots.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
    if(b.hasAttribute("data-reset")){if(b.dataset.armed){disconnect();S=freshState();save();ls.del(ME);me=null;outbox.clear();saveOutbox();closeDialog();renderAllData();toast("Энэ утсыг цэвэрлэлээ")}else{b.dataset.armed="1";b.textContent="Дахин дарж: энэ утасны хуулбарыг устгана"}}});
