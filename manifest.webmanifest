@@ -1,0 +1,14 @@
+{
+  "name": "Steppe to Samui",
+  "short_name": "Samui Trip",
+  "description": "Our New Year trip planner: Ulaanbaatar → Erlian → Hohhot → Shanghai → Koh Samui → Bangkok.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0C1115",
+  "theme_color": "#0C1115",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

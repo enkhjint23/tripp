@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Steppe to Samui</title>
+<meta name="description" content="Our New Year trip: Ulaanbaatar → Erlian → Hohhot → Shanghai → Koh Samui → Bangkok. 25 Dec 2026 – 3 Jan 2027.">
+<meta name="theme-color" content="#0E1317" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F2F5F7" media="(prefers-color-scheme: light)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js" defer></script>
+<script src="config.js"></script>
+<style>
+/* Concept: a journey that runs down the latitude scale, from −27°C steppe to +32°C Bangkok.
+   Cold blue at the top of everything, warm orange at the bottom. App shell: hero + map, then tabs. */
+:root{
+  --bg:#EEF2F5; --surface:#FFFFFF; --surface-2:#F6F8FA; --ink:#121C24; --ink-2:#3A4954; --muted:#66757F; --line:#DAE1E7;
+  --frost:#2C63A0; --frost-soft:#DCE8F5; --sea:#0D857C; --sea-soft:#D6EFEC; --sun:#D45E22; --sun-soft:#FBE5D8;
+  --ok:#1C7A4A; --ok-soft:#DDF1E5; --bad:#B23B2A; --bad-soft:#F9E0DC;
+  --shadow:0 1px 2px rgba(18,28,36,.06),0 8px 24px -12px rgba(18,28,36,.18);
+  --r:14px;
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0C1115; --surface:#141C22; --surface-2:#19232A; --ink:#E6ECF0; --ink-2:#C2CDD4; --muted:#8C9BA6; --line:#24313A;
+  --frost:#80B0E2; --frost-soft:#1A2B3D; --sea:#4FC6BA; --sea-soft:#123430; --sun:#F29B61; --sun-soft:#3A2416;
+  --ok:#5EC78F; --ok-soft:#13301F; --bad:#F08574; --bad-soft:#3A1C17;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1115; --surface:#141C22; --surface-2:#19232A; --ink:#E6ECF0; --ink-2:#C2CDD4; --muted:#8C9BA6; --line:#24313A;
+  --frost:#80B0E2; --frost-soft:#1A2B3D; --sea:#4FC6BA; --sea-soft:#123430; --sun:#F29B61; --sun-soft:#3A2416;
+  --ok:#5EC78F; --ok-soft:#13301F; --bad:#F08574; --bad-soft:#3A1C17;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+@media (min-width:900px){body{padding-bottom:40px}}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--frost);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+[hidden]{display:none!important}
+.shell{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  padding-top:env(safe-area-inset-top,0px);border-bottom:1px solid transparent;transition:border-color .2s}
+.top.scrolled{border-bottom-color:var(--line)}
+.top .shell{display:flex;align-items:center;gap:12px;height:56px}
+.brand{font-family:var(--f-display);font-weight:900;font-size:22px;letter-spacing:.02em;text-transform:uppercase;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.brand i{width:22px;height:22px;border-radius:6px;background:linear-gradient(160deg,var(--frost),var(--sea) 55%,var(--sun));display:inline-block}
+.tabs-top{display:none;gap:2px;margin-left:16px}
+@media (min-width:900px){.tabs-top{display:flex}}
+.tabs-top button{border:0;background:none;padding:8px 12px;border-radius:8px;font-weight:600;color:var(--muted)}
+.tabs-top button[aria-current="page"]{color:var(--ink);background:var(--surface)}
+.top .spacer{flex:1}
+.me-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px 4px 4px;font-weight:600;font-size:14px}
+@media (max-width:560px){.top .shell{gap:8px}.brand{font-size:19px;min-width:0;overflow:hidden;text-overflow:ellipsis}.me-btn span:not(.av){display:none}.me-btn{padding:4px}}
+.sync{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;white-space:nowrap}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.sync.live i{background:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
+.sync.syncing i{background:var(--frost);animation:pulse 1s ease-in-out infinite}
+.sync.offline i,.sync.error i{background:var(--sun);box-shadow:0 0 0 3px var(--sun-soft)}
+@keyframes pulse{50%{opacity:.3}}
+.sync-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 12px;height:38px;display:inline-flex;align-items:center}
+@media (max-width:560px){.sync-btn{padding:0;width:38px;justify-content:center}.sync-btn .sync>span{display:none}}
+.sect{display:flex;flex-direction:column;gap:10px}
+.sect+.sect{border-top:1px solid var(--line);padding-top:14px}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0}
+.icon-btn svg{width:18px;height:18px}
+
+/* bottom nav (mobile) */
+.tabs-bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));
+  display:grid;grid-template-columns:repeat(5,1fr)}
+@media (min-width:900px){.tabs-bottom{display:none}}
+.tabs-bottom button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11px;font-weight:600;color:var(--muted);position:relative}
+.tabs-bottom svg{width:22px;height:22px}
+.tabs-bottom button[aria-current="page"]{color:var(--ink)}
+.tabs-bottom button[aria-current="page"] svg{color:var(--sun)}
+.badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--sun);color:#fff;font-size:10px;line-height:16px;font-family:var(--f-mono)}
+
+/* avatars */
+.av{--c:var(--frost);width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:inline-grid;place-items:center;font-weight:700;font-size:12px;flex:none;letter-spacing:0}
+.av.sm{width:22px;height:22px;font-size:10px}
+.av.lg{width:40px;height:40px;font-size:15px}
+.av.nobody{background:transparent;border:1.5px dashed var(--line);color:var(--muted)}
+
+/* hero */
+.hero{display:grid;gap:20px;padding:20px 0 8px;grid-template-columns:1fr}
+@media (min-width:900px){.hero{grid-template-columns:1.15fr .85fr;align-items:stretch;padding-top:28px}}
+.hero-copy{display:flex;flex-direction:column;gap:14px;min-width:0}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.hero h1{font-family:var(--f-display);font-weight:900;text-transform:uppercase;font-size:clamp(56px,13vw,120px);line-height:.84;letter-spacing:-.005em}
+.hero h1 .cold{color:var(--frost)} .hero h1 .hot{color:var(--sun)}
+.hero p.lede{font-size:17px;color:var(--ink-2);max-width:52ch;margin:0}
+.count{display:flex;gap:10px;flex-wrap:wrap}
+.count .unit{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px 8px;min-width:74px;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.count b{font-family:var(--f-display);font-weight:800;font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.count span{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.count .label{align-self:center;font-size:14px;color:var(--muted);max-width:18ch}
+.crew{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.crew .stack{display:flex}
+.crew .stack .av{border:2px solid var(--bg);margin-left:-8px}
+.crew .stack .av:first-child{margin-left:0}
+
+/* map */
+.mapcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.mapcard header{display:flex;justify-content:space-between;align-items:baseline;padding:14px 16px 0;gap:8px}
+.mapcard h2{font-size:14px;font-weight:700}
+.mapwrap{position:relative;margin-top:10px;background:linear-gradient(180deg,color-mix(in srgb,var(--frost) 16%,transparent),color-mix(in srgb,var(--sea) 8%,transparent) 45%,color-mix(in srgb,var(--sun) 18%,transparent))}
+.map{display:block;width:100%;height:auto;max-height:560px}
+.map .leg{fill:none;stroke-width:2.5;stroke-linecap:round}
+.map .leg.train{stroke-dasharray:1 7;stroke-width:4}
+.map .leg.dim{opacity:.25}
+.map .leg.hi{stroke-width:4}
+.map .lat{stroke:var(--line);stroke-width:1}
+.map text{font-family:var(--f-body);fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
+.map .latlabel{font-family:var(--f-mono);font-size:10px;fill:var(--muted)}
+.map .cityname{font-size:13px;font-weight:700}
+.map .citysub{font-size:10.5px;fill:var(--muted);font-family:var(--f-mono)}
+.map .plane-dot{fill:var(--ink)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:0 16px 14px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend svg{width:26px;height:8px}
+
+/* section structure */
+main{padding-top:12px}
+.view{display:flex;flex-direction:column;gap:18px;padding:12px 0 24px;animation:fade .25s ease}
+@keyframes fade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+.view-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.view-head h2{font-family:var(--f-display);font-weight:800;text-transform:uppercase;font-size:36px;line-height:1;letter-spacing:.01em}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.pad{padding:16px}
+.grid-2{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:760px){.grid-2{grid-template-columns:1fr 1fr}}
+.grid-3{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:760px){.grid-3{grid-template-columns:repeat(3,1fr)}}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:7px;font-weight:600;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 14px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn svg{width:16px;height:16px}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.sun{background:var(--sun);color:#fff;border-color:var(--sun)}
+.btn.ghost{border-color:transparent;background:none}
+.btn.danger{color:var(--bad)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);white-space:nowrap}
+.chip.hot{background:var(--sun-soft);color:var(--sun);border-color:transparent}
+.chip.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.chip.cold{background:var(--frost-soft);color:var(--frost);border-color:transparent}
+input[type=text],input[type=number],input[type=date],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-width:0;width:100%;font-size:15px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--frost);box-shadow:0 0 0 3px var(--frost-soft)}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--ink-2);min-width:0}
+.alert{display:flex;gap:12px;padding:14px 16px;border-radius:var(--r);background:var(--sun-soft);color:var(--ink)}
+.alert svg{width:20px;height:20px;color:var(--sun);flex:none;margin-top:2px}
+.alert b{display:block}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:10px}
+
+/* next-up strip */
+.nextup{display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:760px){.nextup{grid-template-columns:repeat(3,1fr)}}
+.stat{padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.stat .k{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,6.6vw,32px);line-height:1;overflow-wrap:anywhere}
+.stat .s{font-size:13px;color:var(--muted)}
+.bar{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--sea),var(--sun));border-radius:4px;transition:width .5s}
+
+/* days */
+.days{display:flex;flex-direction:column;gap:10px}
+.day{--c:var(--frost);overflow:hidden}
+.day>button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:14px 16px}
+.day>button:focus-visible{outline:2px solid var(--frost);outline-offset:-2px}
+.dnum{display:flex;flex-direction:column;align-items:flex-start;border-right:3px solid var(--c);padding-right:10px}
+.dnum b{font-family:var(--f-display);font-weight:900;font-size:38px;line-height:.9}
+.dnum span{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.dtitle{display:flex;flex-direction:column;gap:3px;min-width:0}
+.dtitle h3{font-size:17px}
+.dtitle .route{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chev{width:20px;height:20px;color:var(--muted);transition:transform .2s}
+.day.open .chev{transform:rotate(180deg)}
+.day.today{border-color:var(--sun);box-shadow:0 0 0 2px var(--sun-soft),var(--shadow)}
+.dbody{padding:0 16px 16px 94px;display:flex;flex-direction:column;gap:12px}
+@media (max-width:560px){.dbody{padding-left:16px}}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.steps li{display:grid;grid-template-columns:30px 76px 1fr;gap:10px;align-items:start;padding:8px 0;border-top:1px dashed var(--line)}
+.steps li:first-child{border-top:0}
+.steps .ico{width:30px;height:30px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;color:var(--c)}
+.steps .ico svg{width:16px;height:16px}
+.steps .t{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);padding-top:6px}
+.steps .x{padding-top:5px;min-width:0}
+@media (max-width:420px){.steps li{grid-template-columns:30px 1fr}.steps .t{grid-column:2;padding-top:0}.steps .x{grid-column:2;padding-top:0}.steps .ico{grid-row:span 2}}
+.tip{font-size:13.5px;background:var(--surface-2);border-radius:10px;padding:10px 12px;color:var(--ink-2)}
+.sleep{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.sleep svg{width:16px;height:16px}
+
+/* tasks */
+.tasks{display:flex;flex-direction:column}
+.task{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:12px 16px;border-top:1px solid var(--line)}
+.task:first-child{border-top:0}
+.ck{appearance:none;-webkit-appearance:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);background:var(--surface);margin:1px 0 0;display:grid;place-items:center;transition:all .15s;cursor:pointer}
+.ck:checked{background:var(--sea);border-color:var(--sea)}
+.ck:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.task.done .ttl{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.ttl{font-weight:500}
+.tmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.task details{margin-top:8px}
+.task summary{font-size:13px;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;gap:4px;align-items:center}
+.task summary::-webkit-details-marker{display:none}
+.task summary svg{width:14px;height:14px}
+.tfields{display:grid;grid-template-columns:1.4fr 1fr 90px;gap:8px;margin-top:8px}
+@media (max-width:560px){.tfields{grid-template-columns:1fr 1fr}}
+.owner{border:0;background:none;padding:0;border-radius:50%}
+.group-h{padding:12px 16px 4px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;border-top:1px solid var(--line);background:var(--surface-2)}
+.group-h:first-child{border-top:0;border-radius:var(--r) var(--r) 0 0}
+.ring{width:64px;height:64px}
+.ring circle{fill:none;stroke-width:7}
+.ring .bg{stroke:var(--surface-2)}
+.ring .fg{stroke:var(--sea);stroke-linecap:round;transition:stroke-dashoffset .6s}
+.ringrow{display:flex;align-items:center;gap:14px}
+
+/* money */
+.money-top{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+@media (min-width:760px){.money-top{grid-template-columns:repeat(4,1fr)}}
+.xlist{display:flex;flex-direction:column}
+.xrow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.xrow:first-child{border-top:0}
+.xrow .amt{text-align:right;font-family:var(--f-mono);font-size:14px}
+.xrow .amt small{display:block;color:var(--muted);font-size:12px}
+.xrow .who{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.xrow .split{display:flex}
+.xrow .split .av{border:2px solid var(--surface);margin-left:-6px}
+.xrow .split .av:first-child{margin-left:0}
+.cat{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--surface-2);color:var(--ink-2)}
+.cat svg{width:18px;height:18px}
+.balrow{display:grid;grid-template-columns:auto 1fr minmax(96px,auto);gap:12px;align-items:center;padding:10px 0}
+.balrow .mono{text-align:right}
+.balbar{position:relative;height:10px;background:var(--surface-2);border-radius:5px}
+.balbar i{position:absolute;top:0;bottom:0;border-radius:5px}
+.balbar::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1.5px;background:var(--muted);opacity:.5}
+.transfer{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px dashed var(--line);flex-wrap:wrap}
+.transfer:first-child{border-top:0}
+.transfer .arrow{color:var(--muted)}
+.transfer .amt{margin-left:auto;font-family:var(--f-mono);font-weight:700}
+.est{display:grid;grid-template-columns:1fr;gap:4px;padding:12px 0;border-top:1px solid var(--line)}
+.est:first-child{border-top:0}
+.est-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.range{position:relative;height:22px;margin-top:4px}
+.range .track{position:absolute;left:0;right:0;top:9px;height:4px;background:var(--surface-2);border-radius:2px}
+.range .band{position:absolute;top:6px;height:10px;border-radius:5px;background:var(--frost-soft);border:1px solid var(--frost)}
+.range .act{position:absolute;top:2px;width:4px;height:18px;border-radius:2px;background:var(--sun)}
+.est input{width:96px;padding:5px 8px;font-size:14px;text-align:right}
+.conv{display:grid;grid-template-columns:1fr 100px;gap:8px}
+.conv-out{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.conv-out div{background:var(--surface-2);border-radius:10px;padding:8px 10px;display:flex;justify-content:space-between;gap:6px;font-family:var(--f-mono);font-size:14px}
+.conv-out span{color:var(--muted);font-family:var(--f-body);font-size:12px;font-weight:700}
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:25;border:0;border-radius:16px;background:var(--sun);color:#fff;padding:14px 18px;font-weight:700;display:flex;gap:8px;align-items:center;box-shadow:0 10px 24px -8px rgba(212,94,34,.6)}
+.fab svg{width:20px;height:20px}
+@media (min-width:900px){.fab{bottom:24px}}
+
+/* pack */
+.packcol h3{display:flex;justify-content:space-between;align-items:baseline;padding:14px 16px;border-bottom:3px solid var(--c);font-size:16px}
+.packcol ul{list-style:none;margin:0;padding:6px 16px 12px}
+.packcol li label{display:flex;gap:10px;align-items:center;padding:7px 0;cursor:pointer}
+.packcol li input:checked+span{color:var(--muted);text-decoration:line-through}
+.packcol .ck{width:20px;height:20px;border-radius:6px}
+.packcol .ck:checked::after{width:5px;height:9px}
+.addpack{display:flex;gap:8px;padding:0 16px 14px}
+
+/* info */
+.info h3{font-size:16px;display:flex;align-items:center;gap:8px}
+.info h3 svg{width:18px;height:18px;color:var(--sun)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin-top:10px}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:6px 4px;border-bottom:1px solid var(--line)}
+.tbl td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl td.n{font-family:var(--f-mono);text-align:right;white-space:nowrap}
+.tblwrap{overflow-x:auto}
+.phr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:8px 0;border-top:1px dashed var(--line)}
+.phr:first-child{border-top:0}
+.phr .nat{font-size:18px} .phr .rom{font-size:13px;color:var(--muted)} .phr .en{grid-row:span 2;align-self:center;font-size:13px;text-align:right;color:var(--ink-2)}
+.tempbar{display:inline-block;height:8px;border-radius:4px;vertical-align:middle}
+.sources a{color:var(--frost)}
+
+/* dialogs */
+dialog{border:0;padding:0;border-radius:18px;background:var(--surface);color:var(--ink);width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 40px);box-shadow:0 30px 80px -20px rgba(0,0,0,.5)}
+dialog::backdrop{background:rgba(8,14,20,.55);backdrop-filter:blur(3px)}
+@media (max-width:600px){dialog{margin:auto auto 0;width:100%;max-width:100%;border-radius:18px 18px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}}
+.dlg{display:flex;flex-direction:column;max-height:inherit}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}
+.dlg-h h2{font-size:18px}
+.dlg-b{padding:16px 18px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.dlg-f{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pick{display:flex;gap:8px;flex-wrap:wrap}
+.pick button{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px 5px 5px;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
+.pick button.txt{padding:7px 14px}
+.pick button[aria-pressed="true"]{border-color:var(--ink);background:var(--surface-2)}
+input.amount-big{font-family:var(--f-display);font-weight:800;font-size:44px;border:0!important;box-shadow:none!important;padding:0!important;background:transparent!important;width:100%}
+.people-edit{display:flex;flex-direction:column;gap:10px}
+.people-edit .r{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.swatches{display:flex;gap:4px}
+.swatches button{width:22px;height:22px;border-radius:50%;border:2px solid transparent;padding:0}
+.swatches button[aria-pressed="true"]{border-color:var(--ink)}
+.whoami{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.whoami button{border:1.5px solid var(--line);background:var(--surface-2);border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:700}
+.whoami button:hover{border-color:var(--ink)}
+textarea{min-height:90px;resize:vertical;font-family:var(--f-mono);font-size:12px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:60;transition:all .25s;pointer-events:none;max-width:calc(100vw - 32px)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (min-width:900px){.toast{bottom:28px}}
+.banner{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--frost-soft);border:1px solid var(--frost);border-radius:var(--r);padding:12px 16px;margin-top:12px}
+.banner p{margin:0;flex:1;min-width:200px}
+.banner>svg{width:22px;height:22px;color:var(--frost);flex:none}
+footer.foot{padding:24px 0 8px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);margin-top:12px}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="top" id="top">
+  <div class="shell">
+    <div class="brand"><i aria-hidden="true"></i>Steppe → Samui</div>
+    <nav class="tabs-top" aria-label="Sections" id="tabsTop"></nav>
+    <div class="spacer"></div>
+    <button class="sync-btn" id="syncBtn" type="button" aria-label="Sync status and settings"></button>
+    <button class="me-btn" id="meBtn" type="button" aria-label="Switch who you are"></button>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark"></button>
+    <button class="icon-btn" id="settingsBtn" type="button" aria-label="Settings and sync"></button>
+  </div>
+</div>
+
+<div class="shell">
+  <div id="importBanner"></div>
+
+  <section class="hero" aria-label="Trip">
+    <div class="hero-copy">
+      <div class="eyebrow">25 Dec 2026 → 3 Jan 2027 · 10 days · 6 stops</div>
+      <h1><span class="cold">Steppe</span><br>to <span class="hot">Samui</span></h1>
+      <p class="lede">Night train to the Chinese border, two days in Shanghai, New Year's Eve on a Gulf of Thailand beach, Bangkok, then a direct flight home into the Mongolian winter.</p>
+      <div class="count" id="count" aria-live="polite"></div>
+      <div class="crew" id="crew"></div>
+    </div>
+    <div class="mapcard">
+      <header><h2>The route, by latitude</h2><span class="muted mono" style="font-size:12px">−27°C → +32°C</span></header>
+      <div class="mapwrap" id="map"></div>
+      <div class="legend">
+        <span><svg viewBox="0 0 26 8"><line x1="2" y1="4" x2="24" y2="4" stroke="var(--frost)" stroke-width="4" stroke-dasharray="1 6" stroke-linecap="round"/></svg>Train</span>
+        <span><svg viewBox="0 0 26 8"><line x1="2" y1="4" x2="24" y2="4" stroke="var(--sun)" stroke-width="2.5" stroke-linecap="round"/></svg>Flight</span>
+        <span>Tap a day below to light up its leg</span>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section class="view" id="v-trip" data-view="trip"></section>
+    <section class="view" id="v-book" data-view="book" hidden></section>
+    <section class="view" id="v-money" data-view="money" hidden></section>
+    <section class="view" id="v-pack" data-view="pack" hidden></section>
+    <section class="view" id="v-info" data-view="info" hidden></section>
+  </main>
+
+  <footer class="foot">
+    With live sync on, every change shows up on everyone's phone. Without it, changes stay on this device. Times are local: China UTC+8 (same as Ulaanbaatar), Thailand UTC+7.
+  </footer>
+</div>
+
+<nav class="tabs-bottom" id="tabsBottom" aria-label="Sections"></nav>
+<button class="fab" id="fab" type="button" hidden></button>
+<div class="toast" id="toast" role="status"></div>
+
+<dialog id="dlg"><div class="dlg" id="dlgInner"></div></dialog>
+
+<script>
+"use strict";
+/* ================= ICONS ================= */
+const I={
+ trip:'<path d="M3 18 9 6l4 8 3-5 5 9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ book:'<rect x="4" y="3" width="16" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="m8 12 3 3 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ money:'<rect x="2.5" y="6" width="19" height="13" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12.5" r="2.8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 3.5h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ pack:'<rect x="4" y="7" width="16" height="13" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M4 12h16" fill="none" stroke="currentColor" stroke-width="2"/>',
+ info:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6M12 7.5v.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+ train:'<rect x="6" y="3" width="12" height="13" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 10h12M9 20l-2 2M15 20l2 2M8 16l-1 4M16 16l1 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ plane:'<path d="M21 15.5 13 11V5.5a1.5 1.5 0 0 0-3 0V11l-8 4.5v2l8-2.5v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2.5z" fill="currentColor"/>',
+ boat:'<path d="M3 15h18l-2.5 5h-13zM12 3v10M12 4l6 8h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ food:'<path d="M7 3v8a2 2 0 0 0 2 2v8M5 3v5M9 3v5M17 3c-2 2-2 6 0 8v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ walk:'<circle cx="13" cy="4.5" r="2" fill="currentColor"/><path d="m10 21 2-6 3 3v3M9 12l2-4 4 1 2 3M11 8l-2 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ star:'<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" fill="currentColor"/>',
+ moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ sun:'<circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ gear:'<circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ bed:'<path d="M3 18V7M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="10.5" r="1.8" fill="currentColor"/>',
+ chev:'<path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ plus:'<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
+ x:'<path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+ warn:'<path d="M12 3 2 20h20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4M12 17v.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+ share:'<path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ down:'<path d="M12 3v12M7 10l5 5 5-5M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ up:'<path d="M12 15V3M7 8l5-5 5 5M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ phone:'<rect x="6" y="2.5" width="12" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ doc:'<path d="M6 3h8l4 4v14H6z M14 3v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ clock:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ plug:'<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ sos:'<path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8v5M12 16v.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ chat:'<path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ therm:'<path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z" fill="none" stroke="currentColor" stroke-width="2"/>',
+ hotel:'<path d="M4 21V5h10v16M14 9h6v12M7 8h2M7 12h2M7 16h2M17 13h1M17 17h1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ party:'<path d="m4 20 5-14 9 9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3l1 2M19 5l-2 1M20 10h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ other:'<circle cx="6" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="18" cy="12" r="1.8" fill="currentColor"/>',
+ trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
+};
+const ico=(n,cls="")=>`<svg viewBox="0 0 24 24" aria-hidden="true" class="${cls}">${I[n]||""}</svg>`;
+
+/* ================= TRIP DATA ================= */
+const DEPART=new Date("2026-12-25T20:22:00+08:00");
+const HOME=new Date("2027-01-03T22:00:00+08:00");
+const PLACES={
+ ub:{n:"Ulaanbaatar",lat:47.92,lon:106.92,t:"−16° / −27°",c:"frost"},
+ erl:{n:"Erlian",lat:43.65,lon:111.98,t:"−9° / −22°",c:"frost"},
+ het:{n:"Hohhot",lat:40.84,lon:111.75,t:"−3° / −15°",c:"frost"},
+ sha:{n:"Shanghai",lat:31.23,lon:121.47,t:"+9° / +2°",c:"sea"},
+ bkk:{n:"Bangkok",lat:13.76,lon:100.50,t:"+32° / +22°",c:"sun"},
+ usm:{n:"Koh Samui",lat:9.51,lon:100.01,t:"+29° / +24°",c:"sun"}
+};
+const LEGS=[
+ {a:"ub",b:"erl",m:"train",d:0},{a:"erl",b:"het",m:"train",d:1},{a:"het",b:"sha",m:"plane",d:2,bend:.18},
+ {a:"sha",b:"bkk",m:"plane",d:4,bend:.12},{a:"bkk",b:"usm",m:"plane",d:4,bend:.5},
+ {a:"usm",b:"bkk",m:"plane",d:7,bend:-.5},{a:"bkk",b:"ub",m:"plane",d:9,bend:.22}
+];
+const DAYS=[
+ {date:"2026-12-25",c:"frost",title:"Overnight train to the border",route:"Ulaanbaatar → Erlian",tz:"UTC+8",
+  steps:[["walk","19:30","Meet at Ulaanbaatar Railway Station. Bring dinner, snacks and slippers."],["train","20:22","Train 34 departs. It's a through car to Hohhot; train 22 only goes as far as Erlian."],["doc","~08:30","Mongolian exit check at Zamyn-Üüd. Passports are collected and returned on board."]],
+  tip:"4-berth compartments sleep exactly four. Book one cabin together.",sleep:"On the train"},
+ {date:"2026-12-26",c:"frost",title:"Into China",route:"Erlian → Hohhot",tz:"UTC+8",
+  steps:[["doc","10:25","Arrive Erlian. Chinese entry check, then the wheels are changed to Chinese gauge."],["walk","10:30–13:45","Three hours in Erlian: the dinosaur statues and lunch near the station."],["train","13:45","Train continues south across Inner Mongolia."],["hotel","21:23","Arrive Hohhot. Taxi to the hotel."]],
+  tip:"If you leave the train for good in Erlian, buses and taxis to Hohhot take about 5 hours. Staying on is simpler.",sleep:"Hohhot"},
+ {date:"2026-12-27",c:"sea",title:"Fly south to Shanghai",route:"Hohhot → Shanghai",tz:"UTC+8",
+  steps:[["walk","09:00","Breakfast, then Dazhao Temple if there's time."],["plane","Midday","Flight Hohhot → Shanghai, about 2.5 hours."],["walk","Evening","Nanjing Road down to the Bund for the Pudong skyline at night."]],
+  sleep:"Shanghai"},
+ {date:"2026-12-28",c:"sea",title:"A full day in Shanghai",route:"Shanghai",tz:"UTC+8",
+  steps:[["walk","Morning","Yu Garden and the old town."],["food","Lunch","Xiaolongbao. Order more than you think."],["walk","Afternoon","Former French Concession: Wukang Road, Tianzifang."],["star","Sunset","Shanghai Tower observation deck, then Lujiazui at night."]],
+  tip:"Repack tonight: summer clothes on top, winter gear in a vacuum bag.",sleep:"Shanghai"},
+ {date:"2026-12-29",c:"sun",title:"To the island",route:"Shanghai → Bangkok → Koh Samui",tz:"UTC+8 → UTC+7",
+  steps:[["plane","Morning","Flight Shanghai Pudong → Bangkok, about 4.5 hours. There are no direct flights to Samui."],["plane","Afternoon","Bangkok Airways Bangkok → Koh Samui, about 1 hour. Clocks go back 1 hour."],["food","Evening","Check in, then dinner in Bophut."]],
+  tip:"Book both legs on one ticket so bags go straight through. Fill in the Thailand Digital Arrival Card before you fly.",sleep:"Koh Samui"},
+ {date:"2026-12-30",c:"sun",title:"Ang Thong Marine Park",route:"Koh Samui",tz:"UTC+7",
+  steps:[["boat","08:00","Full-day boat tour: kayaking, snorkelling, the viewpoint climb."],["food","Evening","Chaweng beach and the night market."]],
+  sleep:"Koh Samui"},
+ {date:"2026-12-31",c:"sun",title:"New Year's Eve on Chaweng",route:"Koh Samui",tz:"UTC+7",
+  steps:[["sun","Day","Beach day. Big Buddha and Wat Plai Laem in the late afternoon."],["party","Evening","Option A: free countdown concert at Central Samui, Chaweng."],["party","Evening","Option B: ARKbar beach party on Chaweng (last year free before 21:00, 500 THB after)."],["star","00:00","Fireworks over the bay. Happy 2027."]],
+  tip:"Late December is the tail end of Samui's rainy season. Bring a light rain jacket.",sleep:"Koh Samui"},
+ {date:"2027-01-01",c:"sun",title:"Slow morning, then Bangkok",route:"Koh Samui → Bangkok",tz:"UTC+7",
+  steps:[["bed","Morning","Sleep in. Ask for late checkout."],["plane","Afternoon","Flight Koh Samui → Bangkok, about 1 hour."],["food","Evening","Street food on Yaowarat Road, Chinatown."]],
+  sleep:"Bangkok"},
+ {date:"2027-01-02",c:"sun",title:"Temples and the river",route:"Bangkok",tz:"UTC+7",
+  steps:[["walk","08:30","Grand Palace and Wat Pho. Shoulders and knees covered."],["boat","Afternoon","Chao Phraya river boat to Wat Arun."],["star","Evening","Rooftop bar, or Jodd Fairs night market."]],
+  sleep:"Bangkok"},
+ {date:"2027-01-03",c:"frost",title:"Home into winter",route:"Bangkok → Ulaanbaatar",tz:"UTC+7 → UTC+8",
+  steps:[["walk","Morning","Chatuchak Weekend Market (Saturday and Sunday) for last shopping."],["plane","Afternoon","MIAT direct flight to Ulaanbaatar, about 5.5–6 hours."],["moon","Night","Land at −25°C. Down jacket goes in hand luggage."]],
+  tip:"Confirm MIAT flies on Sunday 3 Jan. If not, move the return a day and change the Bangkok hotel.",sleep:"Home"}
+];
+const TASKS=[
+ {id:"china-entry",g:"Documents",t:"Confirm China entry rules for Mongolian passports with the Chinese Embassy in Ulaanbaatar",due:"This week",p:1},
+ {id:"passports",g:"Documents",t:"Check all 4 passports are valid until at least July 2027",due:"This week",p:1},
+ {id:"insurance",g:"Documents",t:"Buy travel insurance for all 4",due:"Before 20 Dec"},
+ {id:"tdac",g:"Documents",t:"Fill in the Thailand Digital Arrival Card (TDAC) online",due:"26–28 Dec"},
+ {id:"train",g:"Transport",t:"Train 34 tickets, Ulaanbaatar → Hohhot, Fri 25 Dec 20:22",due:"When sales open",p:1},
+ {id:"fl-sha-usm",g:"Transport",t:"Flight Shanghai Pudong → Bangkok → Koh Samui, Tue 29 Dec, one ticket",due:"Now",p:1},
+ {id:"fl-bkk-ub",g:"Transport",t:"MIAT direct Bangkok → Ulaanbaatar, Sun 3 Jan (confirm the day it flies)",due:"Now",p:1},
+ {id:"fl-het-sha",g:"Transport",t:"Flight Hohhot → Shanghai, Sun 27 Dec, midday",due:"By end of Nov"},
+ {id:"fl-usm-bkk",g:"Transport",t:"Flight Koh Samui → Bangkok, Fri 1 Jan, afternoon",due:"By end of Nov"},
+ {id:"h-usm",g:"Stays",t:"Koh Samui hotel, 3 nights (29 Dec – 1 Jan), Chaweng or Bophut",due:"Now",p:1},
+ {id:"h-sha",g:"Stays",t:"Shanghai hotel, 2 nights (27–29 Dec), People's Square or Jing'an",due:"By end of Nov"},
+ {id:"h-bkk",g:"Stays",t:"Bangkok hotel, 2 nights (1–3 Jan), riverside or Sukhumvit",due:"By end of Nov"},
+ {id:"h-het",g:"Stays",t:"Hohhot hotel, 1 night (26 Dec), late check-in after 21:30",due:"Early Dec"},
+ {id:"nye",g:"Plans",t:"Choose the New Year's Eve plan and book any tickets or dinner",due:"Early Dec"},
+ {id:"angthong",g:"Plans",t:"Book the Ang Thong Marine Park boat tour, Wed 30 Dec",due:"Early Dec"},
+ {id:"pay",g:"Money & phone",t:"Set up Alipay or WeChat Pay with a bank card. Most payments in China are by phone",due:"Before 25 Dec"},
+ {id:"esim",g:"Money & phone",t:"eSIMs for China and Thailand. Google, Instagram and WhatsApp are blocked on Chinese local networks; a roaming eSIM usually still reaches them",due:"Before 25 Dec"},
+ {id:"cash",g:"Money & phone",t:"Some cash: CNY for Erlian, THB for taxis, boats and tips",due:"Before 25 Dec"}
+];
+const EST=[
+ {id:"train",n:"Train Ulaanbaatar → Hohhot",lo:100,hi:150},
+ {id:"h-het",n:"Hotel Hohhot, 1 night",lo:25,hi:40},
+ {id:"f-het",n:"Flight Hohhot → Shanghai",lo:100,hi:200},
+ {id:"h-sha",n:"Hotel Shanghai, 2 nights",lo:80,hi:140},
+ {id:"f-usm",n:"Flight Shanghai → Bangkok → Samui",lo:300,hi:550},
+ {id:"h-usm",n:"Hotel Koh Samui, 3 nights (New Year rates)",lo:200,hi:350},
+ {id:"f-bkk",n:"Flight Koh Samui → Bangkok",lo:120,hi:220},
+ {id:"h-bkk",n:"Hotel Bangkok, 2 nights",lo:60,hi:110},
+ {id:"f-ub",n:"MIAT Bangkok → Ulaanbaatar",lo:250,hi:450},
+ {id:"daily",n:"Food, local transport, tours, NYE",lo:350,hi:550}
+];
+const PACK=[
+ {id:"cold",h:"Steppe & border",r:"−27° to −3°",c:"frost",k:["Down jacket","Thermal base layers","Hat, gloves, scarf","Warm boots","Slippers for the train","Lip balm & hand cream","Power bank"]},
+ {id:"hot",h:"Tropics",r:"+22° to +32°",c:"sun",k:["Swimwear","Sandals","Sunscreen","Sunglasses & sun hat","Light shirts & shorts","Temple outfit (shoulders & knees covered)","Mosquito repellent","Dry bag for the boat","Light rain jacket"]},
+ {id:"both",h:"Every day",r:"Both",c:"sea",k:["Passport + photo of it","Insurance details","2 bank cards, kept apart","Universal plug adapter","Phone with eSIM installed","Vacuum bag for winter gear","Basic medicines"]}
+];
+const CATS={transport:{n:"Transport",i:"plane"},stay:{n:"Stay",i:"hotel"},food:{n:"Food",i:"food"},fun:{n:"Fun",i:"party"},other:{n:"Other",i:"other"}};
+const CURS=["MNT","CNY","THB","USD"];
+const SYM={MNT:"₮",CNY:"¥",THB:"฿",USD:"$"};
+const COLORS=["#2C63A0","#D45E22","#0D857C","#8A4FBF","#B8862B","#C2416B","#3F7A3A","#5B6B7A"];
+
+/* ================= STATE ================= */
+const KEY="sts:v1", ME="sts:me", THEME="sts:theme", VIEWKEY="sts:view";
+const now=()=>Date.now();
+function freshState(){return{v:1,people:[0,1,2,3].map(i=>({id:"p"+(i+1),name:"Friend "+(i+1),color:COLORS[i],ts:0})),
+ rates:{USD:3590,CNY:530,THB:110,ts:0},tasks:{},expenses:{},actuals:{},pack:{},extraPack:{}}}
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+let S=(()=>{try{const s=JSON.parse(ls.get(KEY));if(s&&s.v===1)return Object.assign(freshState(),s)}catch(e){}return freshState()})();
+let me=ls.get(ME);
+const save=()=>ls.set(KEY,JSON.stringify(S));
+
+const person=id=>S.people.find(p=>p.id===id);
+const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const av=(id,cls="")=>{const p=person(id);return p?`<span class="av ${cls}" style="--c:${p.color}" title="${esc(p.name)}">${esc(initials(p.name))}</span>`:`<span class="av nobody ${cls}" title="Nobody yet">?</span>`};
+const rate=c=>c==="MNT"?1:(+S.rates[c]||1);
+const toMNT=(a,c)=>(+a||0)*rate(c);
+const fmt=(n,d=0)=>(+n||0).toLocaleString("en-US",{maximumFractionDigits:d,minimumFractionDigits:d});
+const money=(n,c="MNT")=>c==="MNT"?fmt(n)+" ₮":(SYM[c]+fmt(n,c==="USD"?0:0));
+const uid=()=>Math.random().toString(36).slice(2,8)+now().toString(36).slice(-4);
+const $=s=>document.querySelector(s);
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("on"),2200)}
+
+/* ================= THEME ================= */
+function applyTheme(){const t=ls.get(THEME);if(t)document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme");
+ const dark=t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches;$("#themeBtn").innerHTML=ico(dark?"sun":"moon")}
+$("#themeBtn").onclick=()=>{const cur=document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");ls.set(THEME,cur==="dark"?"light":"dark");applyTheme()};
+$("#settingsBtn").innerHTML=ico("gear");
+
+/* ================= NAV ================= */
+const TABS=[["trip","Trip","trip"],["book","To book","book"],["money","Money","money"],["pack","Packing","pack"],["info","Info","info"]];
+let view=(()=>{const h=location.hash.slice(1);return TABS.some(t=>t[0]===h)?h:"trip"})();
+function renderNav(){
+ const open=TASKS.filter(t=>!S.tasks[t.id]?.done).length;
+ $("#tabsTop").innerHTML=TABS.map(([k,n])=>`<button type="button" data-tab="${k}" ${k===view?'aria-current="page"':""}>${n}</button>`).join("");
+ $("#tabsBottom").innerHTML=TABS.map(([k,n,i])=>`<button type="button" data-tab="${k}" ${k===view?'aria-current="page"':""}>${ico(i)}${n}${k==="book"&&open?`<span class="badge">${open}</span>`:""}</button>`).join("");
+}
+function go(v,scroll=true){view=v;document.querySelectorAll("main .view").forEach(s=>s.hidden=s.dataset.view!==v);
+ if(location.hash.slice(1)!==v&&!/^#(s|join)=/.test(location.hash))history.replaceState(null,"","#"+v);
+ renderNav();renderFab();if(scroll){const m=$("main");const y=m.getBoundingClientRect().top+scrollY-70;if(scrollY>y)scrollTo({top:y,behavior:"smooth"})}}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)go(b.dataset.tab)});
+addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(TABS.some(t=>t[0]===h)&&h!==view)go(h,false)});
+addEventListener("scroll",()=>$("#top").classList.toggle("scrolled",scrollY>8),{passive:true});
+
+/* ================= HERO ================= */
+function renderCrew(){
+ $("#crew").innerHTML=`<div class="stack">${S.people.map(p=>av(p.id)).join("")}</div><span class="muted" style="font-size:14px">${S.people.map(p=>esc(p.name)).join(", ")}</span>`;
+ const m=person(me);$("#meBtn").innerHTML=m?`${av(me,"sm")}<span>${esc(m.name)}</span>`:`<span class="av sm nobody">?</span><span>Who are you?</span>`;
+}
+function tripDayIndex(d=new Date()){const t=d.getTime();if(t<DEPART.getTime()-20*3600e3)return -1;
+ for(let i=DAYS.length-1;i>=0;i--){const s=new Date(DAYS[i].date+"T00:00:00+08:00").getTime();if(t>=s)return t>HOME.getTime()?99:i}return -1}
+function renderCount(){
+ const t=now(),el=$("#count");
+ if(t<DEPART.getTime()){let s=Math.floor((DEPART-t)/1000);const d=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);s%=60;
+  el.innerHTML=[[d,"days"],[h,"hrs"],[m,"min"],[s,"sec"]].map(([v,l])=>`<div class="unit"><b>${String(v).padStart(l==="days"?1:2,"0")}</b><span>${l}</span></div>`).join("")+`<div class="label">until the 20:22 train leaves Ulaanbaatar</div>`}
+ else if(t<HOME.getTime()){const i=tripDayIndex();el.innerHTML=`<div class="unit"><b>Day ${i+1}</b><span>of 10</span></div><div class="label">${esc(DAYS[i]?.title||"On the road")}</div>`}
+ else el.innerHTML=`<div class="unit"><b>Done</b><span>2027</span></div><div class="label">Welcome home. Settle up in Money.</div>`;
+}
+
+/* ================= MAP ================= */
+let hiDay=null;
+function proj(lat,lon){return[24+(lon-93)/34*300,24+(51-lat)/45*480]}
+function renderMap(){
+ const W=360,H=528;let s=`<svg class="map" viewBox="0 0 ${W} ${H}" role="img" aria-label="Route map from Ulaanbaatar south to Koh Samui and back">`;
+ s+=`<defs><linearGradient id="g-temp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--frost)" stop-opacity=".16"/><stop offset=".45" stop-color="var(--sea)" stop-opacity=".08"/><stop offset="1" stop-color="var(--sun)" stop-opacity=".18"/></linearGradient></defs>`;
+ s+=``;
+ [[45,"45°N"],[30,"30°N"],[15,"15°N"]].forEach(([la,l])=>{const y=proj(la,100)[1];s+=`<line class="lat" x1="0" x2="${W}" y1="${y}" y2="${y}"/><text class="latlabel" x="8" y="${y-5}">${l}</text>`});
+ const tc=proj(23.44,100)[1];s+=`<line x1="0" x2="${W}" y1="${tc}" y2="${tc}" stroke="var(--sun)" stroke-opacity=".5" stroke-dasharray="4 5"/><text class="latlabel" x="8" y="${tc-5}" style="fill:var(--sun)">Tropic of Cancer</text>`;
+ LEGS.forEach((L,i)=>{const[a1,a2]=proj(PLACES[L.a].lat,PLACES[L.a].lon),[b1,b2]=proj(PLACES[L.b].lat,PLACES[L.b].lon);
+  const mx=(a1+b1)/2,my=(a2+b2)/2,dx=b1-a1,dy=b2-a2,bend=L.bend||0;const cx=mx-dy*bend,cy=my+dx*bend;
+  const cls=["leg",L.m];if(hiDay!==null){cls.push(L.d===hiDay?"hi":"dim")}
+  const col=L.m==="train"?"var(--frost)":(L.b==="ub"?"var(--frost)":"var(--sun)");
+  s+=`<path class="${cls.join(" ")}" id="leg${i}" d="M${a1.toFixed(1)} ${a2.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${b1.toFixed(1)} ${b2.toFixed(1)}" stroke="${col}"/>`});
+ const lab={ub:["end",-12,4],erl:["start",14,4],het:["start",14,8],sha:["end",-12,4],bkk:["start",14,-2],usm:["start",14,6]};
+ Object.entries(PLACES).forEach(([k,p])=>{const[x,y]=proj(p.lat,p.lon);const[an,ox,oy]=lab[k];
+  s+=`<circle cx="${x}" cy="${y}" r="7" fill="var(--surface)" stroke="var(--${p.c})" stroke-width="3.5"/>`;
+  s+=`<text class="cityname" x="${x+ox}" y="${y+oy}" text-anchor="${an}">${p.n}</text><text class="citysub" x="${x+ox}" y="${y+oy+14}" text-anchor="${an}">${p.t}</text>`});
+ if(hiDay!==null){const L=LEGS.find(l=>l.d===hiDay);if(L){s+=`<circle r="5" class="plane-dot"><animateMotion dur="2.4s" repeatCount="indefinite" rotate="auto"><mpath href="#leg${LEGS.indexOf(L)}"/></animateMotion></circle>`}}
+ s+=`</svg>`;$("#map").innerHTML=s;
+}
+
+/* ================= TRIP VIEW ================= */
+let openDays=new Set([Math.max(0,Math.min(9,tripDayIndex()))]);
+function renderTrip(){
+ const ti=tripDayIndex();const done=TASKS.filter(t=>S.tasks[t.id]?.done).length;
+ const pri=TASKS.filter(t=>t.p&&!S.tasks[t.id]?.done);
+ const net=balances();const mine=me?net[me]||0:0;
+ const nights=DAYS.length-1;
+ let h=`<div class="nextup">
+  <button class="card stat" data-tab="book" style="text-align:left;border:1px solid var(--line)"><span class="k">Booked</span><span class="v">${done}<span class="muted" style="font-size:20px"> / ${TASKS.length}</span></span><div class="bar"><span style="width:${done/TASKS.length*100}%"></span></div><span class="s">${pri.length?`${pri.length} priority item${pri.length>1?"s":""} still open`:"All priority items done"}</span></button>
+  <button class="card stat" data-tab="money" style="text-align:left;border:1px solid var(--line)"><span class="k">${me?"Your balance":"Group spending"}</span><span class="v" style="color:${me?(mine>0.5?"var(--ok)":mine<-0.5?"var(--sun)":"var(--ink)"):"var(--ink)"}">${me?(mine>0.5?"+":"")+fmt(mine):fmt(totalSpent())} <span style="font-size:18px">₮</span></span><span class="s">${me?(mine>0.5?"The group owes you":mine<-0.5?"You owe the group":"You're even"):"Logged so far"}</span></button>
+  <div class="card stat"><span class="k">${nights} nights</span><span class="v">−27° → +32°</span><span class="s">2 countries · 2 time zones · 1 New Year's Eve</span></div>
+ </div>`;
+ if(ti>=0&&ti<10)h+=`<div class="alert" style="background:var(--sea-soft)">${ico("star")}<div><b>Today is day ${ti+1}: ${esc(DAYS[ti].title)}</b>${esc(DAYS[ti].route)}</div></div>`;
+ h+=`<div class="view-head"><h2>Day by day</h2><div class="seg" role="group" aria-label="Expand"><button type="button" data-days="open" aria-pressed="false">Open all</button><button type="button" data-days="close" aria-pressed="false">Close all</button></div></div><div class="days">`;
+ DAYS.forEach((d,i)=>{const dt=new Date(d.date+"T12:00:00");const open=openDays.has(i);
+  h+=`<article class="card day ${open?"open":""} ${ti===i?"today":""}" style="--c:var(--${d.c})">
+   <button type="button" data-day="${i}" aria-expanded="${open}"><div class="dnum"><b>${dt.getDate()}</b><span>${dt.toLocaleDateString("en-GB",{weekday:"short"})} ${dt.toLocaleDateString("en-GB",{month:"short"})}</span></div>
+   <div class="dtitle"><h3>${esc(d.title)}</h3><div class="route"><span>${esc(d.route)}</span><span class="chip">${d.tz}</span></div></div>${ico("chev","chev")}</button>
+   ${open?`<div class="dbody"><ul class="steps">${d.steps.map(([ic,t,x])=>`<li><span class="ico">${ico(ic)}</span><span class="t">${esc(t)}</span><span class="x">${esc(x)}</span></li>`).join("")}</ul>
+   ${d.tip?`<div class="tip">${esc(d.tip)}</div>`:""}<div class="sleep">${ico("bed")}Sleep: <b style="color:var(--ink)">${esc(d.sleep)}</b></div></div>`:""}</article>`});
+ h+=`</div>`;$("#v-trip").innerHTML=h;
+}
+$("#v-trip").addEventListener("click",e=>{
+ const b=e.target.closest("[data-day]");if(b){const i=+b.dataset.day;if(openDays.has(i)){openDays.delete(i);hiDay=null}else{openDays.add(i);hiDay=LEGS.some(l=>l.d===i)?i:null}renderTrip();renderMap();return}
+ const a=e.target.closest("[data-days]");if(a){openDays=a.dataset.days==="open"?new Set(DAYS.map((_,i)=>i)):new Set();hiDay=null;renderTrip();renderMap()}});
+
+/* ================= BOOK VIEW ================= */
+let taskFilter="all";
+function renderBook(){
+ const done=TASKS.filter(t=>S.tasks[t.id]?.done).length,pct=done/TASKS.length;const C=2*Math.PI*28;
+ const spent=TASKS.reduce((a,t)=>{const x=S.tasks[t.id];return a+(x&&x.cost?toMNT(x.cost,x.cur||"MNT"):0)},0);
+ let list=TASKS.filter(t=>{const x=S.tasks[t.id]||{};if(taskFilter==="open")return!x.done;if(taskFilter==="mine")return x.owner===me;if(taskFilter==="pri")return t.p&&!x.done;return true});
+ let h=`<div class="view-head"><div class="ringrow"><svg class="ring" viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="28"/><circle class="fg" cx="32" cy="32" r="28" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}" transform="rotate(-90 32 32)"/></svg>
+  <div><h2>To book</h2><div class="muted">${done} of ${TASKS.length} done${spent?` · ${fmt(spent)} ₮ booked so far`:""}</div></div></div>
+  <div class="seg" role="group" aria-label="Filter">${[["all","All"],["pri","Priority"],["open","Open"],["mine","Mine"]].map(([k,n])=>`<button type="button" data-tf="${k}" aria-pressed="${taskFilter===k}">${n}</button>`).join("")}</div></div>`;
+ if(taskFilter==="mine"&&!me)h+=`<div class="empty card">Pick who you are first (top right) to see your tasks.</div>`;
+ else if(!list.length)h+=`<div class="empty card">${taskFilter==="mine"?"Nothing assigned to you yet. Tap a face on any task to take it.":"Nothing here. Nice work."}</div>`;
+ else{h+=`<div class="card tasks">`;const groups=[...new Set(list.map(t=>t.g))];
+  groups.forEach(g=>{const items=list.filter(t=>t.g===g);h+=`<div class="group-h"><span>${esc(g)}</span><span>${items.filter(t=>S.tasks[t.id]?.done).length}/${items.length}</span></div>`;
+   items.forEach(t=>{const x=S.tasks[t.id]||{};
+    h+=`<div class="task ${x.done?"done":""}"><input type="checkbox" class="ck" id="t-${t.id}" data-tdone="${t.id}" ${x.done?"checked":""} aria-label="Done">
+     <div style="min-width:0"><label for="t-${t.id}" class="ttl">${esc(t.t)}</label>
+      <div class="tmeta">${t.p&&!x.done?'<span class="chip hot">Priority</span>':""}<span class="chip">${esc(t.due)}</span>${x.ref?`<span class="chip ok">Ref ${esc(x.ref)}</span>`:""}${x.cost?`<span class="chip">${money(x.cost,x.cur||"MNT")}</span>`:""}</div>
+      <details ${x.ref||x.cost||x.note?"":""}><summary>${ico("edit")} Booking details</summary><div class="tfields">
+       <input type="text" placeholder="Booking ref" value="${esc(x.ref||"")}" data-tf-ref="${t.id}" aria-label="Booking reference">
+       <input type="number" inputmode="decimal" placeholder="Total price" value="${x.cost??""}" data-tf-cost="${t.id}" aria-label="Price">
+       <select data-tf-cur="${t.id}" aria-label="Currency">${CURS.map(c=>`<option ${c===(x.cur||"MNT")?"selected":""}>${c}</option>`).join("")}</select>
+       <input type="text" placeholder="Note (link, time, address)" value="${esc(x.note||"")}" data-tf-note="${t.id}" aria-label="Note" style="grid-column:1/-1"></div></details></div>
+     <button type="button" class="owner" data-towner="${t.id}" aria-label="Who handles this">${av(x.owner)}</button></div>`})});
+  h+=`</div><p class="muted" style="margin:0;font-size:13px">Tap the circle on the right to choose who handles each item.</p>`}
+ $("#v-book").innerHTML=h;
+}
+function setTask(id,patch){S.tasks[id]={...(S.tasks[id]||{}),...patch,ts:now()};save();dirty("tasks",id)}
+$("#v-book").addEventListener("change",e=>{const t=e.target;
+ if(t.dataset.tdone){setTask(t.dataset.tdone,{done:t.checked});if(t.checked)toast("Nice, ticked off");renderBook();renderNav();renderTrip();return}
+ if(t.dataset.tfRef!==undefined){setTask(t.dataset.tfRef,{ref:t.value.trim()});renderBook()}
+ if(t.dataset.tfCost!==undefined){const v=parseFloat(t.value);setTask(t.dataset.tfCost,{cost:v>0?v:null});renderBook()}
+ if(t.dataset.tfCur!==undefined){setTask(t.dataset.tfCur,{cur:t.value});renderBook()}
+ if(t.dataset.tfNote!==undefined){setTask(t.dataset.tfNote,{note:t.value.trim()});renderBook()}});
+$("#v-book").addEventListener("click",e=>{const f=e.target.closest("[data-tf]");if(f){taskFilter=f.dataset.tf;renderBook();return}
+ const o=e.target.closest("[data-towner]");if(o){const id=o.dataset.towner;const cur=S.tasks[id]?.owner;
+  openDialog(`<div class="dlg-h"><h2>Who's handling this?</h2><button class="icon-btn" data-close aria-label="Close">${ico("x")}</button></div>
+   <div class="dlg-b"><p style="margin:0">${esc(TASKS.find(t=>t.id===id).t)}</p><div class="pick">${S.people.map(p=>`<button type="button" data-pickowner="${p.id}" aria-pressed="${cur===p.id}">${av(p.id)}${esc(p.name)}</button>`).join("")}<button type="button" class="txt" data-pickowner="" aria-pressed="${!cur}">Nobody</button></div></div>`,
+   d=>d.addEventListener("click",ev=>{const b=ev.target.closest("[data-pickowner]");if(!b)return;setTask(id,{owner:b.dataset.pickowner||null});closeDialog();renderBook();toast(b.dataset.pickowner?`${person(b.dataset.pickowner).name} is on it`:"Unassigned")}))}});
+
+/* ================= MONEY ================= */
+let moneyTab="spend";
+const liveExp=()=>Object.entries(S.expenses).filter(([,x])=>!x.deleted).map(([id,x])=>({id,...x})).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.created-a.created);
+const totalSpent=()=>liveExp().reduce((a,x)=>a+toMNT(x.amount,x.cur),0);
+function balances(){const net={};S.people.forEach(p=>net[p.id]=0);
+ liveExp().forEach(x=>{const v=toMNT(x.amount,x.cur);const sp=(x.split||[]).filter(id=>net[id]!==undefined);const who=sp.length?sp:S.people.map(p=>p.id);
+  if(net[x.payer]!==undefined)net[x.payer]+=v;who.forEach(id=>net[id]-=v/who.length)});return net}
+function shares(){const s={};S.people.forEach(p=>s[p.id]=0);liveExp().forEach(x=>{const v=toMNT(x.amount,x.cur);const sp=(x.split||[]).filter(id=>s[id]!==undefined);const who=sp.length?sp:S.people.map(p=>p.id);who.forEach(id=>s[id]+=v/who.length)});return s}
+function settle(net){const cr=[],de=[];Object.entries(net).forEach(([id,v])=>{if(v>0.5)cr.push([id,v]);else if(v<-0.5)de.push([id,-v])});
+ cr.sort((a,b)=>b[1]-a[1]);de.sort((a,b)=>b[1]-a[1]);const out=[];let i=0,j=0;
+ while(i<de.length&&j<cr.length){const m=Math.min(de[i][1],cr[j][1]);out.push({from:de[i][0],to:cr[j][0],amt:m});de[i][1]-=m;cr[j][1]-=m;if(de[i][1]<0.5)i++;if(cr[j][1]<0.5)j++}return out}
+let conv={a:100,c:"USD"};
+function renderMoney(){
+ const xs=liveExp(),net=balances(),sh=shares(),tot=totalSpent();
+ const myShare=me?sh[me]:tot/4;
+ const estLo=EST.reduce((a,e)=>a+e.lo,0),estHi=EST.reduce((a,e)=>a+e.hi,0);
+ let h=`<div class="view-head"><h2>Money</h2><div class="seg" role="group" aria-label="Money section">${[["spend","Expenses"],["settle","Settle up"],["budget","Budget"],["conv","Converter"]].map(([k,n])=>`<button type="button" data-mt="${k}" aria-pressed="${moneyTab===k}">${n}</button>`).join("")}</div></div>
+ <div class="money-top">
+  <div class="card stat"><span class="k">Group spent</span><span class="v">${fmt(tot)}</span><span class="s">₮ · ${xs.length} expense${xs.length===1?"":"s"}</span></div>
+  <div class="card stat"><span class="k">${me?"Your share":"Per person"}</span><span class="v">${fmt(myShare)}</span><span class="s">₮ · ≈ $${fmt(myShare/rate("USD"))}</span></div>
+  <div class="card stat"><span class="k">${me?"Your balance":"Transfers to settle"}</span><span class="v" style="color:${me?(net[me]>0.5?"var(--ok)":net[me]<-0.5?"var(--sun)":"var(--ink)"):"var(--ink)"}">${me?(net[me]>0.5?"+":"")+fmt(net[me]):settle(net).length}</span><span class="s">${me?(net[me]>0.5?"₮ owed to you":net[me]<-0.5?"₮ you owe":"₮ · even"):"to square everyone up"}</span></div>
+  <div class="card stat"><span class="k">Budget / person</span><span class="v">$${fmt(estLo)}–${fmt(estHi)}</span><span class="s">Mid-range estimate</span></div>
+ </div>`;
+ if(moneyTab==="spend"){
+  if(!xs.length)h+=`<div class="card empty">${ico("money")}<div><b style="color:var(--ink)">No expenses yet</b><br>When someone pays for something the group shares, add it with the orange button. Balances and settle-up work themselves out.</div><button class="btn sun" type="button" data-addx>${ico("plus")}Add the first expense</button></div>`;
+  else{h+=`<div class="card xlist">`;let lastDate=null;
+   xs.forEach(x=>{const sp=(x.split&&x.split.length)?x.split:S.people.map(p=>p.id);
+    h+=`<div class="xrow"><span class="cat">${ico(CATS[x.cat]?.i||"other")}</span><div style="min-width:0"><div style="font-weight:600">${esc(x.desc)}</div>
+     <div class="who">${av(x.payer,"sm")} ${esc(person(x.payer)?.name||"?")} paid · ${x.date?new Date(x.date+"T12:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"}):""} · <span class="split">${sp.map(id=>av(id,"sm")).join("")}</span></div></div>
+     <div class="amt">${money(x.amount,x.cur)}${x.cur!=="MNT"?`<small>${fmt(toMNT(x.amount,x.cur))} ₮</small>`:""}<button class="btn ghost" type="button" data-editx="${x.id}" style="padding:2px 0;font-size:12px;color:var(--muted)">Edit</button></div></div>`});
+   h+=`</div>`}
+ }
+ if(moneyTab==="settle"){
+  const max=Math.max(1,...Object.values(net).map(Math.abs));const tr=settle(net);
+  h+=`<div class="grid-2"><div class="card pad"><h3 style="font-size:16px">Balances</h3>${S.people.map(p=>{const v=net[p.id];const w=Math.abs(v)/max*50;
+   return `<div class="balrow">${av(p.id)}<div class="balbar"><i style="${v>=0?`left:50%;width:${w}%;background:var(--ok)`:`right:50%;width:${w}%;background:var(--sun)`}"></i></div><span class="mono" style="color:${v>0.5?"var(--ok)":v<-0.5?"var(--sun)":"var(--muted)"}">${v>0.5?"+":""}${fmt(v)}</span></div>`}).join("")}
+   <p class="muted" style="font-size:13px;margin:8px 0 0">Green: paid more than their share. Orange: owes the group. All in ₮.</p></div>
+   <div class="card pad"><h3 style="font-size:16px">Fewest transfers to settle</h3>${tr.length?tr.map(t=>`<div class="transfer">${av(t.from)}<b>${esc(person(t.from).name)}</b><span class="arrow">pays</span>${av(t.to)}<b>${esc(person(t.to).name)}</b><span class="amt">${fmt(t.amt)} ₮</span></div>`).join(""):`<div class="empty">Everyone is even.</div>`}</div></div>`;
+ }
+ if(moneyTab==="budget"){
+  const a=S.actuals;const actTot=EST.reduce((s,e)=>s+(+a[e.id]?.usd||0),0);const max=Math.max(...EST.map(e=>Math.max(e.hi,+a[e.id]?.usd||0)))*1.1;
+  h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 style="font-size:16px">Per person, in USD</h3><span class="muted" style="font-size:13px">Blue band = estimate range · orange tick = what you actually paid</span></div>
+  ${EST.map(e=>{const act=+a[e.id]?.usd||0;return `<div class="est"><div class="est-top"><span>${esc(e.n)}</span><span style="display:flex;gap:10px;align-items:center"><span class="mono muted" style="font-size:13px">$${e.lo}–${e.hi}</span><input type="number" inputmode="decimal" placeholder="Actual" value="${act||""}" data-act="${e.id}" aria-label="Actual cost for ${esc(e.n)}"></span></div>
+   <div class="range"><div class="track"></div><div class="band" style="left:${e.lo/max*100}%;width:${(e.hi-e.lo)/max*100}%"></div>${act?`<div class="act" style="left:calc(${act/max*100}% - 2px)" title="$${act}"></div>`:""}</div></div>`}).join("")}
+  <div class="est" style="font-weight:700"><div class="est-top"><span>Total per person</span><span class="mono">$${fmt(estLo)}–${fmt(estHi)}${actTot?` · actual $${fmt(actTot)}`:""}</span></div>
+  <div class="muted" style="font-weight:400;font-size:13px">For 4: $${fmt(estLo*4)}–${fmt(estHi*4)} · in tögrög ${fmt(estLo*rate("USD"))}–${fmt(estHi*rate("USD"))} ₮ each</div></div>
+  <p class="muted" style="font-size:12.5px;margin:10px 0 0">Planning ranges at mid-range prices, 2 people per room, checked Nov 2026. Not quotes: type real prices as you book.</p></div>`;
+ }
+ if(moneyTab==="conv"){
+  h+=`<div class="card pad" style="max-width:520px"><h3 style="font-size:16px;margin-bottom:10px">Currency converter</h3><div class="conv"><input type="number" inputmode="decimal" id="cv-a" value="${conv.a}" aria-label="Amount"><select id="cv-c" aria-label="From">${CURS.map(c=>`<option ${c===conv.c?"selected":""}>${c}</option>`).join("")}</select></div>
+   <div class="conv-out" id="cv-out"></div><p class="muted" style="font-size:12.5px;margin:10px 0 0">Rates: 1 USD = ${fmt(S.rates.USD)} ₮ · 1 CNY = ${fmt(S.rates.CNY)} ₮ · 1 THB = ${fmt(S.rates.THB)} ₮. Change them in Settings.</p></div>`;
+ }
+ $("#v-money").innerHTML=h;if(moneyTab==="conv")renderConv();
+}
+function renderConv(){const m=toMNT(conv.a,conv.c);$("#cv-out").innerHTML=CURS.filter(c=>c!==conv.c).map(c=>`<div><span>${c}</span>${SYM[c]}${fmt(m/rate(c),c==="MNT"?0:2)}</div>`).join("")}
+$("#v-money").addEventListener("click",e=>{const t=e.target.closest("[data-mt]");if(t){moneyTab=t.dataset.mt;renderMoney();return}
+ if(e.target.closest("[data-addx]"))expenseDialog();const ed=e.target.closest("[data-editx]");if(ed)expenseDialog(ed.dataset.editx)});
+$("#v-money").addEventListener("input",e=>{if(e.target.id==="cv-a"){conv.a=parseFloat(e.target.value)||0;renderConv()}});
+$("#v-money").addEventListener("change",e=>{if(e.target.id==="cv-c"){conv.c=e.target.value;renderConv()}
+ const a=e.target.dataset.act;if(a){const v=parseFloat(e.target.value);S.actuals[a]={usd:v>0?v:null,ts:now()};save();dirty("actuals",a);renderMoney()}});
+
+function expenseDialog(id){
+ const x=id?S.expenses[id]:null;
+ const st={desc:x?.desc||"",amount:x?.amount??"",cur:x?.cur||(lastCur()),payer:x?.payer||me||S.people[0].id,split:x?.split?.length?[...x.split]:S.people.map(p=>p.id),cat:x?.cat||"food",date:x?.date||todayISO()};
+ const body=()=>`<div class="dlg-h"><h2>${id?"Edit expense":"Add an expense"}</h2><button class="icon-btn" type="button" data-close aria-label="Close">${ico("x")}</button></div>
+ <form class="dlg-b" id="xf" autocomplete="off">
+  <div style="display:flex;align-items:baseline;gap:8px;border-bottom:2px solid var(--line);padding-bottom:4px"><span style="font-family:var(--f-display);font-size:36px;font-weight:800;color:var(--muted)">${SYM[st.cur]}</span><input class="amount-big" id="xa" type="number" inputmode="decimal" step="any" min="0" placeholder="0" value="${st.amount}" aria-label="Amount" required></div>
+  <div class="pick" role="group" aria-label="Currency">${CURS.map(c=>`<button type="button" class="txt" data-cur="${c}" aria-pressed="${c===st.cur}">${c}</button>`).join("")}</div>
+  <label class="f">What was it?<input type="text" id="xd" value="${esc(st.desc)}" placeholder="e.g. Taxi to Hohhot airport" required maxlength="80"></label>
+  <div class="pick" role="group" aria-label="Category">${Object.entries(CATS).map(([k,c])=>`<button type="button" class="txt" data-cat="${k}" aria-pressed="${k===st.cat}">${c.n}</button>`).join("")}</div>
+  <div><div class="f" style="margin-bottom:6px">Who paid?</div><div class="pick" role="group" aria-label="Paid by">${S.people.map(p=>`<button type="button" data-payer="${p.id}" aria-pressed="${p.id===st.payer}">${av(p.id)}${esc(p.name)}</button>`).join("")}</div></div>
+  <div><div class="f" style="margin-bottom:6px;display:flex;justify-content:space-between">Split between <span class="muted" style="font-weight:500">${st.split.length?`${fmt(toMNT(st.amount,st.cur)/st.split.length)} ₮ each`:""}</span></div><div class="pick" role="group" aria-label="Split between">${S.people.map(p=>`<button type="button" data-split="${p.id}" aria-pressed="${st.split.includes(p.id)}">${av(p.id)}${esc(p.name)}</button>`).join("")}</div></div>
+  <label class="f">Date<input type="date" id="xdate" value="${st.date}" min="2026-11-01" max="2027-01-31"></label>
+  <p class="err" id="xerr" style="color:var(--bad);margin:0;font-size:13px" hidden></p>
+ </form>
+ <div class="dlg-f">${id?`<button class="btn danger" type="button" data-delx style="margin-right:auto">${ico("trash")}Delete</button>`:""}<button class="btn" type="button" data-close>Cancel</button><button class="btn primary" type="submit" form="xf">${id?"Save":"Add expense"}</button></div>`;
+ openDialog(body(),d=>{
+  const keep=()=>{st.amount=$("#xa").value;st.desc=$("#xd").value;st.date=$("#xdate").value};
+  const redraw=()=>{keep();const f=document.activeElement?.id;$("#dlgInner").innerHTML=body();if(f&&$("#"+f))$("#"+f).focus()};
+  d.addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b||!d.contains(b))return;
+   if(b.dataset.cur){st.cur=b.dataset.cur;redraw()}else if(b.dataset.cat){st.cat=b.dataset.cat;redraw()}else if(b.dataset.payer){st.payer=b.dataset.payer;redraw()}
+   else if(b.dataset.split){const i=st.split.indexOf(b.dataset.split);i>=0?st.split.splice(i,1):st.split.push(b.dataset.split);redraw()}
+   else if(b.hasAttribute("data-delx")){if(b.dataset.armed){S.expenses[id]={...S.expenses[id],deleted:true,ts:now()};save();dirty("expenses",id);closeDialog();renderAllData();toast("Expense deleted")}else{b.dataset.armed="1";b.innerHTML=ico("trash")+"Tap again to delete"}}});
+  d.addEventListener("input",ev=>{if(ev.target.id==="xa"){st.amount=ev.target.value;const s=d.querySelector('[data-split]')?.closest("div")?.previousElementSibling?.querySelector("span");if(s)s.textContent=st.split.length?`${fmt(toMNT(st.amount,st.cur)/st.split.length)} ₮ each`:""}});
+  d.addEventListener("submit",ev=>{ev.preventDefault();keep();const amt=parseFloat(st.amount),err=$("#xerr");
+   if(!(amt>0)){err.hidden=false;err.textContent="Enter an amount above zero.";return}
+   if(!st.desc.trim()){err.hidden=false;err.textContent="Say what it was, so everyone recognises it.";return}
+   if(!st.split.length){err.hidden=false;err.textContent="Pick at least one person to split with.";return}
+   const nid=id||uid();S.expenses[nid]={desc:st.desc.trim(),amount:amt,cur:st.cur,payer:st.payer,split:[...st.split],cat:st.cat,date:st.date,created:x?.created||now(),ts:now()};
+   ls.set("sts:lastcur",st.cur);save();dirty("expenses",nid);closeDialog();moneyTab="spend";renderAllData();toast(id?"Saved":"Added. Balances updated")});
+  setTimeout(()=>{if(!id)$("#xa")?.focus()},50);
+ });
+}
+const lastCur=()=>ls.get("sts:lastcur")||"MNT";
+const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+
+/* ================= PACK ================= */
+let packFor=null;
+function renderPack(){
+ const pid=packFor||me||S.people[0].id;const mine=S.pack[pid]?.items||{};const extra=S.extraPack[pid]?.items||[];
+ const all=[...PACK.flatMap(g=>g.k.map((k,i)=>g.id+":"+i)),...extra.map(x=>"x:"+x.id)];const done=all.filter(k=>mine[k]).length;
+ let h=`<div class="view-head"><div><h2>Packing</h2><div class="muted">${done} of ${all.length} packed for ${esc(person(pid).name)}</div></div>
+ <div class="pick" role="group" aria-label="Whose list">${S.people.map(p=>`<button type="button" data-packfor="${p.id}" aria-pressed="${p.id===pid}">${av(p.id)}${esc(p.name)}</button>`).join("")}</div></div>
+ <div class="bar" style="height:10px"><span style="width:${all.length?done/all.length*100:0}%"></span></div><div class="grid-3">`;
+ PACK.forEach(g=>{const n=g.k.filter((k,i)=>mine[g.id+":"+i]).length;
+  h+=`<div class="card packcol" style="--c:var(--${g.c})"><h3>${esc(g.h)}<span class="mono muted" style="font-size:12px">${g.r} · ${n}/${g.k.length}</span></h3><ul>${g.k.map((k,i)=>{const id=g.id+":"+i;return `<li><label><input type="checkbox" class="ck" data-pk="${id}" ${mine[id]?"checked":""}><span>${esc(k)}</span></label></li>`}).join("")}
+  ${g.id==="both"?extra.map(x=>`<li><label><input type="checkbox" class="ck" data-pk="x:${x.id}" ${mine["x:"+x.id]?"checked":""}><span>${esc(x.t)}</span></label></li>`).join(""):""}</ul>
+  ${g.id==="both"?`<form class="addpack" data-addpack><input type="text" placeholder="Add your own item" maxlength="60" aria-label="Add an item"><button class="btn" type="submit" aria-label="Add">${ico("plus")}</button></form>`:""}</div>`});
+ h+=`</div>`;$("#v-pack").innerHTML=h;
+}
+$("#v-pack").addEventListener("click",e=>{const b=e.target.closest("[data-packfor]");if(b){packFor=b.dataset.packfor;renderPack()}});
+$("#v-pack").addEventListener("change",e=>{const k=e.target.dataset.pk;if(!k)return;const pid=packFor||me||S.people[0].id;
+ const cur=S.pack[pid]?.items||{};S.pack[pid]={items:{...cur,[k]:e.target.checked},ts:now()};save();dirty("pack",pid);renderPack()});
+$("#v-pack").addEventListener("submit",e=>{if(!e.target.matches("[data-addpack]"))return;e.preventDefault();const inp=e.target.querySelector("input");const t=inp.value.trim();if(!t)return;
+ const pid=packFor||me||S.people[0].id;const cur=S.extraPack[pid]?.items||[];S.extraPack[pid]={items:[...cur,{id:uid(),t}],ts:now()};save();dirty("extraPack",pid);renderPack();setTimeout(()=>$("#v-pack form input")?.focus(),0)});
+
+/* ================= INFO ================= */
+function renderInfo(){
+ const W=[["Ulaanbaatar",-16,-27],["Erlian",-9,-22],["Hohhot",-3,-15],["Shanghai",9,2],["Koh Samui",29,24],["Bangkok",32,22]];
+ const tx=v=>(v+30)/65*100;
+ $("#v-info").innerHTML=`<div class="view-head"><h2>Good to know</h2></div>
+ <div class="alert">${ico("warn")}<div><b>Check these first</b><ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+  <li><b style="display:inline">China entry.</b> Sources disagree on whether Mongolian passports are visa-free for China. Confirm with the Chinese Embassy in Ulaanbaatar; a visa takes about 4–10 working days.</li>
+  <li><b style="display:inline">Train.</b> Last winter some Erlian departures were cancelled from 11 Dec to 5 Jan for low demand. The Friday 20:22 kept running.</li>
+  <li><b style="display:inline">Return flight.</b> MIAT's direct Bangkok flight runs only a few days a week. Confirm Sunday 3 Jan.</li></ul></div></div>
+ <div class="grid-2 info">
+  <div class="card pad"><h3>${ico("doc")}Entry rules</h3><dl class="kv"><dt>China</dt><dd>To confirm (see above). Keep a printed hotel booking and return ticket handy at Erlian.</dd><dt>Thailand</dt><dd>30 days visa-free for Mongolian passports. Fill in the Thailand Digital Arrival Card online within 3 days before landing.</dd><dt>Passports</dt><dd>Valid 6+ months after return: at least July 2027.</dd></dl></div>
+  <div class="card pad"><h3>${ico("therm")}Typical late-December weather</h3><div class="tblwrap"><table class="tbl"><thead><tr><th>Place</th><th class="n">Low</th><th style="width:40%"></th><th class="n">High</th></tr></thead><tbody>
+   ${W.map(([n,hi,lo])=>`<tr><td>${n}</td><td class="n">${lo}°</td><td><span class="tempbar" style="margin-left:${tx(lo)}%;width:${tx(hi)-tx(lo)}%;background:linear-gradient(90deg,${lo<0?"var(--frost)":"var(--sea)"},${hi>20?"var(--sun)":hi>0?"var(--sea)":"var(--frost)"})"></span></td><td class="n">${hi>0?"+":""}${hi}°</td></tr>`).join("")}</tbody></table></div></div>
+  <div class="card pad"><h3>${ico("clock")}Time zones</h3><dl class="kv"><dt>Mongolia</dt><dd class="mono">UTC+8</dd><dt>China</dt><dd class="mono">UTC+8 (same as UB)</dd><dt>Thailand</dt><dd class="mono">UTC+7 (1 hour behind)</dd></dl><p class="muted" style="font-size:13px;margin:10px 0 0">Clocks go back an hour when you land in Bangkok on 29 Dec, and forward again on the way home.</p></div>
+  <div class="card pad"><h3>${ico("money")}Paying</h3><dl class="kv"><dt>China</dt><dd>Alipay or WeChat Pay, linked to your bank card. Cash is rarely used; carry a little for Erlian.</dd><dt>Thailand</dt><dd>Cards in malls and hotels; cash (THB) for taxis, boats, markets and street food.</dd><dt>Tipping</dt><dd>Not expected in China. Small tips welcome in Thailand.</dd></dl></div>
+  <div class="card pad"><h3>${ico("phone")}Phones & apps</h3><dl class="kv"><dt>China</dt><dd>Google, Instagram, WhatsApp and Facebook are blocked on Chinese local networks. A roaming eSIM from home or abroad usually still reaches them. Install WeChat, Alipay, Didi and Amap before you go.</dd><dt>Thailand</dt><dd>Grab and Bolt for rides; Google Maps works.</dd></dl></div>
+  <div class="card pad"><h3>${ico("plug")}Plugs</h3><dl class="kv"><dt>Mongolia</dt><dd>Types C, E · 230 V</dd><dt>China</dt><dd>Types A, C, I · 220 V</dd><dt>Thailand</dt><dd>Types A, B, C, F, O · 220 V</dd></dl><p class="muted" style="font-size:13px;margin:10px 0 0">One universal adapter each covers all three.</p></div>
+  <div class="card pad"><h3>${ico("sos")}Emergency numbers</h3><dl class="kv"><dt>China</dt><dd><span class="mono">110</span> police · <span class="mono">120</span> ambulance · <span class="mono">119</span> fire</dd><dt>Thailand</dt><dd><span class="mono">1155</span> tourist police (English) · <span class="mono">1669</span> ambulance · <span class="mono">191</span> police</dd></dl></div>
+  <div class="card pad"><h3>${ico("chat")}Phrases</h3>
+   <div class="eyebrow" style="margin:10px 0 4px">Chinese</div>
+   ${[["你好","nǐ hǎo","Hello"],["谢谢","xièxie","Thank you"],["多少钱？","duōshao qián?","How much?"],["不要辣","bú yào là","Not spicy"],["买单","mǎidān","The bill"]].map(([a,b,c])=>`<div class="phr"><span class="nat">${a}</span><span class="en">${c}</span><span class="rom">${b}</span></div>`).join("")}
+   <div class="eyebrow" style="margin:14px 0 4px">Thai (men say khrap, women say kha)</div>
+   ${[["สวัสดี","sawasdee khrap / kha","Hello"],["ขอบคุณ","khop khun khrap / kha","Thank you"],["เท่าไหร่","tao rai?","How much?"],["ไม่เผ็ด","mai phet","Not spicy"],["เช็คบิล","check bin","The bill"]].map(([a,b,c])=>`<div class="phr"><span class="nat">${a}</span><span class="en">${c}</span><span class="rom">${b}</span></div>`).join("")}
+  </div>
+ </div>
+ <div class="card pad sources"><h3 style="font-size:15px">Sources</h3><p class="muted" style="font-size:13px;margin:6px 0 0">Train times: <a href="https://www.travelchinaguide.com/china-trains/international-tickets/beijing-ulanbator-k23.htm" target="_blank" rel="noopener">Travel China Guide</a>, <a href="https://legendtour.mn/mongolia/info/train-022-ulaanbaatar-erlian.shtml" target="_blank" rel="noopener">Legend Tour</a>. Train cancellations: <a href="https://gogo.mn/r/7kx9wv" target="_blank" rel="noopener">gogo.mn</a>. Tickets: <a href="https://eticket.ubtz.mn/" target="_blank" rel="noopener">eticket.ubtz.mn</a>. Thailand entry: <a href="https://mongolia.siam-legal.com/" target="_blank" rel="noopener">Siam Legal</a>. MIAT Bangkok: <a href="https://centreforaviation.com/news/miat-mongolian-airlines-to-resume-ulaanbaatar-singapore-service-from-dec-2026-1374574" target="_blank" rel="noopener">CAPA</a>. Samui flights: <a href="https://www.rome2rio.com/s/Shanghai/Ko-Samui" target="_blank" rel="noopener">Rome2rio</a>. New Year's Eve: <a href="https://theo-courant.com/en/new-years-eve-thailand-2026-program/" target="_blank" rel="noopener">Thailand NYE program</a>. Checked 4 Nov 2026.</p></div>`;
+}
+
+/* ================= FAB ================= */
+function renderFab(){const f=$("#fab");if(view==="money"){f.hidden=false;f.innerHTML=ico("plus")+"Expense";f.onclick=()=>expenseDialog()}else f.hidden=true}
+
+/* ================= DIALOG ================= */
+const dlg=$("#dlg");
+function openDialog(html,wire){$("#dlgInner").innerHTML=html;const d=$("#dlgInner").cloneNode(false);dlg.replaceChild(d,$("#dlgInner"));d.innerHTML=html;wire&&wire(d);if(!dlg.open)dlg.showModal()}
+function closeDialog(){if(dlg.open)dlg.close()}
+dlg.addEventListener("click",e=>{if(e.target===dlg||e.target.closest("[data-close]"))closeDialog()});
+
+/* ================= WHO AM I ================= */
+function whoDialog(first){openDialog(`<div class="dlg-h"><h2>${first?"Welcome! Who's this?":"Switch person"}</h2>${first?"":`<button class="icon-btn" data-close aria-label="Close">${ico("x")}</button>`}</div>
+ <div class="dlg-b"><p style="margin:0" class="muted">This sets who pays by default, your packing list, and your balance. It stays on this device only.</p>
+ <div class="whoami">${S.people.map(p=>`<button type="button" data-iam="${p.id}">${av(p.id,"lg")}${esc(p.name)}</button>`).join("")}</div>
+ ${S.people.every(p=>/^Friend \d$/.test(p.name))?`<p class="muted" style="margin:0;font-size:13px">Names still say Friend 1–4? Rename them in Settings.</p>`:""}</div>
+ ${first?`<div class="dlg-f"><button class="btn ghost" type="button" data-close>Skip for now</button></div>`:""}`,
+ d=>d.addEventListener("click",e=>{const b=e.target.closest("[data-iam]");if(!b)return;me=b.dataset.iam;ls.set(ME,me);closeDialog();packFor=null;renderAllData();toast(`Hi ${person(me).name}`)}))}
+$("#meBtn").onclick=()=>whoDialog(false);
+
+/* ================= SETTINGS + SYNC ================= */
+function encodeState(){const j=JSON.stringify(S);if(window.LZString)return"z"+LZString.compressToEncodedURIComponent(j);return"b"+btoa(unescape(encodeURIComponent(j))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+function decodeState(s){try{if(s[0]==="z"){if(!window.LZString)return null;return JSON.parse(LZString.decompressFromEncodedURIComponent(s.slice(1)))}
+ if(s[0]==="b"){let b=s.slice(1).replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";return JSON.parse(decodeURIComponent(escape(atob(b))))}}catch(e){}return null}
+function shareURL(){return location.origin+location.pathname+"#s="+encodeState()}
+const newer=(a,b)=>!a?b:!b?a:((b.ts||0)>(a.ts||0)?b:a);
+function mergeState(A,B){
+ if(!B||B.v!==1)throw new Error("bad");const out=JSON.parse(JSON.stringify(A));
+ out.people=A.people.map(p=>newer(p,(B.people||[]).find(q=>q.id===p.id)));
+ out.rates=newer(A.rates,B.rates);
+ ["tasks","expenses","actuals","pack","extraPack"].forEach(k=>{const a=A[k]||{},b=B[k]||{};out[k]={};new Set([...Object.keys(a),...Object.keys(b)]).forEach(id=>out[k][id]=newer(a[id],b[id]))});
+ return out}
+function diffCount(A,B){let n=0;["tasks","expenses","actuals","pack","extraPack"].forEach(k=>{const a=A[k]||{},b=B[k]||{};Object.keys(b).forEach(id=>{if(!a[id]||(b[id].ts||0)>(a[id].ts||0))n++})});
+ (B.people||[]).forEach(q=>{const p=A.people.find(x=>x.id===q.id);if(p&&(q.ts||0)>(p.ts||0))n++});if((B.rates?.ts||0)>(A.rates?.ts||0))n++;return n}
+function applyIncoming(B,src){const n=diffCount(S,B);if(!n){toast("Already up to date");return}S=mergeState(S,B);save();if(SYNC.code)markAll();renderAllData();toast(`Merged ${n} change${n>1?"s":""} from ${src}`)}
+
+function settingsDialog(){
+ const body=()=>`<div class="dlg-h"><h2>Settings</h2><button class="icon-btn" type="button" data-close aria-label="Close">${ico("x")}</button></div>
+ <div class="dlg-b">
+  <section class="sect"><h3 style="font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:8px">Live sync ${syncPill()}</h3>
+  ${SYNC.code?`<p class="muted" style="margin:0;font-size:13.5px">This phone is connected to the group's trip. Every change saves to the cloud and appears on everyone's phone within a couple of seconds. Offline changes wait on the phone and sync when you're back online.</p>
+   ${SYNC.state==="error"?`<p style="margin:0;font-size:13.5px;color:var(--bad)">${esc(SYNC.msg)}</p>`:""}
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sun" type="button" data-invite>${ico("share")}Invite friends</button><button class="btn" type="button" data-copyinvite>Copy invite link</button><button class="btn" type="button" data-syncnow>Sync now</button></div>
+   <p class="muted" style="margin:0;font-size:12.5px">Anyone with the invite link can see and edit this trip, so only send it to the group.</p>
+   <details><summary class="muted" style="font-size:13px;cursor:pointer">Connection details</summary><dl class="kv"><dt>Project</dt><dd class="mono" style="font-size:12px;word-break:break-all">${esc(SYNC.url)}</dd><dt>Trip code</dt><dd class="mono" style="font-size:12px">${esc(SYNC.code.slice(0,4))}••••••••••••</dd><dt>Waiting to send</dt><dd>${outbox.size} change${outbox.size===1?"":"s"}</dd></dl>
+    <button class="btn danger" type="button" data-disconnect style="margin-top:10px">Disconnect this phone</button></details>`
+  :`<p class="muted" style="margin:0;font-size:13.5px">Connect a free Supabase project and every change appears on everyone's phone automatically. One person creates the trip; everyone else just opens the invite link.</p>
+   <label class="f">Supabase project URL<input type="text" id="sbUrl" placeholder="https://abcdefgh.supabase.co" value="${esc(SYNC.url)}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+   <label class="f">Public API key (anon or publishable)<input type="text" id="sbKey" placeholder="eyJ… or sb_publishable_…" value="${esc(SYNC.key)}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+   ${SYNC.msg&&SYNC.state==="error"?`<p style="margin:0;font-size:13.5px;color:var(--bad)">${esc(SYNC.msg)}</p>`:""}
+   <div><button class="btn sun" type="button" data-create>Create the group's trip</button></div>
+   <label class="f">Already have an invite link? Paste it<textarea id="pasteLink" placeholder="https://…#join=…" style="min-height:64px"></textarea></label>
+   <div><button class="btn" type="button" data-joinpaste>Join the trip</button></div>`}
+  </section>
+  <section class="sect"><h3 style="font-size:15px">Travellers</h3>
+   <div class="people-edit">${S.people.map((p,i)=>`<div class="r">${av(p.id)}<input type="text" value="${esc(p.name)}" data-pname="${p.id}" maxlength="20" aria-label="Name ${i+1}"><div class="swatches">${COLORS.slice(0,6).map(c=>`<button type="button" style="background:${c}" data-pcol="${p.id}" data-c="${c}" aria-pressed="${p.color===c}" aria-label="Colour"></button>`).join("")}</div></div>`).join("")}</div>
+  </section>
+  <section class="sect"><h3 style="font-size:15px">Exchange rates (₮ per 1 unit)</h3>
+   <div class="row2" style="grid-template-columns:repeat(3,1fr)">${["USD","CNY","THB"].map(c=>`<label class="f">${c}<input type="number" step="any" min="0" value="${S.rates[c]}" data-rate="${c}"></label>`).join("")}</div>
+   <p class="muted" style="margin:0;font-size:12.5px">Defaults are approximate rates from early Nov 2026. Check a bank rate before you go.</p>
+  </section>
+  <section class="sect"><h3 style="font-size:15px">Backup</h3>
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-export>${ico("down")}Download backup</button><label class="btn" style="cursor:pointer">${ico("up")}Restore from file<input type="file" accept="application/json,.json" data-import class="sr"></label>${SYNC.code?"":`<button class="btn" type="button" data-share>Send a snapshot link</button>`}<button class="btn danger" type="button" data-reset>Reset this phone</button></div>
+  </section>
+ </div>`;
+ openDialog(body(),d=>{
+  const redraw=()=>{if(dlg.open&&d.isConnected)d.innerHTML=body()};
+  settingsDialog.redraw=redraw;
+  d.addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;
+   if(b.hasAttribute("data-create")){const url=$("#sbUrl").value.trim().replace(/\/+$/,""),key=$("#sbKey").value.trim();
+    if(!/^https:\/\/[^\s]+$/.test(url)){toast("Paste the project URL, starting with https://");return}
+    if(key.length<20){toast("Paste the full public API key");return}
+    b.disabled=true;b.textContent="Connecting…";const ok=await createTrip(url,key);redraw();toast(ok?"Trip created. Now invite your friends":"Couldn't connect. See the message above")}
+   if(b.hasAttribute("data-joinpaste")){const inv=parseInvite($("#pasteLink").value);if(!inv){toast("That doesn't look like an invite link");return}b.disabled=true;b.textContent="Joining…";await joinTrip(inv);redraw()}
+   if(b.hasAttribute("data-invite")){const url=inviteURL();if(navigator.share){try{await navigator.share({title:"Steppe to Samui",text:"Join our trip planner",url});return}catch(err){if(err.name==="AbortError")return}}copy(url,"Invite link copied. Send it to the group")}
+   if(b.hasAttribute("data-copyinvite"))copy(inviteURL(),"Invite link copied. Send it to the group");
+   if(b.hasAttribute("data-syncnow")){b.disabled=true;await pull();await push().catch(()=>{});redraw();toast(SYNC.state==="live"?"Up to date":SYNC.msg||"Couldn't sync")}
+   if(b.hasAttribute("data-disconnect")){if(b.dataset.armed){disconnect();redraw();toast("Disconnected. Your data stays on this phone")}else{b.dataset.armed="1";b.textContent="Tap again to disconnect"}}
+   if(b.hasAttribute("data-share")){const url=shareURL();if(navigator.share){try{await navigator.share({title:"Steppe to Samui",text:"My latest trip updates",url});return}catch(err){if(err.name==="AbortError")return}}copy(url)}
+   if(b.dataset.pcol){const p=person(b.dataset.pcol);p.color=b.dataset.c;p.ts=now();save();dirty("people",p.id);renderAllData();redraw()}
+   if(b.hasAttribute("data-export")){const blob=new Blob([JSON.stringify(S,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="steppe-to-samui-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+   if(b.hasAttribute("data-reset")){if(b.dataset.armed){disconnect();S=freshState();save();ls.del(ME);me=null;outbox.clear();saveOutbox();closeDialog();renderAllData();toast("This phone was reset")}else{b.dataset.armed="1";b.textContent="Tap again: erase this phone's copy"}}});
+  d.addEventListener("change",e=>{const t=e.target;
+   if(t.dataset.pname){const p=person(t.dataset.pname);const v=t.value.trim()||p.name;if(v!==p.name){p.name=v;p.ts=now();save();dirty("people",p.id);renderAllData()}}
+   if(t.dataset.rate){const v=parseFloat(t.value);if(v>0){S.rates[t.dataset.rate]=v;S.rates.ts=now();save();dirty("rates","main");renderAllData()}}
+   if(t.hasAttribute("data-import")&&t.files[0]){const r=new FileReader();r.onload=()=>{try{applyIncoming(JSON.parse(r.result),"the backup")}catch(err){toast("Couldn't read that file")}};r.readAsText(t.files[0])}});
+ });
+}
+async function copy(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||"Link copied. Paste it in your group chat")}catch(e){const ta=$("#pasteLink");if(ta){ta.value=t;ta.select()}toast("Select the link in the box and copy it")}}
+$("#settingsBtn").onclick=settingsDialog;
+
+function checkIncoming(){const m=location.hash.match(/^#s=(.+)$/);if(!m)return;
+ const tryIt=()=>{const B=decodeState(m[1]);history.replaceState(null,"",location.pathname+"#"+view);
+  if(!B){$("#importBanner").innerHTML=`<div class="banner"><p>This link didn't open properly. Ask your friend to share it again.</p></div>`;return}
+  const n=diffCount(S,B);if(!n){toast("You're already up to date");if(!me)setTimeout(()=>whoDialog(true),500);return}
+  $("#importBanner").innerHTML=`<div class="banner">${ico("share")}<p><b>A friend shared ${n} update${n>1?"s":""}.</b> Merging keeps the newest version of every item, yours included.</p><button class="btn primary" type="button" id="mergeYes">Merge</button><button class="btn" type="button" id="mergeNo">Not now</button></div>`;
+  const after=()=>{$("#importBanner").innerHTML="";if(!me)setTimeout(()=>whoDialog(true),500)};
+  $("#mergeYes").onclick=()=>{applyIncoming(B,"your friend");after()};$("#mergeNo").onclick=after};
+ if(m[1][0]==="z"&&!window.LZString)addEventListener("load",tryIt,{once:true});else tryIt()}
+
+/* ================= LIVE SYNC (Supabase) ================= */
+const CFG=Object.assign({supabaseUrl:"",supabaseAnonKey:""},window.TRIP_CONFIG||{});
+const SB_LIB="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js";
+const SYNC={url:ls.get("sts:sb:url")||CFG.supabaseUrl||"",key:ls.get("sts:sb:key")||CFG.supabaseAnonKey||"",code:ls.get("sts:sb:code")||"",
+ client:null,ch:null,state:"off",msg:"",pushTimer:null,pulling:null,pushing:false,again:false};
+let outbox=(()=>{try{return new Set(JSON.parse(ls.get("sts:outbox")||"[]"))}catch(e){return new Set()}})();
+function saveOutbox(){ls.set("sts:outbox",JSON.stringify([...outbox]))}
+const KINDS=["people","rates","tasks","expenses","actuals","pack","extraPack"];
+function getItem(kind,key){if(kind==="people")return S.people.find(p=>p.id===key);if(kind==="rates")return S.rates;return(S[kind]||{})[key]}
+function setItem(kind,key,data){if(kind==="people"){const i=S.people.findIndex(p=>p.id===key);if(i>=0)S.people[i]=data;return}
+ if(kind==="rates"){S.rates=data;return}if(!S[kind])S[kind]={};S[kind][key]=data}
+function dirty(kind,key){if(!SYNC.code)return;outbox.add(kind+"|"+key);saveOutbox();schedulePush()}
+function markAll(){S.people.forEach(p=>outbox.add("people|"+p.id));outbox.add("rates|main");
+ ["tasks","expenses","actuals","pack","extraPack"].forEach(k=>Object.keys(S[k]||{}).forEach(id=>outbox.add(k+"|"+id)));saveOutbox();schedulePush()}
+const syncLabel=()=>({off:"Not synced",syncing:"Syncing",live:"Live",offline:"Offline",error:"Sync problem"})[SYNC.state];
+const syncPill=()=>`<span class="sync ${SYNC.state}"><i></i><span>${syncLabel()}</span></span>`;
+function setSync(state,msg=""){SYNC.state=state;SYNC.msg=msg;const b=$("#syncBtn");
+ if(b){b.innerHTML=syncPill();b.title=state==="off"?"Live sync is off. Tap to set it up":(msg||syncLabel())}}
+function loadLib(){if(window.supabase?.createClient)return Promise.resolve();
+ return new Promise((res,rej)=>{const s=document.createElement("script");s.src=SB_LIB;s.onload=res;s.onerror=()=>rej(new Error("Failed to fetch the sync library"));document.head.appendChild(s)})}
+const cursorKey=()=>"sts:cursor:"+SYNC.code;
+function friendly(err){const m=(err&&(err.message||err.msg||err.error_description))||String(err);
+ if(/PGRST202|Could not find the function|does not exist/i.test(m))return"The database isn't set up yet. Run setup.sql in Supabase → SQL Editor.";
+ if(/Invalid API key|JWT|apikey|No API key|401|Unauthorized/i.test(m))return"Supabase didn't accept the API key. Copy the anon or publishable key again.";
+ if(/Failed to fetch|NetworkError|Load failed|network/i.test(m))return navigator.onLine?"Can't reach Supabase. Check the project URL.":"You're offline. Changes are saved here and will sync later.";
+ return m}
+function failed(e){setSync(navigator.onLine?"error":"offline",friendly(e))}
+async function pullRaw(){
+ const since=+(ls.get(cursorKey())||0);
+ const {data,error}=await SYNC.client.rpc("trip_pull",{p_code:SYNC.code,p_since:Math.max(0,since-3000)});
+ if(error)throw error;
+ let changed=0,max=since;
+ (data||[]).forEach(r=>{max=Math.max(max,+r.updated_ms||0);if(!KINDS.includes(r.kind)||!r.data||typeof r.data!=="object")return;
+  const loc=getItem(r.kind,r.key);if((+r.ts||0)>(loc?.ts||0)){setItem(r.kind,r.key,r.data);changed++}});
+ ls.set(cursorKey(),String(max));
+ if(changed){save();renderAllData();if(dlg.open&&settingsDialog.redraw&&!dlg.querySelector("input:focus,textarea:focus"))settingsDialog.redraw()}
+ setSync(outbox.size?"syncing":"live");return changed}
+function pull(){if(!SYNC.client)return Promise.resolve(0);if(SYNC.pulling)return SYNC.pulling;
+ SYNC.pulling=pullRaw().catch(e=>{failed(e);return 0}).finally(()=>{SYNC.pulling=null});return SYNC.pulling}
+function schedulePush(){clearTimeout(SYNC.pushTimer);if(!SYNC.client){if(SYNC.code&&!navigator.onLine)setSync("offline");return}
+ setSync("syncing");SYNC.pushTimer=setTimeout(()=>push().catch(()=>{}),400)}
+async function push(){
+ if(!SYNC.client||!outbox.size){if(SYNC.client&&SYNC.state==="syncing")setSync("live");return}
+ if(SYNC.pushing){SYNC.again=true;return}
+ SYNC.pushing=true;setSync("syncing");
+ try{const keys=[...outbox];
+  for(let i=0;i<keys.length;i+=200){
+   const batch=keys.slice(i,i+200).map(k=>{const j=k.indexOf("|"),kind=k.slice(0,j),key=k.slice(j+1),d=getItem(kind,key);
+    return d?{k,kind,key,data:JSON.parse(JSON.stringify(d)),ts:d.ts||0}:{k,gone:true}});
+   const items=batch.filter(b=>!b.gone).map(({kind,key,data,ts})=>({kind,key,data,ts}));
+   if(items.length){const {error}=await SYNC.client.rpc("trip_push",{p_code:SYNC.code,p_items:items});if(error)throw error}
+   batch.forEach(b=>{if(b.gone||(getItem(b.kind,b.key)?.ts||0)===b.ts)outbox.delete(b.k)})}
+  saveOutbox();
+  try{SYNC.ch?.send({type:"broadcast",event:"changed",payload:{}})}catch(e){}
+  setSync(outbox.size?"syncing":"live")}
+ catch(e){failed(e);throw e}
+ finally{SYNC.pushing=false;if(SYNC.again){SYNC.again=false;schedulePush()}}}
+async function connect(){
+ if(!(SYNC.url&&SYNC.key&&SYNC.code)){setSync("off");return false}
+ setSync("syncing");
+ try{await loadLib();
+  if(!SYNC.client)SYNC.client=window.supabase.createClient(SYNC.url,SYNC.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  await pullRaw();
+  if(!SYNC.ch){try{SYNC.ch=SYNC.client.channel("trip-"+SYNC.code,{config:{broadcast:{self:false}}}).on("broadcast",{event:"changed"},()=>pull()).subscribe()}catch(e){SYNC.ch=null}}
+  await push();return true}
+ catch(e){failed(e);return false}}
+function disconnect(){try{if(SYNC.ch&&SYNC.client)SYNC.client.removeChannel(SYNC.ch)}catch(e){}
+ SYNC.ch=null;SYNC.client=null;SYNC.code="";ls.del("sts:sb:code");outbox.clear();saveOutbox();setSync("off")}
+function newCode(){const a="abcdefghjkmnpqrstuvwxyz23456789",r=new Uint8Array(22);crypto.getRandomValues(r);return Array.from(r,x=>a[x%a.length]).join("")}
+const b64e=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const b64d=s=>{let b=s.replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";return JSON.parse(decodeURIComponent(escape(atob(b))))};
+function inviteURL(){return location.origin+location.pathname+"#join="+b64e({u:SYNC.url,k:SYNC.key,c:SYNC.code})}
+function parseInvite(text){const m=String(text||"").match(/#join=([A-Za-z0-9_\-]+)/);if(!m)return null;
+ try{const o=b64d(m[1]);if(o&&/^https:\/\//.test(o.u)&&o.k&&o.c&&o.c.length>=16)return o}catch(e){}return null}
+function rememberConn(){ls.set("sts:sb:url",SYNC.url);ls.set("sts:sb:key",SYNC.key);ls.set("sts:sb:code",SYNC.code)}
+async function createTrip(url,key){if(SYNC.code)disconnect();
+ Object.assign(SYNC,{url,key,code:newCode(),client:null,ch:null});ls.set("sts:sb:url",url);ls.set("sts:sb:key",key);
+ markAll();const ok=await connect();if(ok)rememberConn();else{const m=SYNC.msg;SYNC.code="";SYNC.client=null;outbox.clear();saveOutbox();setSync("error",m)}return ok}
+async function joinTrip(inv){
+ if(SYNC.code===inv.c){toast("This phone is already in the trip");return true}
+ if(SYNC.code)disconnect();
+ Object.assign(SYNC,{url:inv.u,key:inv.k,code:inv.c,client:null,ch:null});rememberConn();ls.del(cursorKey());
+ markAll();const ok=await connect();
+ toast(ok?"You're in! Changes now sync live":SYNC.msg||"Couldn't connect yet. It will keep trying");
+ if(!me)setTimeout(()=>{if(!dlg.open)whoDialog(true)},600);return ok}
+function checkJoin(){const inv=parseInvite(location.hash);if(!location.hash.startsWith("#join="))return;
+ history.replaceState(null,"",location.pathname+"#"+view);
+ if(!inv){$("#importBanner").innerHTML=`<div class="banner"><p>This invite link is incomplete. Ask for it again and open the whole link.</p></div>`;return}
+ if(SYNC.code===inv.c){if(!me)setTimeout(()=>whoDialog(true),400);return}
+ $("#importBanner").innerHTML=`<div class="banner">${ico("share")}<p><b>You've been invited to the group's trip.</b> Join to see everyone's bookings, expenses and packing, live.</p><button class="btn primary" type="button" id="joinYes">Join the trip</button><button class="btn" type="button" id="joinNo">Not now</button></div>`;
+ $("#joinYes").onclick=async e=>{e.target.disabled=true;e.target.textContent="Joining…";await joinTrip(inv);$("#importBanner").innerHTML=""};
+ $("#joinNo").onclick=()=>{$("#importBanner").innerHTML="";if(!me)whoDialog(true)}}
+$("#syncBtn").onclick=settingsDialog;
+addEventListener("online",()=>{if(SYNC.code){SYNC.client?pull().then(()=>push().catch(()=>{})):connect()}});
+addEventListener("offline",()=>{if(SYNC.code)setSync("offline","You're offline. Changes are saved here and will sync later.")});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&SYNC.code){SYNC.client?pull().then(()=>push().catch(()=>{})):connect()}});
+setInterval(()=>{if(SYNC.code&&document.visibilityState==="visible"){if(SYNC.client)pull().then(()=>outbox.size&&push().catch(()=>{}));else if(navigator.onLine)connect()}},20000);
+
+/* ================= BOOT ================= */
+function renderAllData(){renderCrew();renderNav();renderTrip();renderBook();renderMoney();renderPack();renderFab()}
+applyTheme();matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",applyTheme);
+const incoming=/^#(s|join)=/.test(location.hash);
+renderMap();renderInfo();renderAllData();renderCount();setInterval(renderCount,1000);
+go(view,false);
+checkIncoming();
+checkJoin();
+if(SYNC.code)connect();else setSync("off");
+if(!me&&!incoming)setTimeout(()=>{if(!dlg.open)whoDialog(true)},400);
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
