@@ -58,3 +58,4 @@ All trip content is near the top of the `<script>` in `index.html`:
 Commit the change and everyone gets the new version next time they open the app with signal.
 
 Facts were checked on 4 Nov 2026. Re-check train times, flight days and China entry rules before booking.
+
