@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Аяланаа хэдүүлээ, бужигнуулнаа</title>
+<title>Тал нутгаас Самуй руу</title>
 <meta name="description" content="Шинэ жилийн аялал: Улаанбаатар → Эрээн → Хөх хот → Шанхай → Ко Самуй → Бангкок. 2026.12.25 – 2027.01.03.">
 <meta name="theme-color" content="#121518" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
@@ -79,6 +79,13 @@ button{cursor:pointer}
 .top .spacer{flex:1}
 .me-btn{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px 3px 3px;font-weight:600;font-size:13px}
 @media (max-width:560px){.me-btn span:not(.av){display:none}.me-btn{padding:3px}}
+.rsites{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.rsites>span{font-size:12px;color:var(--muted);margin-right:2px}
+.av{position:relative}
+.av.on::after{content:"";position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;border-radius:50%;background:var(--ok);border:2px solid var(--bg)}
+.av.off{opacity:.4}
+.stack .av.on{z-index:2}
+.crew b{font-weight:650;color:var(--ink)}
 .sync{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;white-space:nowrap}
 .sync i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
 .sync.live i{background:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
@@ -484,7 +491,7 @@ footer.foot{padding:16px 0 8px;color:var(--muted);font-size:12px;border-top:1px 
   <section class="hero" id="hero" aria-label="Аялал">
     <div class="hero-copy">
       <div class="dates" id="eyebrow"></div>
-      <h1>Аяланаа хэдүүлээ, бужигнуулнаа</h1>
+      <h1>Тал нутгаас Самуй руу</h1>
       <div class="count" id="count" aria-live="polite"></div>
       <div class="crew" id="crew"></div>
     </div>
@@ -707,10 +714,11 @@ const COLORS=["#3D5A99","#B85C1E","#0E7C86","#6B4FA0","#9A6A12","#B03A48","#2E7D
 const KEY="sts:v1", ME="sts:me", THEME="sts:theme", VIEWKEY="sts:view";
 const now=()=>Date.now();
 function freshState(){return{v:1,people:[0,1,2,3].map(i=>({id:"p"+(i+1),name:"Найз "+(i+1),color:COLORS[i],ts:0})),
- rates:{USD:3590,CNY:530,THB:110,ts:0},tasks:{},expenses:{},actuals:{},pack:{},extraPack:{},days:{},places:{},sights:{},votes:{},res:{}}}
+ rates:{USD:3590,CNY:530,THB:110,ts:0},tasks:{},expenses:{},actuals:{},pack:{},extraPack:{},days:{},places:{},sights:{},votes:{},res:{},seen:{}}}
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let S=(()=>{try{const s=JSON.parse(ls.get(KEY));if(s&&s.v===1)return Object.assign(freshState(),s)}catch(e){}return freshState()})();
 let me=ls.get(ME);
+const PRES={on:new Set(),ready:false,key:Math.random().toString(36).slice(2,10)}; // who has the app open right now
 const save=()=>ls.set(KEY,JSON.stringify(S));
 
 const person=id=>S.people.find(p=>p.id===id);
@@ -802,7 +810,11 @@ function homeAt(){const ds=dayList();return new Date(ds[ds.length-1].date+"T23:0
 
 /* ================= HERO ================= */
 function renderCrew(){
- $("#crew").innerHTML=`<div class="stack">${S.people.map(p=>av(p.id)).join("")}</div><span class="muted">${S.people.map(p=>esc(p.name)).join(", ")}</span>`;
+ const live=!!SYNC.code,seen=id=>S.seen&&S.seen[id],on=id=>PRES.on.has(id);
+ const when=t=>{const d=new Date(t),z=n=>String(n).padStart(2,"0");return `${d.getMonth()+1}-р сарын ${d.getDate()}, ${z(d.getHours())}:${z(d.getMinutes())}`};
+ const tip=p=>on(p.id)?"Одоо онлайн":seen(p.id)?"Сүүлд орсон: "+when(seen(p.id).last):"Хараахан нэгдээгүй";
+ const names=S.people.filter(p=>on(p.id)).map(p=>esc(p.name)),gone=S.people.filter(p=>!on(p.id)&&!seen(p.id)).map(p=>esc(p.name));
+ $("#crew").innerHTML=`<div class="stack">${S.people.map(p=>live?av(p.id,on(p.id)?"on":!seen(p.id)?"off":"").replace(/title="[^"]*"/,`title="${esc(p.name)}: ${tip(p)}"`):av(p.id)).join("")}</div><span class="muted">${live?(names.length?`<b>${names.length} онлайн:</b> ${names.join(", ")}`:"Одоо онлайн хүн алга")+(gone.length?` · Нэгдээгүй: ${gone.join(", ")}`:""):S.people.map(p=>esc(p.name)).join(", ")}</span>`;
  const m=person(me);$("#meBtn").innerHTML=m?`${av(me,"sm")}<span>${esc(m.name)}</span>`:`<span class="av sm nobody">?</span><span>Та хэн бэ?</span>`;
 }
 function tripDayIndex(d=new Date()){const ds=dayList(),t=d.getTime();if(t<departAt().getTime()-20*3600e3)return -1;
@@ -1083,6 +1095,11 @@ function searchURL(mode,a,b,date,out){
  if(mode==="plane")return `https://www.google.com/travel/flights?q=${encodeURIComponent(`Flights from ${enName(a)} to ${enName(b)} on ${date}`)}`;
  if(mode==="train"&&(a==="ub"||b==="ub"))return "https://eticket.ubtz.mn/";
  return `https://www.google.com/search?q=${encodeURIComponent(`${mode==="boat"?"ferry":mode==="bus"?"bus":"train"} ${enName(a)} to ${enName(b)} ${date}`)}`}
+function hotelSites(k,i,o){const q=encodeURIComponent(enName(k)),n=S.people.length,rm=Math.max(1,Math.ceil(n/2));
+ return [["Booking.com",`https://www.booking.com/searchresults.html?ss=${q}&checkin=${i}&checkout=${o}&group_adults=${n}&no_rooms=${rm}&group_children=0`],
+  ["Airbnb",`https://www.airbnb.com/s/${q}/homes?checkin=${i}&checkout=${o}&adults=${n}`],
+  ["Agoda",`https://www.agoda.com/search?textToSearch=${q}&checkIn=${i}&checkOut=${o}&rooms=${rm}&adults=${n}&children=0`],
+  ["Trip.com",`https://www.trip.com/hotels/list?cityName=${q}&checkin=${i}&checkout=${o}&adult=${n}&crn=${rm}`]]}
 const safeURL=u=>/^https?:\/\/[^\s"'<>]+$/i.test(u||"")?u:"";
 function codeChip(c){return c?`<span class="code">${esc(c)}<button type="button" data-copy="${esc(c)}" aria-label="Кодыг хуулах">${ico("copy")}</button></span>`:""}
 function resMeta(r){return `<div class="rmeta">${codeChip(r.code)}${r.price?`<span class="chip">${money(r.price,r.cur||"MNT")}</span>`:""}${r.by&&person(r.by)?`<span class="chip">${av(r.by,"sm")}${esc(person(r.by).name)} захиалсан</span>`:""}</div>${r.note?`<div class="rnote">${esc(r.note)}</div>`:""}`}
@@ -1091,14 +1108,14 @@ function legCard({l,key,r},extraR){
  const mode=r?.type||l.m,a=extraR?r.from:pname(l.a),b=extraR?r.to:pname(l.b),date=extraR?r.depD:l.d;
  let h=`<article class="card res ${r?"":"todo"}" style="--c:var(--${extraR?"acc":cityColor(l.b)})"><div class="res-h"><span class="ri">${ico(RT[mode]?.[1]||"plane")}</span><div class="rt"><b>${esc(a||"?")} → ${esc(b||"?")}</b><span>${date?dlong(date):""}${r?.carrier?`, ${esc(r.carrier)}`:""}</span></div>${r?`<span class="chip ok">${ico("check")}Захиалсан</span>`:`<span class="chip warn">Захиалаагүй</span>`}</div>`;
  if(r){h+=`<div class="res-b">${r.depT||r.arrT?`<div class="times"><div><b>${esc(r.depT||"--:--")}</b><span>${esc(a)}${r.depD&&r.depD!==date?`, ${dlabel(r.depD)}`:""}</span></div>${ico("arrow")}<div><b>${esc(r.arrT||"--:--")}</b><span>${esc(b)}${r.arrD&&r.arrD!==date?`, ${dlabel(r.arrD)}`:""}</span></div></div>`:""}${resMeta(r)}${resActions(r)}</div>`}
- else h+=`<div class="res-b"><div class="ractions"><button class="btn sm acc" type="button" data-addleg="${esc(key)}">${ico("plus")}Захиалга нэмэх</button><a class="btn sm" href="${esc(searchURL(l.m,l.a,l.b,l.d))}" target="_blank" rel="noopener">${ico("search")}${l.m==="plane"?"Нислэг хайх":l.m==="train"&&(l.a==="ub"||l.b==="ub")?"УБТЗ тасалбар":"Хайх"}</a></div></div>`;
+ else h+=`<div class="res-b"><div class="ractions"><button class="btn sm acc" type="button" data-addleg="${esc(key)}">${ico("plus")}Захиалга нэмэх</button><a class="btn sm" href="${esc(searchURL(l.m,l.a,l.b,l.d))}" target="_blank" rel="noopener">${ico("search")}${l.m==="plane"?"Нислэг хайх":l.m==="train"&&(l.a==="ub"||l.b==="ub")?"УБТЗ тасалбар":"Хайх"}</a>${l.m==="plane"?`<a class="btn sm" href="https://www.trip.com/flights/" target="_blank" rel="noopener">${ico("search")}Trip.com</a>`:l.m==="train"&&l.a!=="ub"&&l.b!=="ub"?`<a class="btn sm" href="https://www.trip.com/trains/" target="_blank" rel="noopener">${ico("search")}Trip.com</a>`:""}</div></div>`;
  return h+`</article>`}
 function stayCard({c,key,inD,outD,r},extraR){
  const city=extraR?r.city:pname(c.k),i=r?.inD||inD,o=r?.outD||outD,n=i&&o?Math.round((new Date(o)-new Date(i))/864e5):0;
  let h=`<article class="card res ${r?"":"todo"}" style="--c:var(--${extraR?"acc":cityColor(c.k)})"><div class="res-h"><span class="ri">${ico("hotel")}</span><div class="rt"><b>${esc(r?.name||city||"Буудал")}</b><span>${r?.name?esc(city)+", ":""}${i&&o?`${rangeText(i,o)}, ${n} шөнө`:""}</span></div>${r?`<span class="chip ok">${ico("check")}Захиалсан</span>`:`<span class="chip warn">Захиалаагүй</span>`}</div>`;
  if(r){const mapQ=r.addr||[r.name,city].filter(Boolean).join(", ");
   h+=`<div class="res-b"><div class="times"><div><b>${i?dlabel(i):"—"}</b><span>Орох${r.inT?` ${esc(r.inT)}`:""}</span></div>${ico("arrow")}<div><b>${o?dlabel(o):"—"}</b><span>Гарах${r.outT?` ${esc(r.outT)}`:""}</span></div></div>${r.addr?`<div class="muted" style="font-size:13px">${esc(r.addr)}</div>`:""}${resMeta(r)}${resActions(r,`<a class="btn sm" href="${mapsURL(mapQ)}" target="_blank" rel="noopener">${ico("pin")}Газрын зураг</a>`)}</div>`}
- else h+=`<div class="res-b"><div class="ractions"><button class="btn sm acc" type="button" data-addstay="${esc(key)}">${ico("plus")}Захиалга нэмэх</button><a class="btn sm" href="${esc(searchURL("hotel",c.k,null,inD,outD))}" target="_blank" rel="noopener">${ico("search")}Booking.com-оос хайх</a></div></div>`;
+ else h+=`<div class="res-b"><div class="ractions"><button class="btn sm acc" type="button" data-addstay="${esc(key)}">${ico("plus")}Захиалга нэмэх</button></div><div class="rsites"><span>Хайх:</span>${hotelSites(c.k,inD,outD).map(([n,u])=>`<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">${n}</a>`).join("")}</div></div>`;
  return h+`</article>`}
 
 let bookSeg=(()=>{const v=ls.get("sts:bookseg");return["transport","stay","tasks"].includes(v)?v:"transport"})();
@@ -1116,7 +1133,7 @@ function renderBook(){
   h+=H.length?`<div class="reslist">${H.map(x=>stayCard(x)).join("")}</div>`:`<div class="card empty">${ico("hotel")}Төлөвлөгөөнд хонох хот алга.</div>`;
   if(X.length)h+=`<div class="sgroup-h"><span>Бусад буудал</span><span class="muted">${X.length}</span></div><div class="reslist">${X.map(r=>stayCard({c:{},key:"",r},true)).join("")}</div>`;
   h+=`<button type="button" class="addday" data-newres="h">${ico("plus")}Өөр буудал нэмэх</button>
-  <p class="muted" style="margin:0;font-size:12.5px">Хонох хот бүр энд автоматаар гарна. Booking.com-ын хайлтад огноо, ${S.people.length} хүн бөглөгдсөн байна.</p>`}
+  <p class="muted" style="margin:0;font-size:12.5px">Хонох хот бүр энд автоматаар гарна. Booking.com, Airbnb, Agoda, Trip.com-ын хайлтыг огноо, ${S.people.length} хүнтэйгээр нээнэ.</p>`}
  if(bookSeg==="tasks")h+=tasksHTML();
  $("#v-book").innerHTML=h;
 }
@@ -1389,7 +1406,7 @@ function whoDialog(first){openDialog(`<div class="dlg-h"><h2>${first?"Тавта
  <div class="whoami">${S.people.map(p=>`<button type="button" data-iam="${p.id}">${av(p.id,"lg")}${esc(p.name)}</button>`).join("")}</div>
  ${S.people.every(p=>/^(Найз|Friend) \d$/.test(p.name))?`<p class="muted" style="margin:0;font-size:12.5px">Нэрс «Найз 1–4» хэвээр үү? Тохиргооноос солиорой.</p>`:""}</div>
  ${first?`<div class="dlg-f"><button class="btn ghost" type="button" data-close>Одоохондоо алгасах</button></div>`:""}`,
- d=>d.addEventListener("click",e=>{const b=e.target.closest("[data-iam]");if(!b)return;me=b.dataset.iam;ls.set(ME,me);closeDialog();packFor=null;renderAllData();toast(`Сайн уу, ${person(me).name}!`)}))}
+ d=>d.addEventListener("click",e=>{const b=e.target.closest("[data-iam]");if(!b)return;me=b.dataset.iam;ls.set(ME,me);presTrack();markSeen();closeDialog();packFor=null;renderAllData();toast(`Сайн уу, ${person(me).name}!`)}))}
 $("#meBtn").onclick=()=>whoDialog(false);
 
 /* ================= SETTINGS + SYNC ================= */
@@ -1402,9 +1419,9 @@ function mergeState(A,B){
  if(!B||B.v!==1)throw new Error("bad");const out=JSON.parse(JSON.stringify(A));
  out.people=A.people.map(p=>newer(p,(B.people||[]).find(q=>q.id===p.id)));
  out.rates=newer(A.rates,B.rates);
- ["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res"].forEach(k=>{const a=A[k]||{},b=B[k]||{};out[k]={};new Set([...Object.keys(a),...Object.keys(b)]).forEach(id=>out[k][id]=newer(a[id],b[id]))});
+ ["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res","seen"].forEach(k=>{const a=A[k]||{},b=B[k]||{};out[k]={};new Set([...Object.keys(a),...Object.keys(b)]).forEach(id=>out[k][id]=newer(a[id],b[id]))});
  return out}
-function diffCount(A,B){let n=0;["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res"].forEach(k=>{const a=A[k]||{},b=B[k]||{};Object.keys(b).forEach(id=>{if(!a[id]||(b[id].ts||0)>(a[id].ts||0))n++})});
+function diffCount(A,B){let n=0;["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res","seen"].forEach(k=>{const a=A[k]||{},b=B[k]||{};Object.keys(b).forEach(id=>{if(!a[id]||(b[id].ts||0)>(a[id].ts||0))n++})});
  (B.people||[]).forEach(q=>{const p=A.people.find(x=>x.id===q.id);if(p&&(q.ts||0)>(p.ts||0))n++});if((B.rates?.ts||0)>(A.rates?.ts||0))n++;return n}
 function applyIncoming(B,src){const n=diffCount(S,B);if(!n){toast("Аль хэдийн шинэчлэгдсэн байна");return}S=mergeState(S,B);save();if(SYNC.code)markAll();renderAllData();toast(`${n} өөрчлөлт нэгтгэлээ`)}
 
@@ -1446,11 +1463,11 @@ function settingsDialog(){
     if(key.length<20){toast("API түлхүүрийг бүтнээр нь буулгана уу");return}
     b.disabled=true;b.textContent="Холбогдож байна…";const ok=await createTrip(url,key);redraw();toast(ok?"Аялал үүслээ. Одоо найзуудаа уриарай":"Холбогдсонгүй. Дээрх мэдэгдлийг харна уу")}
    if(b.hasAttribute("data-joinpaste")){const inv=parseInvite($("#pasteLink").value);if(!inv){toast("Энэ урилгын холбоос биш байна");return}b.disabled=true;b.textContent="Нэгдэж байна…";await joinTrip(inv);redraw()}
-   if(b.hasAttribute("data-invite")){const url=inviteURL();if(navigator.share){try{await navigator.share({title:"Аяланаа хэдүүлээ, бужигнуулнаа",text:"Манай аяллын төлөвлөгөөнд нэгдээрэй",url});return}catch(err){if(err.name==="AbortError")return}}copy(url,"Урилгын холбоос хуулагдлаа. Бүлэгтээ илгээгээрэй")}
+   if(b.hasAttribute("data-invite")){const url=inviteURL();if(navigator.share){try{await navigator.share({title:"Тал нутгаас Самуй руу",text:"Манай аяллын төлөвлөгөөнд нэгдээрэй",url});return}catch(err){if(err.name==="AbortError")return}}copy(url,"Урилгын холбоос хуулагдлаа. Бүлэгтээ илгээгээрэй")}
    if(b.hasAttribute("data-copyinvite"))copy(inviteURL(),"Урилгын холбоос хуулагдлаа. Бүлэгтээ илгээгээрэй");
    if(b.hasAttribute("data-syncnow")){b.disabled=true;await pull();await push().catch(()=>{});redraw();toast(SYNC.state==="live"?"Шинэчлэгдсэн":SYNC.msg||"Синк хийж чадсангүй")}
    if(b.hasAttribute("data-disconnect")){if(b.dataset.armed){disconnect();redraw();toast("Салгагдлаа. Таны мэдээлэл энэ утсанд үлдэнэ")}else{b.dataset.armed="1";b.textContent="Дахин дарж салгана"}}
-   if(b.hasAttribute("data-share")){const url=shareURL();if(navigator.share){try{await navigator.share({title:"Аяланаа хэдүүлээ, бужигнуулнаа",text:"Миний сүүлийн өөрчлөлтүүд",url});return}catch(err){if(err.name==="AbortError")return}}copy(url)}
+   if(b.hasAttribute("data-share")){const url=shareURL();if(navigator.share){try{await navigator.share({title:"Тал нутгаас Самуй руу",text:"Миний сүүлийн өөрчлөлтүүд",url});return}catch(err){if(err.name==="AbortError")return}}copy(url)}
    if(b.dataset.pcol){const p=person(b.dataset.pcol);p.color=b.dataset.c;p.ts=now();save();dirty("people",p.id);renderAllData();redraw()}
    if(b.hasAttribute("data-export")){const blob=new Blob([JSON.stringify(S,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="tal-samui-noots.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
    if(b.hasAttribute("data-reset")){if(b.dataset.armed){disconnect();S=freshState();save();ls.del(ME);me=null;outbox.clear();saveOutbox();closeDialog();renderAllData();toast("Энэ утсыг цэвэрлэлээ")}else{b.dataset.armed="1";b.textContent="Дахин дарж: энэ утасны хуулбарыг устгана"}}});
@@ -1479,13 +1496,13 @@ const SYNC={url:ls.get("sts:sb:url")||CFG.supabaseUrl||"",key:ls.get("sts:sb:key
  client:null,ch:null,state:"off",msg:"",pushTimer:null,pulling:null,pushing:false,again:false};
 let outbox=(()=>{try{return new Set(JSON.parse(ls.get("sts:outbox")||"[]"))}catch(e){return new Set()}})();
 function saveOutbox(){ls.set("sts:outbox",JSON.stringify([...outbox]))}
-const KINDS=["people","rates","tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res"];
+const KINDS=["people","rates","tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res","seen"];
 function getItem(kind,key){if(kind==="people")return S.people.find(p=>p.id===key);if(kind==="rates")return S.rates;return(S[kind]||{})[key]}
 function setItem(kind,key,data){if(kind==="people"){const i=S.people.findIndex(p=>p.id===key);if(i>=0)S.people[i]=data;return}
  if(kind==="rates"){S.rates=data;return}if(!S[kind])S[kind]={};S[kind][key]=data}
 function dirty(kind,key){if(!SYNC.code)return;outbox.add(kind+"|"+key);saveOutbox();schedulePush()}
 function markAll(){S.people.forEach(p=>outbox.add("people|"+p.id));outbox.add("rates|main");
- ["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res"].forEach(k=>Object.keys(S[k]||{}).forEach(id=>outbox.add(k+"|"+id)));saveOutbox();schedulePush()}
+ ["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res","seen"].forEach(k=>Object.keys(S[k]||{}).forEach(id=>outbox.add(k+"|"+id)));saveOutbox();schedulePush()}
 const syncLabel=()=>({off:"Синкгүй",syncing:"Синк…",live:"Шууд",offline:"Офлайн",error:"Синкийн алдаа"})[SYNC.state];
 const syncPill=()=>`<span class="sync ${SYNC.state}"><i></i><span>${syncLabel()}</span></span>`;
 function setSync(state,msg=""){SYNC.state=state;SYNC.msg=msg;const b=$("#syncBtn");
@@ -1503,9 +1520,10 @@ async function pullRaw(){
  const since=+(ls.get(cursorKey())||0);
  const {data,error}=await SYNC.client.rpc("trip_pull",{p_code:SYNC.code,p_since:Math.max(0,since-3000)});
  if(error)throw error;
- let changed=0,max=since;
+ let changed=0,max=since;const fresh=[];
  (data||[]).forEach(r=>{max=Math.max(max,+r.updated_ms||0);if(!KINDS.includes(r.kind)||!r.data||typeof r.data!=="object")return;
-  const loc=getItem(r.kind,r.key);if((+r.ts||0)>(loc?.ts||0)){setItem(r.kind,r.key,r.data);changed++}});
+  const loc=getItem(r.kind,r.key);if((+r.ts||0)>(loc?.ts||0)){if(r.kind==="seen"&&!loc&&SYNC.primed&&r.key!==me&&person(r.key))fresh.push(person(r.key).name);setItem(r.kind,r.key,r.data);changed++}});
+ if(fresh.length)toast(fresh.join(", ")+" аялалд нэгдлээ");
  ls.set(cursorKey(),String(max));
  if(changed){save();renderAllData();if(dlg.open&&settingsDialog.redraw&&!dlg.querySelector("input:focus,textarea:focus"))settingsDialog.redraw()}
  setSync(outbox.size?"syncing":"live");return changed}
@@ -1534,12 +1552,22 @@ async function connect(){
  setSync("syncing");
  try{await loadLib();
   if(!SYNC.client)SYNC.client=window.supabase.createClient(SYNC.url,SYNC.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-  await pullRaw();
-  if(!SYNC.ch){try{SYNC.ch=SYNC.client.channel("trip-"+SYNC.code,{config:{broadcast:{self:false}}}).on("broadcast",{event:"changed"},()=>pull()).subscribe()}catch(e){SYNC.ch=null}}
+  await pullRaw();SYNC.primed=true;markSeen();
+  if(!SYNC.ch){try{SYNC.ch=SYNC.client.channel("trip-"+SYNC.code,{config:{broadcast:{self:false},presence:{key:PRES.key}}})
+   .on("broadcast",{event:"changed"},()=>pull())
+   .on("presence",{event:"sync"},presSync)
+   .on("presence",{event:"join"},presJoin)
+   .subscribe(st=>{if(st==="SUBSCRIBED"){presTrack();setTimeout(()=>{PRES.ready=true},1500)}})}catch(e){SYNC.ch=null}}
   await push();return true}
  catch(e){failed(e);return false}}
+/* presence: who has the app open right now. Saved "seen" records say who has ever joined. */
+function presTrack(){try{if(SYNC.ch&&!document.hidden)SYNC.ch.track({me:me||null,t:Date.now()})}catch(e){}}
+function presSync(){try{const st=SYNC.ch.presenceState();PRES.on=new Set(Object.values(st).flat().map(m=>m.me).filter(id=>id&&person(id)));renderCrew()}catch(e){}}
+function presJoin(p){if(!PRES.ready)return;(p.newPresences||[]).forEach(m=>{if(m.me&&m.me!==me&&!PRES.on.has(m.me)&&person(m.me))toast(person(m.me).name+" онлайн боллоо")})}
+function markSeen(){if(!me||!SYNC.code)return;const o=S.seen[me],t=now();if(o&&t-(o.last||0)<10*60e3)return;S.seen[me]={first:o?.first||t,last:t,ts:t};save();dirty("seen",me);renderCrew()}
+document.addEventListener("visibilitychange",()=>{if(!SYNC.ch)return;if(document.hidden){try{SYNC.ch.untrack()}catch(e){}}else{presTrack();markSeen()}});
 function disconnect(){try{if(SYNC.ch&&SYNC.client)SYNC.client.removeChannel(SYNC.ch)}catch(e){}
- SYNC.ch=null;SYNC.client=null;SYNC.code="";ls.del("sts:sb:code");outbox.clear();saveOutbox();setSync("off")}
+ PRES.on=new Set();PRES.ready=false;SYNC.primed=false;SYNC.ch=null;SYNC.client=null;SYNC.code="";ls.del("sts:sb:code");outbox.clear();saveOutbox();setSync("off")}
 function newCode(){const a="abcdefghjkmnpqrstuvwxyz23456789",r=new Uint8Array(22);crypto.getRandomValues(r);return Array.from(r,x=>a[x%a.length]).join("")}
 const b64e=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 const b64d=s=>{let b=s.replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";return JSON.parse(decodeURIComponent(escape(atob(b))))};
