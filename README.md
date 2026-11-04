@@ -1,55 +1,55 @@
-# Steppe to Samui
+# Тал нутгаас Самуй руу
 
-Trip planner for our New Year trip, 25 Dec 2026 – 3 Jan 2027:
-Ulaanbaatar → Erlian → Hohhot → Shanghai → Koh Samui → Bangkok → Ulaanbaatar.
+Шинэ жилийн аяллын төлөвлөгөө, 2026.12.25 – 2027.01.03:
+Улаанбаатар → Эрээн → Хөх хот → Шанхай → Ко Самуй → Бангкок → Улаанбаатар.
 
-It has 5 tabs:
+Апп 5 хэсэгтэй:
 
-- **Trip:** countdown, the route map and the plan, in two views:
-  - **Day by day:** open a day and tap **Edit day** to change the title, the travel (from → to, by train, flight, bus or boat), where you sleep, and the steps. You can also add or remove days. The map redraws itself.
-  - **What we'll see:** places to visit in each city. Tap **I'm in** on the ones you want, give a place a day so it shows in that day's plan, or add your own.
-- **To book:** the checklist, with an owner, booking reference and price for each item.
-- **Money:** shared expenses in ₮ / ¥ / ฿ / $, settle-up, budget and a currency converter.
-- **Packing:** a list per person.
-- **Info:** entry rules, weather, plugs, emergency numbers and phrases.
+- **Аялал:** тоолуур, маршрутын зураг, төлөвлөгөө:
+  - **Өдрөөр:** өдөр дээр дарж нээгээд **✏️ Засах**-аар гарчиг, аялал (хаанаас → хаашаа, галт тэрэг, нислэг, автобус, завь), хаана унтах, алхам бүрийг өөрчилнө. Өдөр нэмж, хасаж болно. Зураг өөрөө шинэчлэгдэнэ.
+  - **Үзэх газрууд:** хот бүрийн үзэх газрууд. Явмаар байгаа газар дээрээ **❤️ Би явна** дарна. Газарт өдөр оноовол тэр өдрийн төлөвлөгөөнд гарна. Өөрийн газраа нэмж болно.
+- **Захиалга:** хийх зүйлсийн жагсаалт, хариуцагч, захиалгын код, үнэтэй.
+- **Мөнгө:** нийтийн зардал (₮ / ¥ / ฿ / $), тооцоо, төсөв, ханш хөрвүүлэгч.
+- **Ачаа:** хүн бүрийн жагсаалт.
+- **Мэдээлэл:** нэвтрэх журам, цаг агаар, залгуур, яаралтай дугаар, хэрэгтэй үгс.
 
-Tap any city on the map to jump to what's there.
+**Шууд синк:** Supabase холбогдсон үед өөрчлөлт бүр хэдхэн секундэд бүх хүний утсанд гарна. Офлайн үед өөрчлөлт утсанд хүлээгдэж, сүлжээнд орохоор синк хийгдэнэ.
 
-**Live sync:** with Supabase connected, every tick, expense and name change shows up on everyone's phone within a couple of seconds. It also works offline: changes wait on the phone and sync when you're back online.
+## 1. GitHub Pages дээр байршуулах
 
-## 1. Put the app on GitHub Pages
-
-1. github.com → **New repository** → name it e.g. `samui-trip` → **Public** → Create.
-2. **uploading an existing file** → drag in every file from this folder → **Commit changes**.
+1. github.com → **New repository** → нэр өгнө (ж.нь `tripp`) → **Public** → Create.
+2. **Add file → Upload files** → энэ хавтасны бүх файлыг чирж оруулна → **Commit changes**.
 3. **Settings → Pages** → Source **Deploy from a branch**, Branch **main**, **/ (root)** → **Save**.
-4. After about a minute the app is at `https://<your-username>.github.io/samui-trip/`.
+4. Нэг минутын дараа апп `https://<таны-нэр>.github.io/<repo-нэр>/` хаягаар нээгдэнэ.
 
-## 2. Connect the group
+Шинэчлэх бол файлуудыг дахин upload хийхэд хангалттай: ижил нэртэй файлыг GitHub шууд солино.
 
-Supabase is already set up: the "Samui Trip" project exists, `setup.sql` has been run, and `config.js` holds its address and public key.
+## 2. Бүлгээ холбох
 
-1. Open the app → tap the **Not synced** pill → **Create the group's trip**. Everything already on your phone is uploaded.
-2. Tap **Invite friends** and send the link to the group chat.
-3. Each friend opens the link once and taps **Join the trip**. Their phone stays connected from then on.
+Supabase аль хэдийн бэлэн: "Samui Trip" төсөл үүссэн, `setup.sql` ажилласан, `config.js` дотор хаяг, нийтийн түлхүүр нь бий.
 
-Using a different Supabase project? Run `setup.sql` in its SQL Editor and put its URL and anon/publishable key in `config.js`. Never use the service_role or secret key.
+1. Аппыг нээгээд **Синкгүй** товч → **✨ Бүлгийн аяллыг үүсгэх**. Утсан дээрх бүх мэдээлэл илгээгдэнэ.
+2. **Найзуудаа урих** дарж холбоосыг бүлгийн чат руу явуулна.
+3. Найз бүр холбоосыг нэг удаа нээгээд **Аялалд нэгдэх** дарна. Түүнээс хойш утас нь холбогдсон хэвээр байна.
 
-## How it's protected
+Өөр Supabase төсөл ашиглах бол: түүний SQL Editor дээр `setup.sql`-ийг ажиллуулж, URL болон anon/publishable түлхүүрийг `config.js`-д бичнэ. service_role эсвэл secret түлхүүрийг хэзээ ч бүү ашигла.
 
-- The database table is locked. The app can only call two functions, and both need the trip code.
-- The trip code is a 22-character random secret that exists only inside your invite link.
-- So **anyone with the invite link can see and edit the trip**. Only share it with the group.
+## Хамгаалалт
 
-## How conflicts are handled
+- Өгөгдлийн сангийн хүснэгт түгжээтэй. Апп зөвхөн хоёр функц дуудаж чадах ба хоёулаа аяллын кодыг шаарддаг.
+- Аяллын код нь зөвхөн урилгын холбоос дотор байдаг 22 тэмдэгттэй санамсаргүй нууц.
+- Иймээс **урилгын холбоостой хэн ч аяллыг харж, засаж чадна**. Зөвхөн бүлэгтээ илгээгээрэй.
 
-Every item is saved separately: each day, place, vote, task, expense, packing list, name and rate. When two people edit the same item, the newer change wins. Deleting an expense syncs too.
+## Зөрчил хэрхэн шийдэгддэг
 
-The green **Live** pill means everything is saved. **Syncing** means changes are on their way. **Offline** means changes are waiting on the phone. **Sync problem** means tap it to see what's wrong.
+Зүйл бүр тусдаа хадгалагдана: өдөр, газар, санал, захиалга, зардал, ачааны жагсаалт, нэр, ханш. Хоёр хүн нэг зүйлийг засвал хамгийн сүүлийн өөрчлөлт үлдэнэ.
 
-## Editing the plan
+Ногоон цэг: бүх зүйл хадгалагдсан. Анивчих цэнхэр: илгээж байна. Улбар шар: офлайн эсвэл алдаа, дарж шалтгааныг харна.
 
-Day plans, cities and places to see are edited in the app and sync to everyone. The built-in defaults live near the top of the `<script>` in `index.html`: `DAYS` (itinerary), `SIGHTS` (places to see), `TASKS` (checklist), `EST` (budget estimates), `PACK` (packing lists). Changes made in the app always win over the defaults.
+## Төлөвлөгөөг засах
 
-New cities come from a built-in list, or are looked up online through Open-Meteo's free city search.
+Өдөр, хот, үзэх газрыг апп дотроос засна, бүх хүнд синк хийгдэнэ. Анхдагч утгууд `index.html`-ийн `<script>` дотор байгаа: `DAYS` (өдрүүд), `SIGHTS` (үзэх газрууд), `TASKS` (захиалга), `EST` (төсөв), `PACK` (ачаа). Апп дээр хийсэн өөрчлөлт анхдагч утгаас үргэлж давуу.
 
-Facts were checked on 4 Nov 2026. Re-check train times, flight days and China entry rules before booking.
+Шинэ хотыг суурилуулсан жагсаалтаас, эсвэл Open-Meteo-гийн үнэгүй хайлтаар олно.
+
+Мэдээллийг 2026.11.04-нд шалгасан. Захиалахаасаа өмнө галт тэрэгний цаг, нислэгийн өдөр, Хятадад нэвтрэх журмыг дахин шалгаарай.
