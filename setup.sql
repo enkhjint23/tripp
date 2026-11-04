@@ -59,7 +59,8 @@ begin
   insert into public.trip_items (trip_code, kind, key, data, ts, updated_at)
   select p_code, i->>'kind', i->>'key', i->'data', coalesce((i->>'ts')::bigint, 0), now()
   from jsonb_array_elements(p_items) as i
-  where i->>'kind' in ('people', 'rates', 'tasks', 'expenses', 'actuals', 'pack', 'extraPack')
+  where i->>'kind' in ('people', 'rates', 'tasks', 'expenses', 'actuals', 'pack', 'extraPack',
+                         'days', 'places', 'sights', 'votes')
     and length(i->>'key') between 1 and 64
     and pg_column_size(i->'data') < 20000
   on conflict (trip_code, kind, key) do update

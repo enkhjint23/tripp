@@ -1,6 +1,6 @@
 // Offline support: the app opens with no signal (trains, planes, roaming in China).
 // Trip data itself syncs through Supabase and is never cached here.
-const CACHE = "sts-v2";
+const CACHE = "sts-v3";
 const SHELL = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon.svg"];
 const STATIC_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"];
 
