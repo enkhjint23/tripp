@@ -5,128 +5,123 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Тал нутгаас Самуй руу</title>
 <meta name="description" content="Шинэ жилийн аялал: Улаанбаатар → Эрээн → Хөх хот → Шанхай → Ко Самуй → Бангкок. 2026.12.25 – 2027.01.03.">
-<meta name="theme-color" content="#16101F" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#F6F3FF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121518" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js" defer></script>
 <script src="config.js"></script>
 <style>
-/* Sunset gradient. The colour follows the trip: glacier blue for the frozen days,
-   lagoon teal for Shanghai, pink → mango → gold for the tropics. Everything else stays quiet. */
+/* Calm travel planner. Neutral surfaces, one deep-teal accent for actions.
+   Climate colours (slate blue → teal → burnt orange) mark days and places, quietly. */
 :root{
-  --bg:#F6F3FF; --surface:#FFFFFF; --surface-2:#F3EEFB; --ink:#23182E; --ink-2:#4A3D57; --muted:#857A93; --line:#E8E1F2;
-  --frost:#4A6CFF; --frost-soft:#E7EBFF; --sea:#0B9E91; --sea-soft:#DDF5F1; --sun:#F2553D; --sun-soft:#FFE6DF;
-  --pink:#FF4D8D; --gold:#FFC23D; --violet:#8A5CFF;
-  --ok:#139160; --ok-soft:#DDF5E8; --bad:#D93A44; --bad-soft:#FDE2E4;
-  --g-sun:linear-gradient(120deg,#FF4D8D,#FF7A3D 55%,#FFB72E);
-  --g-frost:linear-gradient(135deg,#4A6CFF,#8A5CFF);
-  --g-sea:linear-gradient(135deg,#0FB5A5,#3D8BFF);
-  --g-trip:linear-gradient(100deg,#4A6CFF,#8A5CFF 30%,#FF4D8D 62%,#FF8A3D 82%,#FFB72E);
-  --shadow:0 1px 2px rgba(35,24,46,.05),0 6px 18px -10px rgba(74,48,110,.22);
-  --r:18px;
-  --f-display:"Unbounded","Onest",system-ui,sans-serif;
+  --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#F1F3F5; --ink:#16191D; --ink-2:#3E4650; --muted:#6B7380; --line:#E3E6EA;
+  --acc:#0E6F78; --acc-ink:#FFFFFF; --acc-soft:#E3F1F2;
+  --frost:#3D5A99; --frost-soft:#E8EDF7; --sea:#0E7C86; --sea-soft:#E1F1F2; --sun:#B85C1E; --sun-soft:#F8EBE1;
+  --ok:#2E7D4F; --ok-soft:#E3F2E9; --bad:#C0392B; --bad-soft:#FBE7E4; --warn:#9A6A12; --warn-soft:#FBF2DE;
+  --pink:var(--sun); --violet:var(--frost); --gold:var(--warn);
+  --g-frost:var(--frost); --g-sea:var(--sea); --g-sun:var(--sun);
+  --shadow:0 1px 2px rgba(16,24,40,.05);
+  --r:12px;
+  --f-display:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --f-body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#16101F; --surface:#211A2C; --surface-2:#2A2236; --ink:#F5EEFF; --ink-2:#D6CBE4; --muted:#9C90AD; --line:#352B44;
-  --frost:#8DA2FF; --frost-soft:#262C55; --sea:#3DD6C6; --sea-soft:#14302E; --sun:#FF8466; --sun-soft:#3D2028;
-  --pink:#FF6FA3; --gold:#FFD15C; --violet:#A98BFF; --ok:#4FD69B; --ok-soft:#153026; --bad:#FF7A7F; --bad-soft:#3A1C22;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px -12px rgba(0,0,0,.7); color-scheme:dark}}
+  --bg:#121518; --surface:#1A1E22; --surface-2:#22272C; --ink:#ECEFF2; --ink-2:#C4CAD1; --muted:#8C95A0; --line:#2C3238;
+  --acc:#4FB3BC; --acc-ink:#0B1A1C; --acc-soft:#173235;
+  --frost:#8FA8DD; --frost-soft:#1E2738; --sea:#4FB3BC; --sea-soft:#173235; --sun:#E09A63; --sun-soft:#33241A;
+  --ok:#6CC495; --ok-soft:#173225; --bad:#F08A7E; --bad-soft:#3A1E1B; --warn:#E2B55A; --warn-soft:#352B17;
+  --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#16101F; --surface:#211A2C; --surface-2:#2A2236; --ink:#F5EEFF; --ink-2:#D6CBE4; --muted:#9C90AD; --line:#352B44;
-  --frost:#8DA2FF; --frost-soft:#262C55; --sea:#3DD6C6; --sea-soft:#14302E; --sun:#FF8466; --sun-soft:#3D2028;
-  --pink:#FF6FA3; --gold:#FFD15C; --violet:#A98BFF; --ok:#4FD69B; --ok-soft:#153026; --bad:#FF7A7F; --bad-soft:#3A1C22;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px -12px rgba(0,0,0,.7); color-scheme:dark}
+  --bg:#121518; --surface:#1A1E22; --surface-2:#22272C; --ink:#ECEFF2; --ink-2:#C4CAD1; --muted:#8C95A0; --line:#2C3238;
+  --acc:#4FB3BC; --acc-ink:#0B1A1C; --acc-soft:#173235;
+  --frost:#8FA8DD; --frost-soft:#1E2738; --sea:#4FB3BC; --sea-soft:#173235; --sun:#E09A63; --sun-soft:#33241A;
+  --ok:#6CC495; --ok-soft:#173225; --bad:#F08A7E; --bad-soft:#3A1E1B; --warn:#E2B55A; --warn-soft:#352B17;
+  --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark}
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.5;
-  padding-bottom:calc(92px + env(safe-area-inset-bottom,0px));min-height:100dvh;position:relative;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:-20vh -30vw auto auto;width:80vw;height:70vh;pointer-events:none;z-index:-1;
-  background:radial-gradient(closest-side,color-mix(in srgb,var(--pink) 16%,transparent),transparent),radial-gradient(closest-side at 30% 70%,color-mix(in srgb,var(--gold) 14%,transparent),transparent)}
-body::after{content:"";position:fixed;inset:auto auto -25vh -30vw;width:80vw;height:70vh;pointer-events:none;z-index:-1;
-  background:radial-gradient(closest-side,color-mix(in srgb,var(--frost) 13%,transparent),transparent)}
+  padding-bottom:calc(76px + env(safe-area-inset-bottom,0px));min-height:100dvh;overflow-x:hidden}
 @media (min-width:900px){body{padding-bottom:40px}}
-h1,h2,h3,h4{margin:0;text-wrap:balance}
+h1,h2,h3,h4{margin:0;text-wrap:balance;letter-spacing:-.01em}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
-:focus-visible{outline:2px solid var(--violet);outline-offset:2px;border-radius:8px}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
 .num{font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 [hidden]{display:none!important}
-.shell{max-width:1080px;margin:0 auto;padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
-.emo{font-size:1.15em;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.shell{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ic{width:16px;height:16px;flex:none}
 
 /* top bar */
-.top{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
+.top{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   padding-top:env(safe-area-inset-top,0px);border-bottom:1px solid transparent;transition:border-color .2s}
 .top.scrolled{border-bottom-color:var(--line)}
 .top .shell{display:flex;align-items:center;gap:8px;height:52px}
-.brand{font-family:var(--f-display);font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:0}
-.brand i{width:24px;height:24px;border-radius:50%;background:var(--g-trip);display:inline-block;flex:none;box-shadow:0 2px 8px -2px color-mix(in srgb,var(--pink) 60%,transparent)}
-.tabs-top{display:none;gap:2px;margin-left:14px}
+.brand{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:0}
+.brand i{width:22px;height:22px;border-radius:6px;background:var(--acc);display:inline-grid;place-items:center;flex:none;color:var(--acc-ink)}
+.brand i svg{width:14px;height:14px}
+.tabs-top{display:none;gap:2px;margin-left:16px}
 @media (min-width:900px){.tabs-top{display:flex}}
-.tabs-top button{border:0;background:none;padding:7px 12px;border-radius:999px;font-weight:600;color:var(--muted);display:flex;gap:6px;align-items:center}
-.tabs-top button[aria-current="page"]{color:#fff;background:var(--g-sun);box-shadow:0 4px 12px -6px var(--pink)}
+.tabs-top button{border:0;background:none;padding:7px 11px;border-radius:8px;font-weight:600;color:var(--muted);display:flex;gap:6px;align-items:center;position:relative}
+.tabs-top button svg{width:16px;height:16px}
+.tabs-top button[aria-current="page"]{color:var(--ink);background:var(--surface);box-shadow:var(--shadow)}
+.tabs-top .badge{position:static;margin-left:2px}
 .top .spacer{flex:1}
 .me-btn{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px 3px 3px;font-weight:600;font-size:13px}
 @media (max-width:560px){.me-btn span:not(.av){display:none}.me-btn{padding:3px}}
 .sync{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;white-space:nowrap}
 .sync i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
 .sync.live i{background:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
-.sync.syncing i{background:var(--frost);animation:pulse 1s ease-in-out infinite}
-.sync.offline i,.sync.error i{background:var(--sun);box-shadow:0 0 0 3px var(--sun-soft)}
+.sync.syncing i{background:var(--acc);animation:pulse 1s ease-in-out infinite}
+.sync.offline i,.sync.error i{background:var(--warn);box-shadow:0 0 0 3px var(--warn-soft)}
 @keyframes pulse{50%{opacity:.3}}
 .sync-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 11px;height:34px;display:inline-flex;align-items:center}
-@media (max-width:560px){.sync-btn .sync.live>span,.sync-btn .sync.syncing>span,.sync-btn .sync.offline>span{display:none}.sync-btn:has(.sync.live),.sync-btn:has(.sync.syncing),.sync-btn:has(.sync.offline){width:34px;padding:0;justify-content:center}.brand span{display:none}}
-.icon-btn{width:34px;height:34px;border-radius:999px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0;color:var(--ink-2);text-decoration:none}
+@media (max-width:560px){.sync-btn .sync.live>span,.sync-btn .sync.syncing>span,.sync-btn .sync.offline>span{display:none}.sync-btn:has(.sync.live),.sync-btn:has(.sync.syncing),.sync-btn:has(.sync.offline){width:34px;padding:0;justify-content:center}}
+.icon-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0;color:var(--ink-2);text-decoration:none;flex:none}
 .icon-btn svg{width:17px;height:17px}
-.icon-btn.sm{width:30px;height:30px}
+.icon-btn.sm{width:30px;height:30px;border-radius:7px}
 .icon-btn.sm svg{width:15px;height:15px}
 .icon-btn:disabled{opacity:.35;cursor:default}
 .sect{display:flex;flex-direction:column;gap:10px}
 .sect+.sect{border-top:1px solid var(--line);padding-top:14px}
 
-/* bottom nav: floating pill */
-.tabs-bottom{position:fixed;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:30;
-  background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
-  border:1px solid var(--line);border-radius:24px;padding:5px;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;box-shadow:0 12px 30px -12px rgba(60,30,90,.35)}
+/* bottom nav */
+.tabs-bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);
+  padding:4px max(6px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));display:grid;grid-template-columns:repeat(5,1fr)}
 @media (min-width:900px){.tabs-bottom{display:none}}
-.tabs-bottom button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 0 5px;font-size:10.5px;font-weight:600;color:var(--muted);position:relative;border-radius:19px;transition:background .2s,color .2s}
-.tabs-bottom .emo{font-size:19px;filter:grayscale(.55) opacity(.75);transition:filter .2s,transform .2s}
-.tabs-bottom button[aria-current="page"]{background:var(--g-sun);color:#fff;box-shadow:0 6px 14px -8px var(--pink)}
-.tabs-bottom button[aria-current="page"] .emo{filter:none;transform:scale(1.08)}
-.badge{position:absolute;top:1px;left:calc(50% + 7px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--pink);color:#fff;font-size:10px;line-height:16px;font-variant-numeric:tabular-nums;box-shadow:0 0 0 2px var(--surface)}
+.tabs-bottom button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 5px;font-size:11px;font-weight:600;color:var(--muted);position:relative}
+.tabs-bottom svg{width:21px;height:21px}
+.tabs-bottom button[aria-current="page"]{color:var(--acc)}
+.tabs-bottom button[aria-current="page"]::before{content:"";position:absolute;top:-4px;left:30%;right:30%;height:2px;border-radius:2px;background:var(--acc)}
+.badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--sun);color:#fff;font-size:10px;line-height:16px;font-weight:700;font-variant-numeric:tabular-nums}
 
 /* avatars */
-.av{--c:var(--frost);width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:inline-grid;place-items:center;font-weight:700;font-size:11.5px;flex:none}
+.av{--c:var(--frost);width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:inline-grid;place-items:center;font-weight:700;font-size:11px;flex:none}
 .av.sm{width:22px;height:22px;font-size:9.5px}
 .av.lg{width:42px;height:42px;font-size:15px}
 .av.nobody{background:transparent;border:1.5px dashed var(--line);color:var(--muted)}
 
 /* hero (trip tab only) */
-.hero{display:grid;gap:12px;padding:10px 0 0;grid-template-columns:1fr}
-@media (min-width:900px){.hero{grid-template-columns:1fr 1fr;align-items:start;gap:18px;padding-top:18px}}
-.hero-copy{display:flex;flex-direction:column;gap:10px;min-width:0;padding:4px 2px}
-.dates{display:flex;gap:6px;flex-wrap:wrap}
-.hero h1{font-family:var(--f-display);font-weight:700;font-size:clamp(27px,7.6vw,46px);line-height:1.06;letter-spacing:-.02em;
-  background:var(--g-trip);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:2px}
-.count{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.count .unit{display:inline-flex;align-items:baseline;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 11px;box-shadow:var(--shadow)}
-.count b{font-family:var(--f-display);font-weight:700;font-size:16px;line-height:1;font-variant-numeric:tabular-nums}
-.count span{font-size:12px;color:var(--muted);font-weight:600}
-.count .unit:first-child{background:var(--g-sun);border-color:transparent;color:#fff}
-.count .unit:first-child span{color:rgba(255,255,255,.85)}
-.count .label{font-size:12.5px;color:var(--muted);flex-basis:100%}
+.hero{display:grid;gap:12px;padding:12px 0 0;grid-template-columns:1fr}
+@media (min-width:900px){.hero{grid-template-columns:1fr 1fr;align-items:start;gap:20px;padding-top:20px}}
+.hero-copy{display:flex;flex-direction:column;gap:10px;min-width:0}
+.dates{font-size:13px;color:var(--muted);font-weight:500}
+.hero h1{font-size:clamp(24px,6.4vw,34px);font-weight:700;line-height:1.15;letter-spacing:-.02em}
+.count{display:flex;gap:0;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;flex-wrap:wrap}
+.count .unit{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 12px;min-width:60px;border-right:1px solid var(--line)}
+.count b{font-size:20px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.count span{font-size:11px;color:var(--muted);font-weight:500}
+.count .label{flex:1;align-self:center;font-size:12.5px;color:var(--muted);padding:6px 12px;min-width:140px}
 .crew{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
 .stack{display:flex}
 .stack .av{border:2px solid var(--bg);margin-left:-7px}
@@ -134,36 +129,36 @@ button{cursor:pointer}
 
 /* map */
 .mapcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-width:0}
-.mapcard header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 0;gap:8px}
-.mapcard h2{font-size:14px;font-weight:700}
-.mapcard .temp{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:linear-gradient(90deg,var(--frost-soft),var(--sun-soft));color:var(--ink-2);font-variant-numeric:tabular-nums}
-.mapwrap{position:relative;margin-top:6px;background:linear-gradient(180deg,color-mix(in srgb,var(--frost) 12%,transparent),color-mix(in srgb,var(--sea) 7%,transparent) 48%,color-mix(in srgb,var(--pink) 12%,transparent))}
-.map{display:block;width:100%;height:auto;max-height:400px;margin:0 auto}
-.map .leg{fill:none;stroke-width:2.5;stroke-linecap:round}
-.map .leg.train{stroke-dasharray:1 7;stroke-width:4}
+.mapcard header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;gap:8px;border-bottom:1px solid var(--line)}
+.mapcard h2{font-size:14px;font-weight:600}
+.mapcard .temp{font-size:12px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.mapwrap{position:relative;background:var(--surface-2)}
+.map{display:block;width:100%;height:auto;max-height:380px;margin:0 auto}
+.map .leg{fill:none;stroke-width:2.2;stroke-linecap:round}
+.map .leg.train{stroke-dasharray:1 6;stroke-width:3.5}
 .map .leg.bus{stroke-dasharray:7 5}
 .map .leg.boat{stroke-dasharray:2 5;stroke-width:3}
-.map .leg.dim{opacity:.22}
-.map .leg.hi{stroke-width:4}
+.map .leg.dim{opacity:.2}
+.map .leg.hi{stroke-width:3.6}
 .map .lat{stroke:var(--line);stroke-width:1}
-.map text{font-family:var(--f-body);fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
+.map text{font-family:var(--f-body);fill:var(--ink);paint-order:stroke;stroke:var(--surface-2);stroke-width:3px;stroke-linejoin:round}
 .map .latlabel{font-size:10px;fill:var(--muted);font-variant-numeric:tabular-nums}
-.map .cityname{font-size:13px;font-weight:700;stroke-width:5px;cursor:pointer}
-.map .cityname.sel{fill:var(--pink)}
+.map .cityname{font-size:12.5px;font-weight:600;stroke-width:5px;cursor:pointer}
+.map .cityname.sel{fill:var(--acc);font-weight:700}
 .map .city{cursor:pointer;outline:none}
-.map .city .dot{transition:stroke-width .15s}
-.map .city:hover .dot,.map .city:focus-visible .dot{stroke-width:5}
+.map .city:hover .dot,.map .city:focus-visible .dot{stroke-width:4.5}
 .map .plane-dot{fill:var(--ink)}
-.legend{display:flex;gap:12px;flex-wrap:wrap;padding:8px 14px 10px;font-size:12px;color:var(--muted);align-items:center}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:8px 14px;font-size:12px;color:var(--muted);align-items:center;border-top:1px solid var(--line)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
-.legend svg{width:24px;height:8px}
-.legend .hint{color:var(--ink-2);font-weight:600;margin-left:auto}
+.legend svg{width:22px;height:8px}
+.legend .hint{margin-left:auto;gap:4px}
+.legend .hint svg{width:13px;height:13px}
 
 /* views */
 main{padding-top:4px}
 .view{display:flex;flex-direction:column;gap:12px;padding:12px 0 20px}
 .view-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.view-head h2{font-family:var(--f-display);font-weight:700;font-size:21px;line-height:1.15;letter-spacing:-.01em}
+.view-head h2{font-size:21px;font-weight:700;line-height:1.2}
 .view-head .sub{font-size:13px;color:var(--muted);margin-top:2px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
 .pad{padding:14px}
@@ -171,148 +166,186 @@ main{padding-top:4px}
 @media (min-width:760px){.grid-2{grid-template-columns:1fr 1fr}}
 .grid-3{display:grid;gap:12px;grid-template-columns:1fr}
 @media (min-width:760px){.grid-3{grid-template-columns:repeat(3,1fr)}}
-.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}
 .seg::-webkit-scrollbar{display:none}
-.seg button{border:0;background:none;padding:6px 12px;border-radius:999px;font-weight:600;font-size:13px;color:var(--muted);white-space:nowrap}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(40,20,60,.15)}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:7px;font-weight:600;font-size:13px;color:var(--muted);white-space:nowrap;display:inline-flex;gap:6px;align-items:center;justify-content:center}
+.seg button svg{width:15px;height:15px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(16,24,40,.12)}
 .seg.wide{display:flex}.seg.wide button{flex:1}
-.sticky{position:sticky;top:calc(52px + env(safe-area-inset-top,0px));z-index:20;padding:6px 0;margin:-6px 0;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;font-size:13.5px;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;text-decoration:none;color:var(--ink)}
+.sticky{position:sticky;top:calc(52px + env(safe-area-inset-top,0px));z-index:20;padding:6px 0;margin:-6px 0;background:var(--bg)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 13px;font-weight:600;font-size:13.5px;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;text-decoration:none;color:var(--ink)}
 .btn svg{width:15px;height:15px}
 .btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.btn.sun{background:var(--g-sun);color:#fff;border-color:transparent;box-shadow:0 6px 14px -8px var(--pink)}
+.btn.sun,.btn.acc{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
 .btn.ghost{border-color:transparent;background:none}
 .btn.danger{color:var(--bad)}
-.btn.sm{padding:5px 11px;font-size:12.5px}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:7px}
 .btn.sm svg{width:13px;height:13px}
-.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
 .chip svg{width:12px;height:12px;flex:none}
 button.chip{cursor:pointer;font-family:inherit}
-.chip.hot{background:var(--sun-soft);color:var(--sun);border-color:transparent}
+.chip.hot,.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
 .chip.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
 .chip.cold{background:var(--frost-soft);color:var(--frost);border-color:transparent}
-.chip.pink{background:color-mix(in srgb,var(--pink) 14%,var(--surface));color:var(--pink);border-color:transparent}
-input[type=text],input[type=number],input[type=date],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 11px;min-width:0;width:100%;font-size:15px}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px color-mix(in srgb,var(--violet) 18%,transparent)}
+.chip.acc,.chip.pink{background:var(--acc-soft);color:var(--acc);border-color:transparent}
+input[type=text],input[type=number],input[type=date],input[type=time],input[type=url],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;width:100%;font-size:15px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
 label.f{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink-2);min-width:0}
 .flabel{font-size:12.5px;font-weight:600;color:var(--ink-2)}
-.alert{display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--sun-soft);color:var(--ink);font-size:13.5px}
-.alert .emo{font-size:18px}
+.chk{display:flex;gap:8px;align-items:center;font-size:13.5px;cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:var(--acc)}
+.alert{display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--warn-soft);color:var(--ink);font-size:13.5px;border:1px solid color-mix(in srgb,var(--warn) 25%,transparent)}
+.alert>svg{width:18px;height:18px;color:var(--warn);flex:none;margin-top:1px}
 .alert b{display:block}
 .alert ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
-.empty{padding:24px 16px;text-align:center;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:8px}
-.empty .emo{font-size:30px}
+.empty{padding:22px 16px;text-align:center;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:8px}
+.empty>svg{width:26px;height:26px;color:var(--muted)}
 .grow{flex:1;min-width:0}
 .err{color:var(--bad);margin:0;font-size:13px}
 
 /* quick stats */
-.nextup{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:2px 14px 4px;scroll-snap-type:x proximity}
-.nextup::-webkit-scrollbar{display:none}
-@media (min-width:760px){.nextup{display:grid;grid-template-columns:repeat(3,1fr);margin:0;padding:0;overflow:visible}}
-.stat{padding:10px 13px;display:flex;flex-direction:column;gap:3px;min-width:150px;flex:1 0 auto;scroll-snap-align:start;text-align:left;border:1px solid var(--line);color:var(--ink)}
-.stat .k{font-size:12px;font-weight:600;color:var(--muted);display:flex;gap:5px;align-items:center}
-.stat .v{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:1.15;font-variant-numeric:tabular-nums;white-space:nowrap}
-.stat .s{font-size:12px;color:var(--muted)}
-.bar{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
-.bar>span{display:block;height:100%;background:var(--g-sun);border-radius:3px;transition:width .5s}
+.nextup{display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat{padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0;text-align:left;border:1px solid var(--line);color:var(--ink)}
+.stat .k{font-size:11.5px;font-weight:500;color:var(--muted);display:flex;gap:5px;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .k svg{width:13px;height:13px;flex:none}
+.stat .v{font-size:17px;font-weight:700;line-height:1.25;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.stat .s{font-size:11.5px;color:var(--muted)}
+.bar{height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden;margin:3px 0}
+.bar>span{display:block;height:100%;background:var(--acc);border-radius:3px;transition:width .5s}
+@media (max-width:420px){.nextup .stat .s{display:none}}
 
 /* days */
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
 .btngrp{display:flex;gap:6px;margin-left:auto}
 .days{display:flex;flex-direction:column;gap:8px}
-.day{--g:var(--g-frost);overflow:hidden}
-.day>button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:50px 1fr auto;gap:12px;align-items:center;padding:9px 12px 9px 9px}
-.day>button:focus-visible{outline:2px solid var(--violet);outline-offset:-2px}
-.dnum{width:50px;height:54px;border-radius:14px;background:var(--g);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;box-shadow:0 6px 14px -9px rgba(60,30,90,.7)}
-.dnum b{font-family:var(--f-display);font-weight:700;font-size:20px;line-height:1;font-variant-numeric:tabular-nums}
-.dnum span{font-size:10px;font-weight:600;opacity:.92}
+.day{--c:var(--frost);overflow:hidden}
+.day>button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:10px 12px}
+.day>button:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.dnum{width:44px;height:48px;border-radius:10px;background:color-mix(in srgb,var(--c) 12%,var(--surface));color:var(--c);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.dnum b{font-size:18px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.dnum span{font-size:10px;font-weight:600}
 .dtitle{display:flex;flex-direction:column;gap:2px;min-width:0}
-.dtitle h3{font-size:15px;font-weight:700;line-height:1.3}
+.dtitle h3{font-size:15px;font-weight:600;line-height:1.3}
 .dtitle .route{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.dtitle .route svg{width:13px;height:13px}
 .chev{width:18px;height:18px;color:var(--muted);transition:transform .2s}
 .day.open .chev{transform:rotate(180deg)}
-.day.today{border-color:transparent;box-shadow:0 0 0 2px var(--pink),var(--shadow)}
-.dbody{padding:2px 14px 14px 14px;display:flex;flex-direction:column;gap:10px}
+.day.today{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.dbody{padding:0 14px 14px 14px;display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:12px}
 .steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;position:relative}
-.steps::before{content:"";position:absolute;left:15px;top:14px;bottom:14px;width:2px;border-radius:1px;background:var(--g);opacity:.35}
-.steps li{display:grid;grid-template-columns:32px 1fr;gap:4px 10px;align-items:start;padding:5px 0;position:relative}
-.steps .ico{width:32px;height:32px;border-radius:50%;background:var(--surface);border:1.5px solid var(--line);display:grid;place-items:center;font-size:15px;grid-row:span 2}
-.steps .t{font-size:12px;font-weight:700;color:var(--muted);padding-top:2px;font-variant-numeric:tabular-nums}
+.steps::before{content:"";position:absolute;left:13px;top:14px;bottom:14px;width:1.5px;background:var(--line)}
+.steps li{display:grid;grid-template-columns:28px 1fr;gap:2px 10px;align-items:start;padding:5px 0;position:relative}
+.steps .ico{width:28px;height:28px;border-radius:50%;background:color-mix(in srgb,var(--c) 12%,var(--surface));color:var(--c);display:grid;place-items:center;grid-row:span 2}
+.steps .ico svg{width:14px;height:14px}
+.steps .t{font-size:12px;font-weight:600;color:var(--muted);padding-top:1px;font-variant-numeric:tabular-nums}
 .steps .x{min-width:0;font-size:14px;line-height:1.45}
 .steps .t:empty{display:none}
-.tip{font-size:13px;background:var(--surface-2);border-radius:12px;padding:9px 11px;color:var(--ink-2);display:flex;gap:7px}
-.sleep{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.tip{font-size:13px;background:var(--surface-2);border-radius:8px;padding:8px 10px;color:var(--ink-2);display:flex;gap:8px}
+.tip svg{width:15px;height:15px;color:var(--warn);flex:none;margin-top:2px}
+.sleep{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.sleep>svg{width:15px;height:15px}
 .dactions{display:flex;gap:6px;flex-wrap:wrap}
 .seeing{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
-.addday{border:1.5px dashed color-mix(in srgb,var(--violet) 40%,var(--line));background:color-mix(in srgb,var(--violet) 4%,transparent);border-radius:var(--r);padding:11px;font-weight:600;font-size:13.5px;color:var(--violet);display:flex;gap:7px;justify-content:center;align-items:center;width:100%}
+.dres{display:flex;flex-direction:column;gap:6px}
+.dres button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:13px}
+.dres button:hover{border-color:var(--acc)}
+.dres button svg{width:15px;height:15px;color:var(--acc);flex:none}
+.dres .no{color:var(--warn)}
+.dres .no svg{color:var(--warn)}
+.addday{border:1px dashed var(--line);background:none;border-radius:var(--r);padding:11px;font-weight:600;font-size:13.5px;color:var(--acc);display:flex;gap:7px;justify-content:center;align-items:center;width:100%}
 .addday svg{width:16px;height:16px}
-.addday:hover{border-color:var(--violet)}
+.addday:hover{border-color:var(--acc);background:var(--surface)}
 
 /* places to see */
-.cities{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 14px 6px;margin:-2px -14px -4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cities{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 16px 6px;margin:-2px -16px -4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .cities::-webkit-scrollbar{display:none}
-.citycard{--g:var(--g-sea);flex:0 0 auto;scroll-snap-align:start;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:8px 12px 8px 8px;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;box-shadow:var(--shadow)}
-.citycard .emo{grid-row:span 2;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:19px;background:var(--surface-2)}
-.citycard b{font-size:14px;font-weight:700;line-height:1.2;white-space:nowrap}
+.citycard{--c:var(--sea);flex:0 0 auto;scroll-snap-align:start;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px 8px 14px;display:flex;flex-direction:column;gap:1px;position:relative;overflow:hidden}
+.citycard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c)}
+.citycard b{font-size:14px;font-weight:600;line-height:1.25;white-space:nowrap}
 .citycard span{font-size:11.5px;color:var(--muted);white-space:nowrap}
-.citycard[aria-pressed="true"]{background:var(--g);border-color:transparent;color:#fff;box-shadow:0 8px 18px -10px rgba(60,30,90,.6)}
-.citycard[aria-pressed="true"] span{color:rgba(255,255,255,.88)}
-.citycard[aria-pressed="true"] .emo{background:rgba(255,255,255,.22)}
-.cityhead{--g:var(--g-sea);padding:14px;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
-.cityhead::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:var(--g)}
+.citycard[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-soft)}
+.cityhead{--c:var(--sea);padding:14px;display:flex;flex-direction:column;gap:8px}
 .cityhead .ch-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.cityhead h3{font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1.1;display:flex;gap:8px;align-items:center}
-.cityhead .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.cityhead h3{font-size:20px;font-weight:700;line-height:1.2;display:flex;gap:8px;align-items:center}
+.cityhead h3 i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.cityhead .meta{display:flex;gap:6px;flex-wrap:wrap}
 .cityhead p{margin:0;color:var(--ink-2);font-size:14px}
-.sgroup-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:700;margin:4px 2px -4px}
+.sgroup-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:600;margin:6px 2px -4px;color:var(--ink-2)}
 .sgroup-h .muted{font-weight:500;font-size:12px}
 .sights{display:grid;gap:8px;grid-template-columns:1fr}
 @media (min-width:760px){.sights{grid-template-columns:1fr 1fr}}
-.sight{--c:var(--sea);display:grid;grid-template-columns:38px 1fr;gap:10px;padding:11px 12px;min-width:0}
-.sight .sk{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,var(--surface));font-size:19px}
+.sight{--c:var(--sea);display:grid;grid-template-columns:36px 1fr;gap:10px;padding:11px 12px;min-width:0}
+.sight .sk{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 12%,var(--surface));color:var(--c)}
+.sight .sk svg{width:18px;height:18px}
 .sight .sbody{min-width:0;display:flex;flex-direction:column}
-.sight h4{font-size:14.5px;font-weight:700;line-height:1.3}
-.sight .smeta{font-size:12px;font-weight:600;color:var(--c);margin-top:1px}
+.sight h4{font-size:14.5px;font-weight:600;line-height:1.3}
+.sight .smeta{font-size:12px;font-weight:500;color:var(--muted);margin-top:1px}
 .sight p{margin:4px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.45}
 .sfoot{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
 .sfoot .stack .av{border-color:var(--surface)}
-.vote{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;font-weight:600;font-size:12.5px;display:inline-flex;gap:5px;align-items:center;color:var(--ink-2);transition:transform .12s}
+.vote{border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:4px 10px;font-weight:600;font-size:12.5px;display:inline-flex;gap:5px;align-items:center;color:var(--ink-2)}
 .vote svg{width:14px;height:14px}
-.vote:active{transform:scale(.94)}
-.vote[aria-pressed="true"]{background:var(--g-sun);border-color:transparent;color:#fff}
+.vote[aria-pressed="true"]{background:var(--acc-soft);border-color:transparent;color:var(--acc)}
 .vote[aria-pressed="true"] svg path{fill:currentColor}
+
+/* bookings */
+.progress{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.progress .stat .v{font-size:16px}
+.reslist{display:flex;flex-direction:column;gap:8px}
+.res{--c:var(--acc);padding:0;overflow:hidden}
+.res-h{display:flex;align-items:center;gap:10px;padding:11px 12px}
+.res-h .ri{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 12%,var(--surface));color:var(--c);flex:none}
+.res-h .ri svg{width:17px;height:17px}
+.res-h .rt{min-width:0;flex:1}
+.res-h .rt b{display:block;font-size:14.5px;font-weight:600;line-height:1.3}
+.res-h .rt span{font-size:12.5px;color:var(--muted)}
+.res-b{border-top:1px dashed var(--line);padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+.times{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.times div{display:flex;flex-direction:column;min-width:0}
+.times div:last-child{text-align:right}
+.times b{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.times span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.times svg{width:16px;height:16px;color:var(--muted)}
+.rmeta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}
+.code{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface-2);border-radius:7px;padding:3px 4px 3px 9px;font-weight:700;font-size:13px;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.code button{border:0;background:var(--surface);border-radius:5px;width:24px;height:24px;display:grid;place-items:center;color:var(--muted);padding:0}
+.code button svg{width:13px;height:13px}
+.ractions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.res.todo .res-h{opacity:.95}
+.res.todo .ri{background:var(--warn-soft);color:var(--warn)}
+.rnote{font-size:13px;color:var(--ink-2);background:var(--surface-2);border-radius:7px;padding:7px 9px}
 
 /* tasks */
 .tasks{display:flex;flex-direction:column;overflow:hidden}
 .task{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:10px 12px;border-top:1px solid var(--line)}
 .task:first-child{border-top:0}
-.ck{appearance:none;-webkit-appearance:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--line);background:var(--surface);margin:0;display:grid;place-items:center;transition:all .15s;cursor:pointer;flex:none}
-.ck:checked{background:var(--g-sun);border-color:transparent}
-.ck:checked::after{content:"";width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.ck{appearance:none;-webkit-appearance:none;width:20px;height:20px;border-radius:6px;border:1.5px solid color-mix(in srgb,var(--muted) 60%,transparent);background:var(--surface);margin:1px 0 0;display:grid;place-items:center;transition:all .15s;cursor:pointer;flex:none}
+.ck:checked{background:var(--acc);border-color:var(--acc)}
+.ck:checked::after{content:"";width:5px;height:9px;border:solid var(--acc-ink);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
 .task.done .ttl{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
 .ttl{font-weight:500;font-size:14px;line-height:1.4}
 .tmeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;align-items:center}
 .task details{margin-top:6px}
-.task summary{font-size:12.5px;color:var(--violet);font-weight:600;cursor:pointer;list-style:none;display:inline-flex;gap:4px;align-items:center}
+.task summary{font-size:12.5px;color:var(--acc);font-weight:600;cursor:pointer;list-style:none;display:inline-flex;gap:4px;align-items:center}
 .task summary::-webkit-details-marker{display:none}
 .task summary svg{width:13px;height:13px}
 .tfields{display:grid;grid-template-columns:1.4fr 1fr 86px;gap:6px;margin-top:6px}
 @media (max-width:560px){.tfields{grid-template-columns:1fr 1fr}}
 .owner{border:0;background:none;padding:0;border-radius:50%}
-.group-h{padding:9px 12px 5px;font-size:12.5px;font-weight:700;color:var(--ink-2);display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);background:var(--surface-2)}
+.group-h{padding:8px 12px;font-size:12.5px;font-weight:600;color:var(--ink-2);display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);background:var(--surface-2)}
 .group-h:first-child{border-top:0}
 .group-h span:first-child{display:flex;gap:6px;align-items:center}
-.ring{width:52px;height:52px;flex:none}
-.ring circle{fill:none;stroke-width:7}
+.group-h svg{width:14px;height:14px;color:var(--muted)}
+.ring{width:48px;height:48px;flex:none}
+.ring circle{fill:none;stroke-width:6}
 .ring .bg{stroke:var(--surface-2)}
-.ring .fg{stroke:url(#ringg);stroke-linecap:round;transition:stroke-dashoffset .6s}
+.ring .fg{stroke:var(--acc);stroke-linecap:round;transition:stroke-dashoffset .6s}
 .ringrow{display:flex;align-items:center;gap:12px}
 
 /* money */
 .money-top{display:grid;gap:8px;grid-template-columns:1fr 1fr}
 @media (min-width:760px){.money-top{grid-template-columns:repeat(4,1fr)}}
-.money-top .stat{min-width:0}
-.money-top .stat .v{font-size:17px;white-space:normal;overflow-wrap:anywhere}
+.money-top .stat .v{font-size:16px}
 .xlist{display:flex;flex-direction:column;overflow:hidden}
 .xrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
 .xrow:first-child{border-top:0}
@@ -322,11 +355,12 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:
 .xrow .split{display:flex}
 .xrow .split .av{border:2px solid var(--surface);margin-left:-6px}
 .xrow .split .av:first-child{margin-left:0}
-.cat{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--surface-2);font-size:18px}
+.cat{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--surface-2);color:var(--ink-2)}
+.cat svg{width:17px;height:17px}
 .balrow{display:grid;grid-template-columns:auto 1fr minmax(90px,auto);gap:10px;align-items:center;padding:8px 0}
 .balrow .num{text-align:right;font-weight:600}
-.balbar{position:relative;height:9px;background:var(--surface-2);border-radius:5px}
-.balbar i{position:absolute;top:0;bottom:0;border-radius:5px}
+.balbar{position:relative;height:8px;background:var(--surface-2);border-radius:4px}
+.balbar i{position:absolute;top:0;bottom:0;border-radius:4px}
 .balbar::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1.5px;background:var(--muted);opacity:.5}
 .transfer{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px dashed var(--line);flex-wrap:wrap;font-size:14px}
 .transfer:first-child{border-top:0}
@@ -335,33 +369,34 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:
 .est{display:grid;grid-template-columns:1fr;gap:3px;padding:10px 0;border-top:1px solid var(--line)}
 .est:first-child{border-top:0}
 .est-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
-.range{position:relative;height:18px;margin-top:3px}
-.range .track{position:absolute;left:0;right:0;top:7px;height:4px;background:var(--surface-2);border-radius:2px}
-.range .band{position:absolute;top:4px;height:10px;border-radius:5px;background:var(--frost-soft);border:1px solid var(--frost)}
-.range .act{position:absolute;top:0;width:4px;height:18px;border-radius:2px;background:var(--pink)}
+.range{position:relative;height:16px;margin-top:3px}
+.range .track{position:absolute;left:0;right:0;top:6px;height:4px;background:var(--surface-2);border-radius:2px}
+.range .band{position:absolute;top:3px;height:10px;border-radius:5px;background:var(--acc-soft);border:1px solid var(--acc)}
+.range .act{position:absolute;top:0;width:3px;height:16px;border-radius:2px;background:var(--sun)}
 .est input{width:90px;padding:4px 8px;font-size:14px;text-align:right}
 .conv{display:grid;grid-template-columns:1fr 96px;gap:8px}
 .conv-out{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}
-.conv-out div{background:var(--surface-2);border-radius:12px;padding:8px 10px;display:flex;justify-content:space-between;gap:6px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
-.conv-out span{color:var(--muted);font-size:12px;font-weight:700}
-.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:25;border:0;border-radius:999px;background:var(--g-sun);color:#fff;padding:11px 16px;font-weight:700;font-size:14px;display:flex;gap:6px;align-items:center;box-shadow:0 10px 22px -8px var(--pink)}
+.conv-out div{background:var(--surface-2);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;gap:6px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.conv-out span{color:var(--muted);font-size:12px;font-weight:600}
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:25;border:0;border-radius:12px;background:var(--acc);color:var(--acc-ink);padding:11px 15px;font-weight:600;font-size:14px;display:flex;gap:6px;align-items:center;box-shadow:0 6px 16px -6px rgba(14,111,120,.55)}
 .fab svg{width:18px;height:18px}
 @media (min-width:900px){.fab{bottom:24px}}
 
 /* pack */
-.packcol{--g:var(--g-frost);overflow:hidden}
-.packcol h3{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-size:14.5px;background:var(--g);color:#fff;gap:8px}
-.packcol h3 small{font-size:12px;font-weight:600;opacity:.9;font-variant-numeric:tabular-nums}
+.packcol{--c:var(--frost);overflow:hidden}
+.packcol h3{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-size:14px;font-weight:600;gap:8px;border-bottom:1px solid var(--line);border-top:3px solid var(--c)}
+.packcol h3 small{font-size:12px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
 .packcol ul{list-style:none;margin:0;padding:4px 14px 8px}
 .packcol li label{display:flex;gap:10px;align-items:center;padding:6px 0;cursor:pointer;font-size:14px}
 .packcol li input:checked+span{color:var(--muted);text-decoration:line-through}
-.packcol .ck{width:20px;height:20px;border-radius:6px}
-.packcol .ck:checked::after{width:5px;height:9px}
+.packcol .ck{width:18px;height:18px;border-radius:5px}
+.packcol .ck:checked::after{width:4px;height:8px}
 .addpack{display:flex;gap:6px;padding:0 14px 12px}
 .addpack .btn{padding:8px 11px}
 
 /* info */
-.info h3{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:7px}
+.info h3{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+.info h3 svg{width:16px;height:16px;color:var(--acc)}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13.5px;margin-top:8px}
 .kv dt{color:var(--muted)} .kv dd{margin:0}
 .tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
@@ -372,38 +407,37 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:
 .phr{display:grid;grid-template-columns:1fr auto;gap:1px 12px;padding:7px 0;border-top:1px dashed var(--line)}
 .phr:first-child{border-top:0}
 .phr .nat{font-size:17px} .phr .rom{font-size:12.5px;color:var(--muted)} .phr .en{grid-row:span 2;align-self:center;font-size:13px;text-align:right;color:var(--ink-2)}
-.tempbar{display:inline-block;height:7px;border-radius:4px;vertical-align:middle}
-.sources a{color:var(--violet)}
+.tempbar{display:inline-block;height:6px;border-radius:3px;vertical-align:middle}
+.sources a{color:var(--acc)}
 
 /* dialogs */
-dialog{border:0;padding:0;border-radius:24px;background:var(--surface);color:var(--ink);width:min(540px,calc(100vw - 24px));max-height:calc(100dvh - 40px);box-shadow:0 30px 80px -20px rgba(30,10,50,.55)}
-dialog::backdrop{background:rgba(22,12,34,.5);backdrop-filter:blur(4px)}
-@media (max-width:600px){dialog{margin:auto auto 0;width:100%;max-width:100%;border-radius:24px 24px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
- dialog[open]{animation:sheet .22s ease-out}}
-@keyframes sheet{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+dialog{border:0;padding:0;border-radius:16px;background:var(--surface);color:var(--ink);width:min(540px,calc(100vw - 24px));max-height:calc(100dvh - 40px);box-shadow:0 24px 60px -18px rgba(16,24,40,.45)}
+dialog::backdrop{background:rgba(16,20,24,.45)}
+@media (max-width:600px){dialog{margin:auto auto 0;width:100%;max-width:100%;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}}
 .dlg{display:flex;flex-direction:column;max-height:inherit}
-.dlg-h{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);gap:10px}
-.dlg-h h2{font-size:16px;font-weight:700}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);gap:10px}
+.dlg-h h2{font-size:16px;font-weight:600}
 .dlg-b{padding:14px 16px;overflow:auto;display:flex;flex-direction:column;gap:12px}
 .dlg-f{padding:10px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pick{display:flex;gap:6px;flex-wrap:wrap}
-.pick button{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px 4px 4px;display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px}
+.pick button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px 4px 4px;display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px}
+.pick button svg{width:14px;height:14px}
 .pick button.txt{padding:6px 12px}
-.pick button[aria-pressed="true"]{border-color:transparent;background:var(--g-sun);color:#fff}
-input.amount-big{font-family:var(--f-display);font-weight:700;font-size:34px;border:0!important;box-shadow:none!important;padding:0!important;background:transparent!important;width:100%}
+.pick button[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-soft);color:var(--acc)}
+input.amount-big{font-size:30px;font-weight:700;border:0!important;box-shadow:none!important;padding:0!important;background:transparent!important;width:100%}
 .people-edit{display:flex;flex-direction:column;gap:8px}
 .people-edit .r{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
 .swatches{display:flex;gap:4px}
 .swatches button{width:22px;height:22px;border-radius:50%;border:2px solid transparent;padding:0}
 .swatches button[aria-pressed="true"]{border-color:var(--ink)}
 .whoami{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.whoami button{border:1.5px solid var(--line);background:var(--surface-2);border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700}
-.whoami button:hover{border-color:var(--pink)}
+.whoami button{border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:600}
+.whoami button:hover{border-color:var(--acc)}
 textarea{min-height:70px;resize:vertical;font-size:14px}
-textarea.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+textarea.code-in{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
 .fgroup{display:flex;flex-direction:column;gap:7px}
-.mvrow,.strow{border:1px solid var(--line);border-radius:14px;background:var(--surface-2);padding:8px;display:grid;gap:6px}
+.mvrow,.strow{border:1px solid var(--line);border-radius:10px;background:var(--surface-2);padding:8px;display:grid;gap:6px}
 .mv{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center}
 .mv2{display:grid;grid-template-columns:1fr auto;gap:6px}
 .strow{grid-template-columns:minmax(0,1fr) 84px auto}
@@ -411,19 +445,20 @@ textarea.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
 .stbtns{display:flex;gap:4px}
 .mvrow select,.strow select{padding:7px 8px;font-size:14px}
 @media (max-width:420px){.strow{grid-template-columns:minmax(0,1fr) 76px}.stbtns{grid-column:1/-1;justify-content:flex-end;order:3}}
-.plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;max-height:46vh;overflow:auto}
+.plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;max-height:46vh;overflow:auto}
 .plist li+li{border-top:1px solid var(--line)}
 .plist button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:space-between;gap:10px;width:100%;padding:10px 12px;font-weight:600}
 .plist button .muted{font-weight:400;font-size:12.5px;text-align:right}
 .plist button:hover,.plist button:focus-visible{background:var(--surface-2)}
+.dtrow{display:grid;grid-template-columns:1.3fr 1fr;gap:6px}
 
 /* toast + banner */
-.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--bg);padding:9px 15px;border-radius:999px;font-weight:600;font-size:13.5px;z-index:60;transition:all .25s;pointer-events:none;max-width:calc(100vw - 32px)}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(16px);opacity:0;background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:10px;font-weight:600;font-size:13.5px;z-index:60;transition:all .2s;pointer-events:none;max-width:calc(100vw - 32px)}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (min-width:900px){.toast{bottom:28px}}
-.banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--frost-soft);border:1px solid color-mix(in srgb,var(--frost) 40%,transparent);border-radius:var(--r);padding:11px 14px;margin-top:10px;font-size:13.5px}
+.banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--acc-soft);border:1px solid color-mix(in srgb,var(--acc) 35%,transparent);border-radius:var(--r);padding:11px 14px;margin-top:10px;font-size:13.5px}
 .banner p{margin:0;flex:1;min-width:200px}
-.banner .emo{font-size:20px}
+.banner>svg{width:20px;height:20px;color:var(--acc)}
 footer.foot{padding:16px 0 8px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);margin-top:8px}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
@@ -433,7 +468,7 @@ footer.foot{padding:16px 0 8px;color:var(--muted);font-size:12px;border-top:1px 
 
 <div class="top" id="top">
   <div class="shell">
-    <div class="brand"><i aria-hidden="true"></i><span>Тал → Самуй</span></div>
+    <div class="brand"><i aria-hidden="true" id="brandIco"></i><span>Тал → Самуй</span></div>
     <nav class="tabs-top" aria-label="Хэсгүүд" id="tabsTop"></nav>
     <div class="spacer"></div>
     <button class="sync-btn" id="syncBtn" type="button" aria-label="Синк ба тохиргоо"></button>
@@ -517,6 +552,15 @@ const I={
  other:'<circle cx="6" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="18" cy="12" r="1.8" fill="currentColor"/>',
  trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
  edit:'<path d="M4 20h4L19 9l-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ ticket:'<path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 6v12" stroke="currentColor" stroke-width="2" stroke-dasharray="2 2.5"/>',
+ copy:'<rect x="8" y="8" width="12" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="2"/>',
+ link:'<path d="M14 4h6v6M20 4l-9 9M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ arrow:'<path d="M4 12h15M14 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ search:'<circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ check:'<path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
+ user:'<circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ sliders:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/>',
+ chevr:'<path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
  temple:'<path d="M12 3 4 8h16zM6 8c0 2-1 3.5-3 3.5h18C19 11.5 18 10 18 8M7 11.5V20M17 11.5V20M4 20h16M10 20v-4h4v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>',
  museum:'<path d="M3 9 12 4l9 5zM4 20h16M6 10v8M10 10v8M14 10v8M18 10v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>',
  bag:'<path d="M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
@@ -625,21 +669,12 @@ const SIGHTS=[
  {id:"bkk-rooftop",city:"bkk",n:"Дээвэр дээрх бар",k:"night",day:"",d:"Хотын үзэмж, ундаа. Ихэнх нь хувцаслалтын шаардлагатай: богино өмд, шаахайтай оруулахгүй."},
  {id:"bkk-iconsiam",city:"bkk",n:"ICONSIAM",k:"shop",day:"",cost:"Үнэгүй",d:"Доторх хөвөгч захын хоолны талбайтай, голын эргийн асар том худалдааны төв. Сатхорн боомтоос үнэгүй завь явдаг."}
 ];
-const GROUPS={"Бичиг баримт":"🛂","Тээвэр":"✈️","Буудал":"🏨","Төлөвлөгөө":"🎉","Мөнгө, утас":"📱"};
+const GROUPS={"Бичиг баримт":"doc","Төлөвлөгөө":"star","Мөнгө, утас":"phone"};
 const TASKS=[
  {id:"china-entry",g:"Бичиг баримт",t:"Монгол паспорттой Хятадад нэвтрэх журмыг Улаанбаатар дахь Хятадын ЭСЯ-наас лавлах",due:"Энэ долоо хоногт",p:1},
  {id:"passports",g:"Бичиг баримт",t:"4 паспорт бүгд 2027 оны 7-р сар хүртэл хүчинтэй эсэхийг шалгах",due:"Энэ долоо хоногт",p:1},
  {id:"insurance",g:"Бичиг баримт",t:"4 хүнд аяллын даатгал авах",due:"12-р сарын 20-оос өмнө"},
  {id:"tdac",g:"Бичиг баримт",t:"Тайландын цахим ирэлтийн карт (TDAC) онлайнаар бөглөх",due:"12-р сарын 26–28"},
- {id:"train",g:"Тээвэр",t:"34-р галт тэрэгний тасалбар, Улаанбаатар → Хөх хот, 12-р сарын 25 (баасан) 20:22",due:"Худалдаа нээгдэхэд",p:1},
- {id:"fl-sha-usm",g:"Тээвэр",t:"Нислэг Шанхай Пудун → Бангкок → Ко Самуй, 12-р сарын 29 (мягмар), нэг тасалбараар",due:"Одоо",p:1},
- {id:"fl-bkk-ub",g:"Тээвэр",t:"MIAT шууд нислэг Бангкок → Улаанбаатар, 1-р сарын 3 (ням). Нисдэг өдрийг нь баталгаажуулах",due:"Одоо",p:1},
- {id:"fl-het-sha",g:"Тээвэр",t:"Нислэг Хөх хот → Шанхай, 12-р сарын 27 (ням), үдээр",due:"11-р сарын эцэс гэхэд"},
- {id:"fl-usm-bkk",g:"Тээвэр",t:"Нислэг Ко Самуй → Бангкок, 1-р сарын 1 (баасан), үдээс хойш",due:"11-р сарын эцэс гэхэд"},
- {id:"h-usm",g:"Буудал",t:"Ко Самуйн буудал, 3 шөнө (12.29 – 01.01), Чавенг эсвэл Бопхут",due:"Одоо",p:1},
- {id:"h-sha",g:"Буудал",t:"Шанхайн буудал, 2 шөнө (12.27–29), Ардын талбай эсвэл Жинань орчим",due:"11-р сарын эцэс гэхэд"},
- {id:"h-bkk",g:"Буудал",t:"Бангкокийн буудал, 2 шөнө (01.01–03), голын эрэг эсвэл Сукхумвит",due:"11-р сарын эцэс гэхэд"},
- {id:"h-het",g:"Буудал",t:"Хөх хотын буудал, 1 шөнө (12.26), 21:30-аас хойш оройтож буух",due:"12-р сарын эхээр"},
  {id:"nye",g:"Төлөвлөгөө",t:"Шинэ жилийн үдшийн төлөвлөгөөгөө сонгоод, тасалбар эсвэл оройн хоолоо захиалах",due:"12-р сарын эхээр"},
  {id:"angthong",g:"Төлөвлөгөө",t:"Анг Тхонгийн завин аялал захиалах, 12-р сарын 30 (лхагва)",due:"12-р сарын эхээр"},
  {id:"pay",g:"Мөнгө, утас",t:"Alipay эсвэл WeChat Pay-г банкны карттайгаа холбох. Хятадад ихэнх төлбөрийг утсаар хийдэг",due:"12-р сарын 25-аас өмнө"},
@@ -659,20 +694,20 @@ const EST=[
  {id:"daily",n:"Хоол, орон нутгийн унаа, аялал, шинэ жил",lo:350,hi:550}
 ];
 const PACK=[
- {id:"cold",h:"🥶 Тал нутаг, хил",r:"−27° … −3°",c:"frost",k:["Өдөн хүрэм","Дулаан дотуур хувцас","Малгай, бээлий, ороолт","Дулаан гутал","Галт тэргэнд өмсөх шаахай","Уруулын тос, гарын тос","Зөөврийн цэнэглэгч"]},
- {id:"hot",h:"🌴 Халуун орон",r:"+22° … +32°",c:"sun",k:["Усны хувцас","Сандаал","Нарны тос","Нарны шил, малгай","Нимгэн цамц, шорт","Сүмд орох хувцас (мөр, өвдөг далд)","Шумуулын тос","Завинд ус нэвтрэхгүй уут","Нимгэн борооны цув"]},
- {id:"both",h:"🎒 Өдөр бүр",r:"Хоёуланд",c:"sea",k:["Паспорт, түүний зураг","Даатгалын мэдээлэл","2 банкны карт, тусад нь","Олон төрлийн залгуурын адаптер","eSIM суулгасан утас","Өвлийн хувцсанд вакуум уут","Энгийн эм"]}
+ {id:"cold",h:"Тал нутаг, хил",r:"−27° … −3°",c:"frost",k:["Өдөн хүрэм","Дулаан дотуур хувцас","Малгай, бээлий, ороолт","Дулаан гутал","Галт тэргэнд өмсөх шаахай","Уруулын тос, гарын тос","Зөөврийн цэнэглэгч"]},
+ {id:"hot",h:"Халуун орон",r:"+22° … +32°",c:"sun",k:["Усны хувцас","Сандаал","Нарны тос","Нарны шил, малгай","Нимгэн цамц, шорт","Сүмд орох хувцас (мөр, өвдөг далд)","Шумуулын тос","Завинд ус нэвтрэхгүй уут","Нимгэн борооны цув"]},
+ {id:"both",h:"Өдөр бүр",r:"Хоёуланд",c:"sea",k:["Паспорт, түүний зураг","Даатгалын мэдээлэл","2 банкны карт, тусад нь","Олон төрлийн залгуурын адаптер","eSIM суулгасан утас","Өвлийн хувцсанд вакуум уут","Энгийн эм"]}
 ];
-const CATS={transport:{n:"Унаа",e:"🚕"},stay:{n:"Буудал",e:"🏨"},food:{n:"Хоол",e:"🍜"},fun:{n:"Зугаа",e:"🎉"},other:{n:"Бусад",e:"📦"}};
+const CATS={transport:{n:"Унаа",i:"bus"},stay:{n:"Буудал",i:"hotel"},food:{n:"Хоол",i:"food"},fun:{n:"Зугаа",i:"party"},other:{n:"Бусад",i:"other"}};
 const CURS=["MNT","CNY","THB","USD"];
 const SYM={MNT:"₮",CNY:"¥",THB:"฿",USD:"$"};
-const COLORS=["#4A6CFF","#FF4D8D","#0FB5A5","#8A5CFF","#F2A12E","#F2553D","#2E9E5B","#5B6B7A"];
+const COLORS=["#3D5A99","#B85C1E","#0E7C86","#6B4FA0","#9A6A12","#B03A48","#2E7D4F","#5B6B7A"];
 
 /* ================= STATE ================= */
 const KEY="sts:v1", ME="sts:me", THEME="sts:theme", VIEWKEY="sts:view";
 const now=()=>Date.now();
 function freshState(){return{v:1,people:[0,1,2,3].map(i=>({id:"p"+(i+1),name:"Найз "+(i+1),color:COLORS[i],ts:0})),
- rates:{USD:3590,CNY:530,THB:110,ts:0},tasks:{},expenses:{},actuals:{},pack:{},extraPack:{},days:{},places:{},sights:{},votes:{}}}
+ rates:{USD:3590,CNY:530,THB:110,ts:0},tasks:{},expenses:{},actuals:{},pack:{},extraPack:{},days:{},places:{},sights:{},votes:{},res:{}}}
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let S=(()=>{try{const s=JSON.parse(ls.get(KEY));if(s&&s.v===1)return Object.assign(freshState(),s)}catch(e){}return freshState()})();
 let me=ls.get(ME);
@@ -682,7 +717,8 @@ const person=id=>S.people.find(p=>p.id===id);
 const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const av=(id,cls="")=>{const p=person(id);return p?`<span class="av ${cls}" style="--c:${p.color}" title="${esc(p.name)}">${esc(initials(p.name))}</span>`:`<span class="av nobody ${cls}" title="Хэн ч биш">?</span>`};
-const emo=e=>`<span class="emo" aria-hidden="true">${e}</span>`;
+const EMO={"✅":"book","💸":"money","🌡️":"therm","📍":"pin","🗺️":"trip","💡":"info","🛏️":"bed","🙋":"user","🙌":"check","🎉":"check","🧾":"doc","⚖️":"money","🎯":"star","🤝":"check","⚠️":"warn","🛂":"doc","🕗":"clock","💳":"money","📱":"phone","🔌":"plug","🆘":"sos","💬":"chat","🔗":"link","📬":"share","💌":"share"};
+const emo=e=>EMO[e]?ico(EMO[e]):"";
 const rate=c=>c==="MNT"?1:(+S.rates[c]||1);
 const toMNT=(a,c)=>(+a||0)*rate(c);
 const fmt=(n,d=0)=>(+n||0).toLocaleString("en-US",{maximumFractionDigits:d,minimumFractionDigits:d});
@@ -704,15 +740,15 @@ function rangeText(a,b){const A=dparts(a),B=dparts(b);return A.m===B.m?`${A.m}-�
 function applyTheme(){const t=ls.get(THEME);if(t)document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme");
  const dark=t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches;$("#themeBtn").innerHTML=ico(dark?"sun":"moon")}
 $("#themeBtn").onclick=()=>{const cur=document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");ls.set(THEME,cur==="dark"?"light":"dark");applyTheme()};
-$("#settingsBtn").innerHTML=ico("gear");
+$("#settingsBtn").innerHTML=ico("sliders");$("#brandIco").innerHTML=ico("plane");
 
 /* ================= NAV ================= */
-const TABS=[["trip","Аялал","🗺️"],["book","Захиалга","✅"],["money","Мөнгө","💸"],["pack","Ачаа","🎒"],["info","Мэдээлэл","💡"]];
+const TABS=[["trip","Аялал","trip"],["book","Захиалга","ticket"],["money","Мөнгө","money"],["pack","Ачаа","pack"],["info","Мэдээлэл","info"]];
 let view=(()=>{const h=location.hash.slice(1);return TABS.some(t=>t[0]===h)?h:"trip"})();
 function renderNav(){
- const open=TASKS.filter(t=>!S.tasks[t.id]?.done).length;
- $("#tabsTop").innerHTML=TABS.map(([k,n,e])=>`<button type="button" data-tab="${k}" ${k===view?'aria-current="page"':""}>${emo(e)}${n}</button>`).join("");
- $("#tabsBottom").innerHTML=TABS.map(([k,n,e])=>`<button type="button" data-tab="${k}" ${k===view?'aria-current="page"':""}>${emo(e)}${n}${k==="book"&&open?`<span class="badge">${open}</span>`:""}</button>`).join("");
+ const k=bookingCounts(),open=(k.lt-k.lb)+(k.ht-k.hb)+TASKS.filter(t=>t.p&&!S.tasks[t.id]?.done).length;
+ $("#tabsTop").innerHTML=TABS.map(([id,n,i])=>`<button type="button" data-tab="${id}" ${id===view?'aria-current="page"':""}>${ico(i)}${n}${id==="book"&&open?`<span class="badge">${open}</span>`:""}</button>`).join("");
+ $("#tabsBottom").innerHTML=TABS.map(([id,n,i])=>`<button type="button" data-tab="${id}" ${id===view?'aria-current="page"':""}>${ico(i)}${n}${id==="book"&&open?`<span class="badge">${open}</span>`:""}</button>`).join("");
 }
 function go(v,scroll=true){view=v;document.querySelectorAll("main .view").forEach(s=>s.hidden=s.dataset.view!==v);$("#hero").hidden=v!=="trip";
  if(location.hash.slice(1)!==v&&!/^#(s|join)=/.test(location.hash))history.replaceState(null,"","#"+v);
@@ -722,9 +758,9 @@ addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(TABS.some(t
 addEventListener("scroll",()=>$("#top").classList.toggle("scrolled",scrollY>8),{passive:true});
 
 /* ================= PLAN HELPERS ================= */
-const MODES={train:["Галт тэрэг","🚂"],plane:["Нислэг","✈️"],bus:["Автобус, машин","🚌"],boat:["Завь","⛴️"]};
-const STEP={walk:["Алхах, үзэх","🚶"],star:["Үзвэр","⭐"],food:["Хоол","🍜"],train:["Галт тэрэг","🚂"],plane:["Нислэг","✈️"],bus:["Автобус, машин","🚌"],boat:["Завь","⛴️"],hotel:["Буудал","🏨"],doc:["Хил, бичиг баримт","🛂"],sun:["Далайн эрэг","🏖️"],party:["Үдэшлэг","🎉"],bed:["Амрах","😴"],moon:["Шөнө","🌙"]};
-const SK={see:["Үзвэр","📸","sea"],temple:["Сүм хийд","🛕","sun"],museum:["Музей","🏛️","frost"],food:["Хоол","🍜","sun"],night:["Шөнийн амьдрал","🎉","violet"],beach:["Далайн эрэг","🏖️","sun"],nature:["Байгаль","🌿","ok"],tour:["Аялал","⛵","sea"],shop:["Дэлгүүр","🛍️","pink"]};
+const MODES={train:["Галт тэрэг","train"],plane:["Нислэг","plane"],bus:["Автобус, машин","bus"],boat:["Завь","boat"]};
+const STEP={walk:["Алхах, үзэх","walk"],star:["Үзвэр","star"],food:["Хоол","food"],train:["Галт тэрэг","train"],plane:["Нислэг","plane"],bus:["Автобус, машин","bus"],boat:["Завь","boat"],hotel:["Буудал","hotel"],doc:["Хил, бичиг баримт","doc"],sun:["Далайн эрэг","sun"],party:["Үдэшлэг","party"],bed:["Амрах","bed"],moon:["Шөнө","moon"]};
+const SK={see:["Үзвэр","star","sea"],temple:["Сүм хийд","temple","sun"],museum:["Музей","museum","frost"],food:["Хоол","food","sun"],night:["Шөнийн амьдрал","party","frost"],beach:["Далайн эрэг","sun","sun"],nature:["Байгаль","nature","ok"],tour:["Аялал","boat","sea"],shop:["Дэлгүүр","bag","warn"]};
 const ISO=/^\d{4}-\d\d-\d\d$/;
 function place(k){if(!k)return null;const c=S.places&&S.places[k];if(c&&!c.deleted&&c.n)return c;return PLACES[k]||GAZ[k]||null}
 const pname=k=>place(k)?.n||"Тодорхойгүй газар";
@@ -737,7 +773,7 @@ const movesOf=d=>Array.isArray(d?.moves)?d.moves.filter(m=>Array.isArray(m)&&m[0
 const stepsOf=d=>Array.isArray(d?.steps)?d.steps.filter(Array.isArray):[];
 function seqOf(d){const s=[];movesOf(d).forEach(([a,b])=>{if(s[s.length-1]!==a)s.push(a);s.push(b)});return s}
 function routeText(d){const s=seqOf(d);if(s.length)return s.map(pname).join(" → ");return d.stay?pname(d.stay):(d.note||"")}
-const modeEmo=d=>[...new Set(movesOf(d).map(m=>MODES[m[2]]?.[1]||"✈️"))].join("");
+const modeEmo=d=>[...new Set(movesOf(d).map(m=>MODES[m[2]]?.[1]||"plane"))].map(i=>ico(i)).join("");
 const startCity=d=>movesOf(d)[0]?.[0]||d.stay||"";
 const endCity=d=>{const m=movesOf(d);return m.length?m[m.length-1][1]:(d.stay||"")};
 const tzs=n=>"UTC"+(n>=0?"+":"−")+Math.abs(n);
@@ -772,7 +808,7 @@ function renderCrew(){
 function tripDayIndex(d=new Date()){const ds=dayList(),t=d.getTime();if(t<departAt().getTime()-20*3600e3)return -1;
  for(let i=ds.length-1;i>=0;i--){const s=new Date(ds[i].date+"T00:00:00+08:00").getTime();if(t>=s)return t>homeAt().getTime()?99:i}return -1}
 function renderHero(){const ds=dayList();
- $("#eyebrow").innerHTML=`<span class="chip cold">${ddot(ds[0].date)} – ${ddot(ds[ds.length-1].date)}</span><span class="chip pink">${ds.length} өдөр</span><span class="chip">${routeCities().length} хот</span>`}
+ $("#eyebrow").textContent=`${ddot(ds[0].date)} – ${ddot(ds[ds.length-1].date)}, ${ds.length} өдөр, ${routeCities().length} хот`}
 function renderCount(){
  const t=now(),el=$("#count"),DEP=departAt();
  if(t<DEP.getTime()){let s=Math.floor((DEP-t)/1000);const d=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);s%=60;
@@ -826,7 +862,7 @@ function renderMap(){
  if(hiDay)L.forEach((l,i)=>{if(l.d===hiDay)s+=`<circle r="5" class="plane-dot"><animateMotion dur="2.4s" repeatCount="indefinite" rotate="auto"><mpath href="#leg${i}"/></animateMotion></circle>`});
  s+=`</svg>`;$("#map").innerHTML=s;
  const sw={train:`<line x1="2" y1="4" x2="22" y2="4" stroke="var(--frost)" stroke-width="4" stroke-dasharray="1 6" stroke-linecap="round"/>`,plane:`<line x1="2" y1="4" x2="22" y2="4" stroke="var(--pink)" stroke-width="2.5" stroke-linecap="round"/>`,bus:`<line x1="2" y1="4" x2="22" y2="4" stroke="var(--pink)" stroke-width="2.5" stroke-dasharray="7 5"/>`,boat:`<line x1="2" y1="4" x2="22" y2="4" stroke="var(--pink)" stroke-width="3" stroke-dasharray="2 5" stroke-linecap="round"/>`};
- $("#mapLegend").innerHTML=Object.keys(MODES).filter(m=>L.some(l=>l.m===m)).map(m=>`<span><svg viewBox="0 0 24 8" aria-hidden="true">${sw[m]}</svg>${MODES[m][0]}</span>`).join("")+`<span class="hint">👆 Хот дээр дарж үзэх газрыг хар</span>`;
+ $("#mapLegend").innerHTML=Object.keys(MODES).filter(m=>L.some(l=>l.m===m)).map(m=>`<span><svg viewBox="0 0 24 8" aria-hidden="true">${sw[m]}</svg>${MODES[m][0]}</span>`).join("")+`<span class="hint">${ico("pin")}Хот дээр дарж үзэх газрыг хар</span>`;
 }
 function showCity(k){const cs=cityStays();if(!cs.some(c=>c.k===k)){toast(`${pname(k)} бол гэр. Замын хот дээр дарна уу`);return}
  tripSeg="see";seeCity=k;ls.set("sts:tripseg","see");if(view!=="trip")go("trip",false);renderTrip();renderMap();
@@ -839,32 +875,33 @@ let tripSeg=ls.get("sts:tripseg")==="see"?"see":"days",seeCity=null,openDays=nul
 function renderTrip(){
  const ds=dayList(),ti=tripDayIndex();
  if(!openDays)openDays=new Set([ds[Math.max(0,Math.min(ds.length-1,ti))].date]);
- const done=TASKS.filter(t=>S.tasks[t.id]?.done).length,pri=TASKS.filter(t=>t.p&&!S.tasks[t.id]?.done);
+ const bk=bookingCounts();
  const net=balances(),mine=me?net[me]||0:0,nights=ds.length-1,rc=routeCities();
  const tzn=new Set(rc.map(k=>place(k)?.tz).filter(v=>v!=null)).size,tp=rc.map(place).filter(p=>p&&p.hi!=null);
  const sl=$("#v-trip .cities")?.scrollLeft||0;
  let h=`<div class="nextup">
-  <button class="card stat" data-tab="book" type="button"><span class="k">${emo("✅")}Захиалга</span><span class="v">${done} / ${TASKS.length}</span><div class="bar"><span style="width:${done/TASKS.length*100}%"></span></div><span class="s">${pri.length?`${pri.length} яаралтай зүйл үлдсэн`:"Яаралтай бүгд хийгдсэн"}</span></button>
-  <button class="card stat" data-tab="money" type="button"><span class="k">${emo("💸")}${me?"Таны үлдэгдэл":"Нийт зардал"}</span><span class="v" style="color:${me?(mine>0.5?"var(--ok)":mine<-0.5?"var(--sun)":"var(--ink)"):"var(--ink)"}">${me?(mine>0.5?"+":"")+fmt(mine):fmt(totalSpent())} ₮</span><span class="s">${me?(mine>0.5?"Бүлэг танд өртэй":mine<-0.5?"Та бүлэгт өртэй":"Тэнцүү"):"Одоогоор бүртгэсэн"}</span></button>
+  <button class="card stat" data-tab="book" type="button"><span class="k">${ico("ticket")}Захиалга</span><span class="v">${bk.lb+bk.hb} / ${bk.lt+bk.ht}</span><div class="bar"><span style="width:${(bk.lb+bk.hb)/Math.max(1,bk.lt+bk.ht)*100}%"></span></div><span class="s">${bk.lt+bk.ht-bk.lb-bk.hb?`${bk.lt+bk.ht-bk.lb-bk.hb} захиалаагүй`:"Бүгд захиалсан"}</span></button>
+  <button class="card stat" data-tab="money" type="button"><span class="k">${ico("money")}${me?"Таны үлдэгдэл":"Нийт зардал"}</span><span class="v" style="color:${me?(mine>0.5?"var(--ok)":mine<-0.5?"var(--sun)":"var(--ink)"):"var(--ink)"}">${me?(mine>0.5?"+":"")+fmt(mine):fmt(totalSpent())} ₮</span><span class="s">${me?(mine>0.5?"Бүлэг танд өртэй":mine<-0.5?"Та бүлэгт өртэй":"Тэнцүү"):"Одоогоор бүртгэсэн"}</span></button>
   <div class="card stat"><span class="k">${emo("🌡️")}${nights} шөнө</span><span class="v">${tp.length?`${sg(Math.min(...tp.map(p=>p.lo)))}° → ${sg(Math.max(...tp.map(p=>p.hi)))}°`:"—"}</span><span class="s">${rc.length} хот, ${tzn} цагийн бүс</span></div>
  </div>`;
  if(ti>=0&&ti<ds.length)h+=`<div class="alert" style="background:var(--sea-soft)">${emo("📍")}<div><b>Өнөөдөр ${ti+1}-р өдөр: ${esc(ds[ti].title||"")}</b>${esc(routeText(ds[ti]))}</div></div>`;
- h+=`<div class="sticky" id="planHead"><div class="seg wide" role="group" aria-label="Харах">${[["days","📅 Өдрөөр"],["see","📸 Үзэх газрууд"]].map(([k,n])=>`<button type="button" data-tseg="${k}" aria-pressed="${tripSeg===k}">${n}</button>`).join("")}</div></div>`;
+ h+=`<div class="sticky" id="planHead"><div class="seg wide" role="group" aria-label="Харах">${[["days","Өдрөөр","clock"],["see","Үзэх газрууд","star"]].map(([k,n,i])=>`<button type="button" data-tseg="${k}" aria-pressed="${tripSeg===k}">${ico(i)}${n}</button>`).join("")}</div></div>`;
  h+=tripSeg==="see"?seeHTML():daysHTML(ds,ti);
  $("#v-trip").innerHTML=h;const cr=$("#v-trip .cities");
  if(cr){cr.scrollLeft=sl;const c=cr.querySelector('[aria-pressed="true"]');if(c&&(c.offsetLeft<cr.scrollLeft||c.offsetLeft+c.offsetWidth>cr.scrollLeft+cr.clientWidth))cr.scrollLeft=c.offsetLeft-cr.offsetLeft-14}
 }
 function daysHTML(ds,ti){
  const sights=sightList(),stays=cityStays().map(c=>c.k);
- let h=`<div class="toolbar"><span class="muted grow">Өдөр дээр дарж нээгээд ✏️ Засах товчоор өөрчилнө.</span><span class="btngrp"><button class="btn sm" type="button" data-days="open">Бүгдийг нээх</button><button class="btn sm" type="button" data-days="close">Хаах</button></span></div><div class="days">`;
+ let h=`<div class="toolbar"><span class="muted grow">Өдөр дээр дарж нээгээд «Засах» товчоор өөрчилнө.</span><span class="btngrp"><button class="btn sm" type="button" data-days="open">Бүгдийг нээх</button><button class="btn sm" type="button" data-days="close">Хаах</button></span></div><div class="days">`;
  ds.forEach((d,i)=>{const p=dparts(d.date),open=openDays.has(d.date),tz=tzText(d),see=sights.filter(s=>s.day===d.date),steps=stepsOf(d),c=dayColor(d);
   h+=`<article class="card day ${open?"open":""} ${ti===i?"today":""}" style="--g:var(--g-${c})">
    <button type="button" data-day="${d.date}" aria-expanded="${open}"><div class="dnum"><b>${p.d}</b><span>${WD[p.w]}</span></div>
-   <div class="dtitle"><h3>${esc(d.title||"Чөлөөт өдөр")}</h3><div class="route"><span>${esc(routeText(d))} ${modeEmo(d)}</span>${see.length?`<span class="chip pink">📸 ${see.length}</span>`:""}</div></div>${ico("chev","chev")}</button>
-   ${open?`<div class="dbody">${steps.length?`<ul class="steps">${steps.map(([ic,t,x])=>`<li><span class="ico" aria-hidden="true">${(STEP[ic]||STEP.walk)[1]}</span><span class="t">${esc(t)}</span><span class="x">${esc(x)}</span></li>`).join("")}</ul>`:`<p class="muted" style="margin:0">Төлөвлөгөө алга. ✏️ Засах дээр дарж нэмээрэй.</p>`}
-   ${see.length?`<div class="seeing"><span class="flabel">Өнөөдөр үзэх:</span>${see.map(s=>`<button type="button" class="chip" data-gosee="${esc(s.city)}">${(SK[s.k]||SK.see)[1]} ${esc(s.n)}</button>`).join("")}</div>`:""}
+   <div class="dtitle"><h3>${esc(d.title||"Чөлөөт өдөр")}</h3><div class="route"><span>${esc(routeText(d))} ${modeEmo(d)}</span>${see.length?`<span class="chip">${ico("star")}${see.length}</span>`:""}</div></div>${ico("chev","chev")}</button>
+   ${open?`<div class="dbody">${steps.length?`<ul class="steps">${steps.map(([ic,t,x])=>`<li><span class="ico" aria-hidden="true">${ico(STEP[ic]?ic:"walk")}</span><span class="t">${esc(t)}</span><span class="x">${esc(x)}</span></li>`).join("")}</ul>`:`<p class="muted" style="margin:0">Төлөвлөгөө алга. «Засах» дээр дарж нэмээрэй.</p>`}
+   ${dayBookingsHTML(d)}
+   ${see.length?`<div class="seeing"><span class="flabel">Өнөөдөр үзэх:</span>${see.map(s=>`<button type="button" class="chip" data-gosee="${esc(s.city)}">${ico((SK[s.k]||SK.see)[1])}${esc(s.n)}</button>`).join("")}</div>`:""}
    ${d.tip?`<div class="tip">${emo("💡")}<span>${esc(d.tip)}</span></div>`:""}<div class="sleep">${emo("🛏️")}<span>Унтах: <b style="color:var(--ink)">${esc(sleepText(d))}</b>${tz?` <span class="chip">${tz}</span>`:""}</span></div>
-   <div class="dactions"><button class="btn sm sun" type="button" data-editday="${d.date}">✏️ Засах</button>${d.stay&&stays.includes(d.stay)?`<button class="btn sm" type="button" data-gosee="${esc(d.stay)}">📸 ${esc(pname(d.stay))}-д үзэх</button>`:""}</div></div>`:""}</article>`});
+   <div class="dactions"><button class="btn sm" type="button" data-editday="${d.date}">${ico("edit")}Засах</button>${d.stay&&stays.includes(d.stay)?`<button class="btn sm ghost" type="button" data-gosee="${esc(d.stay)}">${ico("star")}${esc(pname(d.stay))}-д үзэх</button>`:""}</div></div>`:""}</article>`});
  h+=`</div><button type="button" class="addday" data-addday>${ico("plus")}Өдөр нэмэх (${dlabel(addDays(ds[ds.length-1].date,1))})</button>`;
  return h}
 function seeHTML(){
@@ -872,18 +909,18 @@ function seeHTML(){
  if(!seeCity||!cs.some(c=>c.k===seeCity)){const ti=tripDayIndex(),ds=dayList();const cur=ti>=0&&ti<ds.length?ds[ti].stay:"";seeCity=cs.some(c=>c.k===cur)?cur:cs[0].k}
  const all=sightList(),days=dayList(),c=cs.find(x=>x.k===seeCity),p=place(seeCity),list=all.filter(s=>s.city===seeCity);
  let h=`<div class="cities" role="group" aria-label="Хот сонгох">${cs.map(x=>{const n=all.filter(s=>s.city===x.k).length;
-  return `<button type="button" class="citycard" data-seecity="${esc(x.k)}" aria-pressed="${x.k===seeCity}" style="--g:var(--g-${cityColor(x.k)})"><span class="emo">${pemo(x.k)}</span><b>${esc(pname(x.k))}</b><span>${x.nights.length?`${x.nights.length} шөнө`:"Түр зогсоно"} · ${n} газар</span></button>`}).join("")}</div>`;
- h+=`<div class="card cityhead" style="--g:var(--g-${cityColor(seeCity)})"><div class="ch-top"><h3>${emo(pemo(seeCity))}${esc(p.n)}</h3><a class="btn sm" href="${mapsURL(p.en||p.n)}" target="_blank" rel="noopener">${ico("pin")}Газрын зураг</a></div>
-  <div class="meta"><span class="chip cold">${esc(stayText(c))}</span>${tempText(seeCity)?`<span class="chip hot">🌡️ ${tempText(seeCity)}</span>`:""}</div>${CITY_NOTE[seeCity]?`<p>${esc(CITY_NOTE[seeCity])}</p>`:""}</div>`;
+  return `<button type="button" class="citycard" data-seecity="${esc(x.k)}" aria-pressed="${x.k===seeCity}" style="--c:var(--${cityColor(x.k)})"><b>${esc(pname(x.k))}</b><span>${x.nights.length?`${x.nights.length} шөнө`:"Түр зогсоно"} · ${n} газар</span></button>`}).join("")}</div>`;
+ h+=`<div class="card cityhead" style="--c:var(--${cityColor(seeCity)})"><div class="ch-top"><h3><i></i>${esc(p.n)}</h3><a class="btn sm" href="${mapsURL(p.en||p.n)}" target="_blank" rel="noopener">${ico("pin")}Газрын зураг</a></div>
+  <div class="meta"><span class="chip cold">${esc(stayText(c))}</span>${tempText(seeCity)?`<span class="chip">${ico("therm")}${tempText(seeCity)}</span>`:""}</div>${CITY_NOTE[seeCity]?`<p>${esc(CITY_NOTE[seeCity])}</p>`:""}</div>`;
  days.filter(d=>list.some(s=>s.day===d.date)).forEach(d=>{h+=`<div class="sgroup-h"><span>${dlong(d.date)}</span><span class="muted">${days.indexOf(d)+1}-р өдөр</span></div><div class="sights">${list.filter(s=>s.day===d.date).map(sightCard).join("")}</div>`});
  const ideas=list.filter(s=>!s.day||!days.some(d=>d.date===s.day));
- if(ideas.length)h+=`<div class="sgroup-h"><span>💭 Төлөвлөөгүй санаанууд</span><span class="muted">${ideas.length}</span></div><div class="sights">${ideas.map(sightCard).join("")}</div>`;
+ if(ideas.length)h+=`<div class="sgroup-h"><span>Төлөвлөөгүй санаанууд</span><span class="muted">${ideas.length}</span></div><div class="sights">${ideas.map(sightCard).join("")}</div>`;
  if(!list.length)h+=`<div class="card empty">${emo("📍")}<div>Одоогоор хоосон. ${esc(p.n)}-д үзэх эхний газраа нэмээрэй.</div></div>`;
  h+=`<button type="button" class="addday" data-addsight="${esc(seeCity)}">${ico("plus")}${esc(p.n)}-д газар нэмэх</button>
- <p class="muted" style="margin:0;font-size:12.5px">Очмоор байгаа газар дээрээ ❤️ Би явна дар. Газарт өдөр оноовол тэр өдрийн төлөвлөгөөнд гарч ирнэ.</p>`;
+ <p class="muted" style="margin:0;font-size:12.5px">Очмоор байгаа газар дээрээ «Би явна» дар. Газарт өдөр оноовол тэр өдрийн төлөвлөгөөнд гарч ирнэ.</p>`;
  return h}
 function sightCard(s){const k=SK[s.k]||SK.see,v=votesFor(s.id),mine=!!me&&v.includes(me);
- return `<article class="card sight" style="--c:var(--${k[2]})"><span class="sk" aria-hidden="true">${k[1]}</span><div class="sbody"><h4>${esc(s.n)}</h4><div class="smeta">${k[0]}${s.cost?` · ${esc(s.cost)}`:""}</div>${s.d?`<p>${esc(s.d)}</p>`:""}
+ return `<article class="card sight" style="--c:var(--${k[2]})"><span class="sk" aria-hidden="true">${ico(k[1])}</span><div class="sbody"><h4>${esc(s.n)}</h4><div class="smeta">${k[0]}${s.cost?` · ${esc(s.cost)}`:""}</div>${s.d?`<p>${esc(s.d)}</p>`:""}
   <div class="sfoot"><button type="button" class="vote" data-vote="${esc(s.id)}" aria-pressed="${mine}">${ico("heart")}${mine?"Явна":"Би явна"}</button>${v.length?`<span class="stack">${v.map(id=>av(id,"sm")).join("")}</span><span class="muted" style="font-size:12px">${S.people.length}-аас ${v.length}</span>`:""}
   <span class="grow"></span><a class="icon-btn sm" href="${mapsURL(s.n+", "+(place(s.city)?.en||pname(s.city)))}" target="_blank" rel="noopener" aria-label="${esc(s.n)}: газрын зураг">${ico("pin")}</a><button type="button" class="icon-btn sm" data-editsight="${esc(s.id)}" aria-label="${esc(s.n)}: засах">${ico("edit")}</button></div></div></article>`}
 $("#v-trip").addEventListener("click",e=>{
@@ -893,9 +930,12 @@ $("#v-trip").addEventListener("click",e=>{
  const ed=e.target.closest("[data-editday]");if(ed){dayDialog(ed.dataset.editday,false);return}
  if(e.target.closest("[data-addday]")){const ds=dayList();dayDialog(addDays(ds[ds.length-1].date,1),true);return}
  const gs=e.target.closest("[data-gosee]");if(gs){showCity(gs.dataset.gosee);return}
+ const orr=e.target.closest("[data-openres]");if(orr){resDialog({id:orr.dataset.openres});return}
+ const al=e.target.closest("[data-addleg]");if(al){resDialog({leg:al.dataset.addleg});return}
+ const ast=e.target.closest("[data-addstay]");if(ast){resDialog({stay:ast.dataset.addstay});return}
  const sc=e.target.closest("[data-seecity]");if(sc){seeCity=sc.dataset.seecity;renderTrip();renderMap();return}
  const vo=e.target.closest("[data-vote]");if(vo){if(!me){whoDialog(false);toast("Эхлээд хэн бэ гэдгээ сонгоорой");return}
-  const key=vo.dataset.vote+"."+me,on=!S.votes[key]?.v;S.votes[key]={v:on,ts:now()};save();dirty("votes",key);renderTrip();if(on)toast("Та явна ❤️");return}
+  const key=vo.dataset.vote+"."+me,on=!S.votes[key]?.v;S.votes[key]={v:on,ts:now()};save();dirty("votes",key);renderTrip();if(on)toast("Тэмдэглэлээ: та явна");return}
  const es=e.target.closest("[data-editsight]");if(es){sightDialog(es.dataset.editsight);return}
  const as=e.target.closest("[data-addsight]");if(as){sightDialog(null,as.dataset.addsight);return}
 });
@@ -923,26 +963,26 @@ function dayDialog(date,isNew){
  const formBody=()=>`<div class="dlg-h"><h2>${dlong(date)}: ${isNew?"шинэ өдөр":"засах"}</h2><button class="icon-btn" type="button" data-close aria-label="Хаах">${ico("x")}</button></div>
  <form class="dlg-b" id="df" autocomplete="off">
   <label class="f">Гарчиг<input type="text" id="d-title" value="${esc(st.title)}" maxlength="60" placeholder="ж.нь: Шанхайд бүтэн өдөр"></label>
-  <div class="fgroup"><div class="flabel">🧭 Энэ өдрийн аялал</div>
+  <div class="fgroup"><div class="flabel">Энэ өдрийн аялал</div>
    ${st.moves.map((m,i)=>`<div class="mvrow"><div class="mv"><select data-mv="${i}" data-part="0" aria-label="Хаанаас">${opts(m[0],"Хаанаас…")}</select><span class="muted" aria-hidden="true">→</span><select data-mv="${i}" data-part="1" aria-label="Хаашаа">${opts(m[1],"Хаашаа…")}</select></div>
-    <div class="mv2"><select data-mv="${i}" data-part="2" aria-label="Юугаар">${Object.entries(MODES).map(([k,[n,e]])=>`<option value="${k}" ${k===m[2]?"selected":""}>${e} ${n}</option>`).join("")}</select><button type="button" class="icon-btn sm" data-mvdel="${i}" aria-label="Энэ аяллыг хасах">${ico("trash")}</button></div></div>`).join("")}
+    <div class="mv2"><select data-mv="${i}" data-part="2" aria-label="Юугаар">${Object.entries(MODES).map(([k,[n]])=>`<option value="${k}" ${k===m[2]?"selected":""}>${n}</option>`).join("")}</select><button type="button" class="icon-btn sm" data-mvdel="${i}" aria-label="Энэ аяллыг хасах">${ico("trash")}</button></div></div>`).join("")}
    ${st.moves.length?"":`<p class="muted" style="margin:0;font-size:13px">Аялал байхгүй: нэг газартаа байна.</p>`}
    <div><button type="button" class="btn sm" data-mvadd>${ico("plus")}Аялал нэмэх</button></div></div>
-  <label class="f">🛏️ Хаана унтах<select id="d-stay">${opts(st.stay,"Хотод биш (галт тэрэг, онгоц, гэр)")}</select></label>
+  <label class="f">Хаана унтах<select id="d-stay">${opts(st.stay,"Хотод биш (галт тэрэг, онгоц, гэр)")}</select></label>
   ${st.stay?"":`<label class="f">Тэгвэл хаана?<input type="text" id="d-note" value="${esc(st.note)}" maxlength="40" placeholder="ж.нь: Галт тэргэнд"></label>`}
-  <div class="fgroup"><div class="flabel">📝 Өдрийн төлөвлөгөө</div>
-   ${st.steps.map((s,i)=>`<div class="strow"><select data-st="${i}" data-part="0" aria-label="Төрөл">${Object.entries(STEP).map(([k,[n,e]])=>`<option value="${k}" ${k===s[0]?"selected":""}>${e} ${n}</option>`).join("")}</select><input type="text" data-st="${i}" data-part="1" value="${esc(s[1])}" placeholder="Цаг" maxlength="16" aria-label="Цаг">
+  <div class="fgroup"><div class="flabel">Өдрийн төлөвлөгөө</div>
+   ${st.steps.map((s,i)=>`<div class="strow"><select data-st="${i}" data-part="0" aria-label="Төрөл">${Object.entries(STEP).map(([k,[n]])=>`<option value="${k}" ${k===s[0]?"selected":""}>${n}</option>`).join("")}</select><input type="text" data-st="${i}" data-part="1" value="${esc(s[1])}" placeholder="Цаг" maxlength="16" aria-label="Цаг">
     <div class="stbtns"><button type="button" class="icon-btn sm" data-stmove="${i}" data-dir="-1" aria-label="Дээш" ${i===0?"disabled":""}>${ico("chup")}</button><button type="button" class="icon-btn sm" data-stmove="${i}" data-dir="1" aria-label="Доош" ${i===st.steps.length-1?"disabled":""}>${ico("chev")}</button><button type="button" class="icon-btn sm" data-stdel="${i}" aria-label="Хасах">${ico("trash")}</button></div>
     <textarea data-st="${i}" data-part="2" rows="2" maxlength="300" placeholder="Юу хийх вэ" aria-label="Дэлгэрэнгүй">${esc(s[2])}</textarea></div>`).join("")}
    <div><button type="button" class="btn sm" data-stadd>${ico("plus")}Төлөвлөгөөнд нэмэх</button></div></div>
-  <label class="f">💡 Зөвлөгөө, тэмдэглэл (заавал биш)<input type="text" id="d-tip" value="${esc(st.tip)}" maxlength="200" placeholder="Санах зүйл"></label>
+  <label class="f">Зөвлөгөө, тэмдэглэл (заавал биш)<input type="text" id="d-tip" value="${esc(st.tip)}" maxlength="200" placeholder="Санах зүйл"></label>
   <p class="err" id="derr" hidden></p>
  </form>
  <div class="dlg-f">${isNew?"":`<button class="btn danger" type="button" data-delday style="margin-right:auto">${ico("trash")}Өдөр хасах</button>`}${!isNew&&isDef&&S.days[date]?`<button class="btn" type="button" data-resetday>Анхны хувилбар</button>`:""}<button class="btn" type="button" data-close>Болих</button><button class="btn sun" type="submit" form="df">${isNew?"Өдөр нэмэх":"Хадгалах"}</button></div>`;
  const listHTML=()=>{const loc=localPlaces(q),seen=new Set(loc.flatMap(k=>[pname(k).toLowerCase(),(place(k).en||"").toLowerCase()]));
   const on=found.filter(r=>!seen.has(r.n.toLowerCase()));
-  return loc.map(k=>`<li><button type="button" data-pick="${esc(k)}"><span>${pemo(k)} ${esc(pname(k))}</span><span class="muted">${tempText(k)}</span></button></li>`).join("")
-   +on.map(r=>`<li><button type="button" data-pickon="${esc(r.key)}"><span>📍 ${esc(r.n)}</span><span class="muted">${esc(r.sub)}</span></button></li>`).join("")
+  return loc.map(k=>`<li><button type="button" data-pick="${esc(k)}"><span>${esc(pname(k))}</span><span class="muted">${tempText(k)}</span></button></li>`).join("")
+   +on.map(r=>`<li><button type="button" data-pickon="${esc(r.key)}"><span>${esc(r.n)}</span><span class="muted">${esc(r.sub)}</span></button></li>`).join("")
    +(!loc.length&&!on.length&&!searching?`<li class="muted" style="padding:10px">${q.trim().length<3?"Бүх газраас хайхын тулд 3-аас дээш үсэг бичнэ үү.":searchErr||"Олдсонгүй."}</li>`:"")
    +(searching?`<li class="muted" style="padding:10px">Хайж байна…</li>`:"")};
  const pickBody=()=>`<div class="dlg-h"><h2>Хот сонгох</h2><button class="icon-btn" type="button" data-pickback aria-label="Буцах">${ico("x")}</button></div>
@@ -998,7 +1038,7 @@ function sightDialog(id,city){
   <form class="dlg-b" id="sf" autocomplete="off">
    <label class="f">Нэр<input type="text" id="s-n" value="${esc(st.n)}" maxlength="60" placeholder="ж.нь: Ват Арун"></label>
    <label class="f">Юу вэ, зөвлөгөө<textarea id="s-d" rows="3" maxlength="300" placeholder="Очих цаг, хувцаслалт, хэрхэн хүрэх">${esc(st.d)}</textarea></label>
-   <div><div class="flabel" style="margin-bottom:6px">Төрөл</div><div class="pick" role="group" aria-label="Төрөл">${Object.entries(SK).map(([k,v])=>`<button type="button" class="txt" data-sk="${k}" aria-pressed="${k===st.k}">${v[1]} ${v[0]}</button>`).join("")}</div></div>
+   <div><div class="flabel" style="margin-bottom:6px">Төрөл</div><div class="pick" role="group" aria-label="Төрөл">${Object.entries(SK).map(([k,v])=>`<button type="button" class="txt" data-sk="${k}" aria-pressed="${k===st.k}">${ico(v[1])}${v[0]}</button>`).join("")}</div></div>
    <div class="row2"><label class="f">Хот<select id="s-city">${cities.map(k=>`<option value="${esc(k)}" ${k===st.city?"selected":""}>${esc(pname(k))}</option>`).join("")}</select></label>
    <label class="f">Аль өдөр<select id="s-day"><option value="">Төлөвлөөгүй</option>${dates.map(x=>`<option value="${x}" ${x===st.day?"selected":""}>${dlong(x)}</option>`).join("")}</select></label></div>
    <label class="f">Тасалбар, үнэ (заавал биш)<input type="text" id="s-cost" value="${esc(st.cost)}" maxlength="30" placeholder="ж.нь: Үнэгүй, 500 THB"></label>
@@ -1020,42 +1060,173 @@ function sightDialog(id,city){
 
 /* ================= BOOK VIEW ================= */
 let taskFilter="all";
-function renderBook(){
- const done=TASKS.filter(t=>S.tasks[t.id]?.done).length,pct=done/TASKS.length;const C=2*Math.PI*26;
- const spent=TASKS.reduce((a,t)=>{const x=S.tasks[t.id];return a+(x&&x.cost?toMNT(x.cost,x.cur||"MNT"):0)},0);
- let list=TASKS.filter(t=>{const x=S.tasks[t.id]||{};if(taskFilter==="open")return!x.done;if(taskFilter==="mine")return x.owner===me;if(taskFilter==="pri")return t.p&&!x.done;return true});
- let h=`<div class="view-head"><div class="ringrow"><svg class="ring" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="ringg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF4D8D"/><stop offset="1" stop-color="#FFB72E"/></linearGradient></defs><circle class="bg" cx="32" cy="32" r="26"/><circle class="fg" cx="32" cy="32" r="26" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}" transform="rotate(-90 32 32)"/></svg>
-  <div><h2>Захиалах зүйлс</h2><div class="sub">${TASKS.length}-аас ${done} нь хийгдсэн${spent?`, ${fmt(spent)} ₮ захиалсан`:""}</div></div></div></div>
-  <div class="seg wide" role="group" aria-label="Шүүх">${[["all","Бүгд"],["pri","🔥 Яаралтай"],["open","Үлдсэн"],["mine","Минийх"]].map(([k,n])=>`<button type="button" data-tf="${k}" aria-pressed="${taskFilter===k}">${n}</button>`).join("")}</div>`;
- if(taskFilter==="mine"&&!me)h+=`<div class="empty card">${emo("🙋")}Эхлээд баруун дээд буланд хэн бэ гэдгээ сонгоорой.</div>`;
- else if(!list.length)h+=`<div class="empty card">${emo(taskFilter==="mine"?"🙌":"🎉")}${taskFilter==="mine"?"Танд оноосон зүйл алга. Аль нэг зүйлийн баруун талын дугуйг дарж өөртөө аваарай.":"Энд юу ч алга. Сайн байна!"}</div>`;
- else{h+=`<div class="card tasks">`;const groups=[...new Set(list.map(t=>t.g))];
-  groups.forEach(g=>{const items=list.filter(t=>t.g===g);h+=`<div class="group-h"><span>${emo(GROUPS[g]||"📌")}${esc(g)}</span><span class="muted">${items.filter(t=>S.tasks[t.id]?.done).length}/${items.length}</span></div>`;
-   items.forEach(t=>{const x=S.tasks[t.id]||{};
-    h+=`<div class="task ${x.done?"done":""}"><input type="checkbox" class="ck" id="t-${t.id}" data-tdone="${t.id}" ${x.done?"checked":""} aria-label="Хийгдсэн">
-     <div style="min-width:0"><label for="t-${t.id}" class="ttl">${esc(t.t)}</label>
-      <div class="tmeta">${t.p&&!x.done?'<span class="chip hot">🔥 Яаралтай</span>':""}<span class="chip">⏰ ${esc(t.due)}</span>${x.ref?`<span class="chip ok">Код ${esc(x.ref)}</span>`:""}${x.cost?`<span class="chip">${money(x.cost,x.cur||"MNT")}</span>`:""}</div>
-      <details><summary>${ico("edit")} Захиалгын мэдээлэл</summary><div class="tfields">
-       <input type="text" placeholder="Захиалгын код" value="${esc(x.ref||"")}" data-tf-ref="${t.id}" aria-label="Захиалгын код">
-       <input type="number" inputmode="decimal" placeholder="Нийт үнэ" value="${x.cost??""}" data-tf-cost="${t.id}" aria-label="Үнэ">
-       <select data-tf-cur="${t.id}" aria-label="Валют">${CURS.map(c=>`<option ${c===(x.cur||"MNT")?"selected":""}>${c}</option>`).join("")}</select>
-       <input type="text" placeholder="Тэмдэглэл (холбоос, цаг, хаяг)" value="${esc(x.note||"")}" data-tf-note="${t.id}" aria-label="Тэмдэглэл" style="grid-column:1/-1"></div></details></div>
-     <button type="button" class="owner" data-towner="${t.id}" aria-label="Хэн хариуцах">${av(x.owner)}</button></div>`})});
-  h+=`</div><p class="muted" style="margin:0;font-size:12.5px">Баруун талын дугуйг дарж хэн хариуцахыг сонгоно.</p>`}
- $("#v-book").innerHTML=h;
-}
 function setTask(id,patch){S.tasks[id]={...(S.tasks[id]||{}),...patch,ts:now()};save();dirty("tasks",id)}
 $("#v-book").addEventListener("change",e=>{const t=e.target;
- if(t.dataset.tdone){setTask(t.dataset.tdone,{done:t.checked});if(t.checked)toast("Гоё, хийгдлээ 🎉");renderBook();renderNav();renderTrip();return}
+ if(t.dataset.tdone){setTask(t.dataset.tdone,{done:t.checked});if(t.checked)toast("Хийгдлээ");renderBook();renderNav();renderTrip();return}
  if(t.dataset.tfRef!==undefined){setTask(t.dataset.tfRef,{ref:t.value.trim()});renderBook()}
  if(t.dataset.tfCost!==undefined){const v=parseFloat(t.value);setTask(t.dataset.tfCost,{cost:v>0?v:null});renderBook()}
  if(t.dataset.tfCur!==undefined){setTask(t.dataset.tfCur,{cur:t.value});renderBook()}
  if(t.dataset.tfNote!==undefined){setTask(t.dataset.tfNote,{note:t.value.trim()});renderBook()}});
-$("#v-book").addEventListener("click",e=>{const f=e.target.closest("[data-tf]");if(f){taskFilter=f.dataset.tf;renderBook();return}
+/* ================= BOOKINGS (transport + stays) ================= */
+// Every leg of the route and every stay in the plan gets a slot. A booking fills the slot.
+const RT={plane:["Нислэг","plane"],train:["Галт тэрэг","train"],bus:["Автобус, машин","bus"],boat:["Завь","boat"],hotel:["Буудал","hotel"]};
+const resList=()=>Object.entries(S.res||{}).filter(([,r])=>r&&typeof r==="object"&&!r.deleted&&RT[r.type]).map(([id,r])=>({id,...r}));
+const legKey=l=>`${l.d}|${l.a}|${l.b}`;
+function legItems(){const rs=resList();return legs().map(l=>({l,key:legKey(l),r:rs.find(r=>r.type!=="hotel"&&r.leg===legKey(l))}))}
+function stayItems(){const rs=resList();return cityStays().filter(c=>c.nights.length).map(c=>({c,key:c.k,inD:c.nights[0],outD:addDays(c.nights[c.nights.length-1],1),r:rs.find(r=>r.type==="hotel"&&r.stay===c.k)})).sort((a,b)=>a.inD.localeCompare(b.inD))}
+function extraRes(kind){const li=legItems().map(x=>x.r?.id),si=stayItems().map(x=>x.r?.id);
+ return resList().filter(r=>kind==="h"?r.type==="hotel"&&!si.includes(r.id):r.type!=="hotel"&&!li.includes(r.id)).sort((a,b)=>(a.depD||a.inD||"").localeCompare(b.depD||b.inD||""))}
+function bookingCounts(){const L=legItems(),H=stayItems();return{lt:L.length,lb:L.filter(x=>x.r).length,ht:H.length,hb:H.filter(x=>x.r).length}}
+const enName=k=>place(k)?.en||pname(k);
+function searchURL(mode,a,b,date,out){
+ if(mode==="hotel")return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(enName(a))}&checkin=${date}&checkout=${out}&group_adults=${S.people.length}&no_rooms=2&group_children=0`;
+ if(mode==="plane")return `https://www.google.com/travel/flights?q=${encodeURIComponent(`Flights from ${enName(a)} to ${enName(b)} on ${date}`)}`;
+ if(mode==="train"&&(a==="ub"||b==="ub"))return "https://eticket.ubtz.mn/";
+ return `https://www.google.com/search?q=${encodeURIComponent(`${mode==="boat"?"ferry":mode==="bus"?"bus":"train"} ${enName(a)} to ${enName(b)} ${date}`)}`}
+const safeURL=u=>/^https?:\/\/[^\s"'<>]+$/i.test(u||"")?u:"";
+function codeChip(c){return c?`<span class="code">${esc(c)}<button type="button" data-copy="${esc(c)}" aria-label="Кодыг хуулах">${ico("copy")}</button></span>`:""}
+function resMeta(r){return `<div class="rmeta">${codeChip(r.code)}${r.price?`<span class="chip">${money(r.price,r.cur||"MNT")}</span>`:""}${r.by&&person(r.by)?`<span class="chip">${av(r.by,"sm")}${esc(person(r.by).name)} захиалсан</span>`:""}</div>${r.note?`<div class="rnote">${esc(r.note)}</div>`:""}`}
+function resActions(r,extra=""){const u=safeURL(r.link);return `<div class="ractions">${u?`<a class="btn sm acc" href="${esc(u)}" target="_blank" rel="noopener">${ico("link")}Захиалга нээх</a>`:""}${extra}<button class="btn sm" type="button" data-editres="${esc(r.id)}">${ico("edit")}Засах</button></div>`}
+function legCard({l,key,r},extraR){
+ const mode=r?.type||l.m,a=extraR?r.from:pname(l.a),b=extraR?r.to:pname(l.b),date=extraR?r.depD:l.d;
+ let h=`<article class="card res ${r?"":"todo"}" style="--c:var(--${extraR?"acc":cityColor(l.b)})"><div class="res-h"><span class="ri">${ico(RT[mode]?.[1]||"plane")}</span><div class="rt"><b>${esc(a||"?")} → ${esc(b||"?")}</b><span>${date?dlong(date):""}${r?.carrier?`, ${esc(r.carrier)}`:""}</span></div>${r?`<span class="chip ok">${ico("check")}Захиалсан</span>`:`<span class="chip warn">Захиалаагүй</span>`}</div>`;
+ if(r){h+=`<div class="res-b">${r.depT||r.arrT?`<div class="times"><div><b>${esc(r.depT||"--:--")}</b><span>${esc(a)}${r.depD&&r.depD!==date?`, ${dlabel(r.depD)}`:""}</span></div>${ico("arrow")}<div><b>${esc(r.arrT||"--:--")}</b><span>${esc(b)}${r.arrD&&r.arrD!==date?`, ${dlabel(r.arrD)}`:""}</span></div></div>`:""}${resMeta(r)}${resActions(r)}</div>`}
+ else h+=`<div class="res-b"><div class="ractions"><button class="btn sm acc" type="button" data-addleg="${esc(key)}">${ico("plus")}Захиалга нэмэх</button><a class="btn sm" href="${esc(searchURL(l.m,l.a,l.b,l.d))}" target="_blank" rel="noopener">${ico("search")}${l.m==="plane"?"Нислэг хайх":l.m==="train"&&(l.a==="ub"||l.b==="ub")?"УБТЗ тасалбар":"Хайх"}</a></div></div>`;
+ return h+`</article>`}
+function stayCard({c,key,inD,outD,r},extraR){
+ const city=extraR?r.city:pname(c.k),i=r?.inD||inD,o=r?.outD||outD,n=i&&o?Math.round((new Date(o)-new Date(i))/864e5):0;
+ let h=`<article class="card res ${r?"":"todo"}" style="--c:var(--${extraR?"acc":cityColor(c.k)})"><div class="res-h"><span class="ri">${ico("hotel")}</span><div class="rt"><b>${esc(r?.name||city||"Буудал")}</b><span>${r?.name?esc(city)+", ":""}${i&&o?`${rangeText(i,o)}, ${n} шөнө`:""}</span></div>${r?`<span class="chip ok">${ico("check")}Захиалсан</span>`:`<span class="chip warn">Захиалаагүй</span>`}</div>`;
+ if(r){const mapQ=r.addr||[r.name,city].filter(Boolean).join(", ");
+  h+=`<div class="res-b"><div class="times"><div><b>${i?dlabel(i):"—"}</b><span>Орох${r.inT?` ${esc(r.inT)}`:""}</span></div>${ico("arrow")}<div><b>${o?dlabel(o):"—"}</b><span>Гарах${r.outT?` ${esc(r.outT)}`:""}</span></div></div>${r.addr?`<div class="muted" style="font-size:13px">${esc(r.addr)}</div>`:""}${resMeta(r)}${resActions(r,`<a class="btn sm" href="${mapsURL(mapQ)}" target="_blank" rel="noopener">${ico("pin")}Газрын зураг</a>`)}</div>`}
+ else h+=`<div class="res-b"><div class="ractions"><button class="btn sm acc" type="button" data-addstay="${esc(key)}">${ico("plus")}Захиалга нэмэх</button><a class="btn sm" href="${esc(searchURL("hotel",c.k,null,inD,outD))}" target="_blank" rel="noopener">${ico("search")}Booking.com-оос хайх</a></div></div>`;
+ return h+`</article>`}
+
+let bookSeg=(()=>{const v=ls.get("sts:bookseg");return["transport","stay","tasks"].includes(v)?v:"transport"})();
+function renderBook(){
+ const k=bookingCounts(),done=TASKS.filter(t=>S.tasks[t.id]?.done).length;
+ const booked=resList(),spent=booked.reduce((a,r)=>a+(r.price?toMNT(r.price,r.cur||"MNT"):0),0);
+ let h=`<div class="view-head"><div><h2>Захиалга</h2><div class="sub">Тээвэр ${k.lb}/${k.lt}, буудал ${k.hb}/${k.ht} захиалсан${spent?`, нийт ${fmt(spent)} ₮`:""}</div></div></div>
+ <div class="seg wide" role="group" aria-label="Захиалгын хэсэг">${[["transport","Тээвэр",`${k.lb}/${k.lt}`],["stay","Буудал",`${k.hb}/${k.ht}`],["tasks","Хийх зүйлс",`${done}/${TASKS.length}`]].map(([id,n,c])=>`<button type="button" data-bseg="${id}" aria-pressed="${bookSeg===id}">${n} <span class="muted num" style="font-weight:500">${c}</span></button>`).join("")}</div>`;
+ if(bookSeg==="transport"){const L=legItems(),X=extraRes("t");
+  h+=L.length?`<div class="reslist">${L.map(x=>legCard(x)).join("")}</div>`:`<div class="card empty">${ico("plane")}Төлөвлөгөөнд аялал алга. Өдөр засахдаа аялал нэмэхэд энд гарна.</div>`;
+  if(X.length)h+=`<div class="sgroup-h"><span>Бусад тээвэр</span><span class="muted">${X.length}</span></div><div class="reslist">${X.map(r=>legCard({l:{},key:"",r},true)).join("")}</div>`;
+  h+=`<button type="button" class="addday" data-newres="t">${ico("plus")}Өөр тээвэр нэмэх (такси, трансфер, гатлага…)</button>
+  <p class="muted" style="margin:0;font-size:12.5px">Маршрутын аялал бүр энд автоматаар гарна. Захиалсныхаа дараа код, холбоос, цагийг нэмбэл өдрийн төлөвлөгөөнд ч харагдана.</p>`}
+ if(bookSeg==="stay"){const H=stayItems(),X=extraRes("h");
+  h+=H.length?`<div class="reslist">${H.map(x=>stayCard(x)).join("")}</div>`:`<div class="card empty">${ico("hotel")}Төлөвлөгөөнд хонох хот алга.</div>`;
+  if(X.length)h+=`<div class="sgroup-h"><span>Бусад буудал</span><span class="muted">${X.length}</span></div><div class="reslist">${X.map(r=>stayCard({c:{},key:"",r},true)).join("")}</div>`;
+  h+=`<button type="button" class="addday" data-newres="h">${ico("plus")}Өөр буудал нэмэх</button>
+  <p class="muted" style="margin:0;font-size:12.5px">Хонох хот бүр энд автоматаар гарна. Booking.com-ын хайлтад огноо, ${S.people.length} хүн бөглөгдсөн байна.</p>`}
+ if(bookSeg==="tasks")h+=tasksHTML();
+ $("#v-book").innerHTML=h;
+}
+function tasksHTML(){
+ const done=TASKS.filter(t=>S.tasks[t.id]?.done).length;
+ let list=TASKS.filter(t=>{const x=S.tasks[t.id]||{};if(taskFilter==="open")return!x.done;if(taskFilter==="mine")return x.owner===me;if(taskFilter==="pri")return t.p&&!x.done;return true});
+ let h=`<div class="toolbar"><span class="muted grow">${TASKS.length}-аас ${done} нь хийгдсэн</span><div class="seg" role="group" aria-label="Шүүх">${[["all","Бүгд"],["pri","Яаралтай"],["open","Үлдсэн"],["mine","Минийх"]].map(([k,n])=>`<button type="button" data-tf="${k}" aria-pressed="${taskFilter===k}">${n}</button>`).join("")}</div></div>`;
+ if(taskFilter==="mine"&&!me)return h+`<div class="empty card">${ico("user")}Эхлээд баруун дээд буланд хэн бэ гэдгээ сонгоорой.</div>`;
+ if(!list.length)return h+`<div class="empty card">${ico("check")}${taskFilter==="mine"?"Танд оноосон зүйл алга. Аль нэг зүйлийн баруун талын дугуйг дарж өөртөө аваарай.":"Энд юу ч алга. Сайн байна."}</div>`;
+ h+=`<div class="card tasks">`;const groups=[...new Set(list.map(t=>t.g))];
+ groups.forEach(g=>{const items=list.filter(t=>t.g===g);h+=`<div class="group-h"><span>${ico(GROUPS[g]||"doc")}${esc(g)}</span><span class="muted">${items.filter(t=>S.tasks[t.id]?.done).length}/${items.length}</span></div>`;
+  items.forEach(t=>{const x=S.tasks[t.id]||{};
+   h+=`<div class="task ${x.done?"done":""}"><input type="checkbox" class="ck" id="t-${t.id}" data-tdone="${t.id}" ${x.done?"checked":""} aria-label="Хийгдсэн">
+    <div style="min-width:0"><label for="t-${t.id}" class="ttl">${esc(t.t)}</label>
+     <div class="tmeta">${t.p&&!x.done?'<span class="chip warn">Яаралтай</span>':""}<span class="chip">${ico("clock")}${esc(t.due)}</span>${x.ref?`<span class="chip ok">Код ${esc(x.ref)}</span>`:""}${x.cost?`<span class="chip">${money(x.cost,x.cur||"MNT")}</span>`:""}</div>
+     <details><summary>${ico("edit")} Дэлгэрэнгүй</summary><div class="tfields">
+      <input type="text" placeholder="Код, дугаар" value="${esc(x.ref||"")}" data-tf-ref="${t.id}" aria-label="Код">
+      <input type="number" inputmode="decimal" placeholder="Үнэ" value="${x.cost??""}" data-tf-cost="${t.id}" aria-label="Үнэ">
+      <select data-tf-cur="${t.id}" aria-label="Валют">${CURS.map(c=>`<option ${c===(x.cur||"MNT")?"selected":""}>${c}</option>`).join("")}</select>
+      <input type="text" placeholder="Тэмдэглэл (холбоос, хаяг)" value="${esc(x.note||"")}" data-tf-note="${t.id}" aria-label="Тэмдэглэл" style="grid-column:1/-1"></div></details></div>
+    <button type="button" class="owner" data-towner="${t.id}" aria-label="Хэн хариуцах">${av(x.owner)}</button></div>`})});
+ return h+`</div><p class="muted" style="margin:0;font-size:12.5px">Баруун талын дугуйг дарж хэн хариуцахыг сонгоно.</p>`}
+
+function resDialog(opt){
+ // opt: {id} edit | {leg:key} | {stay:key} | {kind:"t"|"h"}
+ const old=opt.id?(S.res||{})[opt.id]:null;if(opt.id&&!old)return;
+ const id=opt.id||"r"+uid();
+ const li=opt.leg?legItems().find(x=>x.key===opt.leg):old?.leg?legItems().find(x=>x.key===old.leg):null;
+ const si=opt.stay?stayItems().find(x=>x.key===opt.stay):old?.stay?stayItems().find(x=>x.key===old.stay):null;
+ const isH=old?old.type==="hotel":!!(opt.stay||opt.kind==="h");
+ const st=old?{...old}:isH?{type:"hotel",stay:si?.key||"",city:si?pname(si.key):"",name:"",addr:"",inD:si?.inD||"",inT:"14:00",outD:si?.outD||"",outT:"12:00",code:"",link:"",price:"",cur:"THB",by:me||"",note:"",exp:false}
+  :{type:li?.l.m||"plane",leg:li?.key||"",from:li?pname(li.l.a):"",to:li?pname(li.l.b):"",carrier:"",depD:li?.l.d||"",depT:"",arrD:li?.l.d||"",arrT:"",code:"",link:"",price:"",cur:"MNT",by:me||"",note:"",exp:false};
+ const hadExp=!!(S.expenses["r-"+id]&&!S.expenses["r-"+id].deleted);if(old)st.exp=hadExp;
+ const bound=isH?!!si:!!li;
+ const title=isH?(bound?`${pname(si.key)}: буудал`:"Буудал"):(bound?`${pname(li.l.a)} → ${pname(li.l.b)}`:"Тээвэр");
+ const body=()=>`<div class="dlg-h"><h2>${esc(title)}</h2><button class="icon-btn" type="button" data-close aria-label="Хаах">${ico("x")}</button></div>
+ <form class="dlg-b" id="rf" autocomplete="off">
+  ${isH?`
+   ${bound?"":`<label class="f">Хот<input type="text" id="r-city" value="${esc(st.city||"")}" maxlength="40" placeholder="ж.нь: Пхукет"></label>`}
+   <label class="f">Буудлын нэр<input type="text" id="r-name" value="${esc(st.name)}" maxlength="80" placeholder="ж.нь: Chaweng Garden Beach Resort"></label>
+   <label class="f">Хаяг (заавал биш)<input type="text" id="r-addr" value="${esc(st.addr)}" maxlength="140" placeholder="Газрын зурагт нээгдэнэ"></label>
+   <div class="row2"><div class="fgroup"><span class="flabel">Орох</span><div class="dtrow"><input type="date" id="r-inD" value="${esc(st.inD)}" aria-label="Орох огноо"><input type="time" id="r-inT" value="${esc(st.inT)}" aria-label="Орох цаг"></div></div>
+   <div class="fgroup"><span class="flabel">Гарах</span><div class="dtrow"><input type="date" id="r-outD" value="${esc(st.outD)}" aria-label="Гарах огноо"><input type="time" id="r-outT" value="${esc(st.outT)}" aria-label="Гарах цаг"></div></div></div>`
+  :`
+   <div><div class="flabel" style="margin-bottom:6px">Төрөл</div><div class="pick" role="group" aria-label="Төрөл">${["plane","train","bus","boat"].map(k=>`<button type="button" class="txt" data-rtype="${k}" aria-pressed="${st.type===k}">${ico(RT[k][1])}${RT[k][0]}</button>`).join("")}</div></div>
+   ${bound?"":`<div class="row2"><label class="f">Хаанаас<input type="text" id="r-from" value="${esc(st.from)}" maxlength="40"></label><label class="f">Хаашаа<input type="text" id="r-to" value="${esc(st.to)}" maxlength="40"></label></div>`}
+   <label class="f">Компани, дугаар<input type="text" id="r-carrier" value="${esc(st.carrier)}" maxlength="60" placeholder="${st.type==="plane"?"ж.нь: MIAT OM 712":st.type==="train"?"ж.нь: 34-р галт тэрэг, 5-р вагон":"ж.нь: Lomprayah"}"></label>
+   <div class="row2"><div class="fgroup"><span class="flabel">Хөдлөх</span><div class="dtrow"><input type="date" id="r-depD" value="${esc(st.depD)}" aria-label="Хөдлөх огноо"><input type="time" id="r-depT" value="${esc(st.depT)}" aria-label="Хөдлөх цаг"></div></div>
+   <div class="fgroup"><span class="flabel">Хүрэх</span><div class="dtrow"><input type="date" id="r-arrD" value="${esc(st.arrD)}" aria-label="Хүрэх огноо"><input type="time" id="r-arrT" value="${esc(st.arrT)}" aria-label="Хүрэх цаг"></div></div></div>`}
+  <div class="row2"><label class="f">Захиалгын код<input type="text" id="r-code" value="${esc(st.code)}" maxlength="40" placeholder="ж.нь: K7Q2ZP" autocapitalize="characters"></label>
+   <label class="f">Холбоос<input type="text" id="r-link" value="${esc(st.link)}" maxlength="500" placeholder="https://…" inputmode="url" autocapitalize="off"></label></div>
+  <div class="row2"><label class="f">Үнэ (нийт)<input type="number" id="r-price" value="${esc(st.price)}" inputmode="decimal" step="any" min="0" placeholder="0"></label>
+   <label class="f">Валют<select id="r-cur">${CURS.map(c=>`<option ${c===(st.cur||"MNT")?"selected":""}>${c}</option>`).join("")}</select></label></div>
+  <div><div class="flabel" style="margin-bottom:6px">Хэн захиалсан</div><div class="pick" role="group" aria-label="Хэн захиалсан">${S.people.map(p=>`<button type="button" data-rby="${p.id}" aria-pressed="${st.by===p.id}">${av(p.id)}${esc(p.name)}</button>`).join("")}</div></div>
+  <label class="f">Тэмдэглэл<textarea id="r-note" rows="2" maxlength="300" placeholder="${isH?"Өрөө, өглөөний цай, бүртгэлийн дүрэм":"Суудал, терминал, ачааны хэмжээ"}">${esc(st.note)}</textarea></label>
+  <label class="chk"><input type="checkbox" id="r-exp" ${st.exp?"checked":""}>Мөнгө хэсэгт зардал болгон нэмэх (бүгдэд хуваана)</label>
+  <p class="err" id="rerr" hidden></p>
+ </form>
+ <div class="dlg-f">${old?`<button class="btn danger" type="button" data-delres style="margin-right:auto">${ico("trash")}Устгах</button>`:""}<button class="btn" type="button" data-close>Болих</button><button class="btn acc" type="submit" form="rf">Хадгалах</button></div>`;
+ openDialog(body(),d=>{
+  const v=id=>{const el=document.getElementById(id);return el?el.value:undefined};
+  const keep=()=>{["name","addr","inD","inT","outD","outT","city","from","to","carrier","depD","depT","arrD","arrT","code","link","price","cur","note"].forEach(k=>{const x=v("r-"+k);if(x!==undefined)st[k]=x});const e=document.getElementById("r-exp");if(e)st.exp=e.checked};
+  d.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!d.contains(b))return;
+   if(b.dataset.rtype){keep();st.type=b.dataset.rtype;d.innerHTML=body();return}
+   if(b.dataset.rby){keep();st.by=st.by===b.dataset.rby?"":b.dataset.rby;d.innerHTML=body();return}
+   if(b.hasAttribute("data-delres")){if(b.dataset.armed){S.res[id]={deleted:true,ts:now()};save();dirty("res",id);const ex=S.expenses["r-"+id];if(ex&&!ex.deleted){S.expenses["r-"+id]={...ex,deleted:true,ts:now()};dirty("expenses","r-"+id)}save();closeDialog();renderAllData();toast("Захиалга устгагдлаа")}else{b.dataset.armed="1";b.innerHTML=ico("trash")+"Дахин дарж устгана"}}});
+  d.addEventListener("submit",e=>{e.preventDefault();keep();const err=$("#rerr");
+   let link=(st.link||"").trim();if(link&&!/^https?:\/\//i.test(link))link="https://"+link;
+   if(link&&!safeURL(link)){err.hidden=false;err.textContent="Холбоос буруу байна. https://-ээр эхэлсэн хаяг оруулна уу.";return}
+   if(isH&&!bound&&!(st.city||"").trim()&&!(st.name||"").trim()){err.hidden=false;err.textContent="Хот эсвэл буудлын нэрийг бичнэ үү.";return}
+   if(!isH&&!bound&&!((st.from||"").trim()&&(st.to||"").trim())){err.hidden=false;err.textContent="Хаанаас, хаашаа хоёуланг нь бичнэ үү.";return}
+   if(isH&&st.inD&&st.outD&&st.outD<=st.inD){err.hidden=false;err.textContent="Гарах өдөр орох өдрөөс хойш байх ёстой.";return}
+   const price=parseFloat(st.price);
+   const rec={type:isH?"hotel":st.type,code:(st.code||"").trim().toUpperCase(),link,price:price>0?price:null,cur:st.cur||"MNT",by:st.by||"",note:(st.note||"").trim(),created:old?.created||now(),ts:now()};
+   if(isH)Object.assign(rec,{stay:bound?si.key:"",city:bound?pname(si.key):(st.city||"").trim(),name:(st.name||"").trim(),addr:(st.addr||"").trim(),inD:st.inD,inT:st.inT,outD:st.outD,outT:st.outT});
+   else Object.assign(rec,{leg:bound?li.key:"",from:bound?pname(li.l.a):(st.from||"").trim(),to:bound?pname(li.l.b):(st.to||"").trim(),carrier:(st.carrier||"").trim(),depD:st.depD,depT:st.depT,arrD:st.arrD,arrT:st.arrT});
+   S.res[id]=rec;dirty("res",id);
+   const eid="r-"+id,ex=S.expenses[eid];
+   if(st.exp&&rec.price){const desc=isH?`Буудал: ${rec.name||rec.city}`:`${RT[rec.type][0]}: ${rec.from} → ${rec.to}`;
+    S.expenses[eid]={desc,amount:rec.price,cur:rec.cur,payer:rec.by||me||S.people[0].id,split:S.people.map(p=>p.id),cat:isH?"stay":"transport",date:(isH?rec.inD:rec.depD)||todayISO(),created:ex?.created||now(),ts:now()};dirty("expenses",eid)}
+   else if(ex&&!ex.deleted){S.expenses[eid]={...ex,deleted:true,ts:now()};dirty("expenses",eid)}
+   save();closeDialog();renderAllData();toast(SYNC.code?"Захиалга хадгалагдлаа. Бүгд харна":"Захиалга хадгалагдлаа")});
+  setTimeout(()=>{const f=d.querySelector(isH?"#r-name":"#r-carrier");if(f&&!old)f.focus()},60);
+ });
+}
+$("#v-book").addEventListener("click",e=>{
+ const s=e.target.closest("[data-bseg]");if(s){bookSeg=s.dataset.bseg;ls.set("sts:bookseg",bookSeg);renderBook();return}
+ const f=e.target.closest("[data-tf]");if(f){taskFilter=f.dataset.tf;renderBook();return}
+ const cp=e.target.closest("[data-copy]");if(cp){copyText(cp.dataset.copy);return}
+ const a=e.target.closest("[data-addleg]");if(a){resDialog({leg:a.dataset.addleg});return}
+ const b=e.target.closest("[data-addstay]");if(b){resDialog({stay:b.dataset.addstay});return}
+ const n=e.target.closest("[data-newres]");if(n){resDialog({kind:n.dataset.newres});return}
+ const ed=e.target.closest("[data-editres]");if(ed){resDialog({id:ed.dataset.editres});return}
  const o=e.target.closest("[data-towner]");if(o){const id=o.dataset.towner;const cur=S.tasks[id]?.owner;
   openDialog(`<div class="dlg-h"><h2>Хэн хариуцах вэ?</h2><button class="icon-btn" data-close aria-label="Хаах">${ico("x")}</button></div>
    <div class="dlg-b"><p style="margin:0">${esc(TASKS.find(t=>t.id===id).t)}</p><div class="pick">${S.people.map(p=>`<button type="button" data-pickowner="${p.id}" aria-pressed="${cur===p.id}">${av(p.id)}${esc(p.name)}</button>`).join("")}<button type="button" class="txt" data-pickowner="" aria-pressed="${!cur}">Хэн ч биш</button></div></div>`,
    d=>d.addEventListener("click",ev=>{const b=ev.target.closest("[data-pickowner]");if(!b)return;setTask(id,{owner:b.dataset.pickowner||null});closeDialog();renderBook();toast(b.dataset.pickowner?`${person(b.dataset.pickowner).name} хариуцлаа`:"Хариуцагчгүй болголоо")}))}});
+async function copyText(t){try{await navigator.clipboard.writeText(t);toast("Код хуулагдлаа: "+t)}catch(e){toast(t)}}
+// Bookings that touch a given day, for the day-by-day plan.
+function dayBookingsHTML(d){
+ const out=[];
+ legItems().filter(x=>x.l.d===d.date).forEach(x=>{const r=x.r,m=r?.type||x.l.m;
+  out.push(r?`<button type="button" data-openres="${esc(r.id)}">${ico(RT[m][1])}<span class="grow"><b>${esc(r.carrier||RT[m][0])}</b>${r.depT?`, ${esc(r.depT)}${r.arrT?`–${esc(r.arrT)}`:""}`:""}${r.code?`, код ${esc(r.code)}`:""}</span>${ico("chevr")}</button>`
+   :`<button type="button" class="no" data-addleg="${esc(x.key)}">${ico(RT[m][1])}<span class="grow">${RT[m][0]} ${esc(pname(x.l.a))} → ${esc(pname(x.l.b))}: захиалаагүй</span>${ico("plus")}</button>`)});
+ stayItems().forEach(x=>{const r=x.r;
+  if(r&&r.inD===d.date)out.push(`<button type="button" data-openres="${esc(r.id)}">${ico("hotel")}<span class="grow"><b>${esc(r.name||pname(x.key))}</b>, орох${r.inT?` ${esc(r.inT)}`:""}${r.code?`, код ${esc(r.code)}`:""}</span>${ico("chevr")}</button>`);
+  else if(r&&r.outD===d.date)out.push(`<button type="button" data-openres="${esc(r.id)}">${ico("hotel")}<span class="grow"><b>${esc(r.name||pname(x.key))}</b>, гарах${r.outT?` ${esc(r.outT)}`:""}</span>${ico("chevr")}</button>`);
+  else if(!r&&x.inD===d.date)out.push(`<button type="button" class="no" data-addstay="${esc(x.key)}">${ico("hotel")}<span class="grow">${esc(pname(x.key))}-ийн буудал: захиалаагүй</span>${ico("plus")}</button>`)});
+ resList().filter(r=>!r.leg&&!r.stay&&((r.type!=="hotel"&&r.depD===d.date)||(r.type==="hotel"&&r.inD===d.date))).forEach(r=>out.push(`<button type="button" data-openres="${esc(r.id)}">${ico(RT[r.type][1])}<span class="grow"><b>${esc(r.type==="hotel"?(r.name||r.city):(r.carrier||`${r.from} → ${r.to}`))}</b>${r.depT?`, ${esc(r.depT)}`:""}</span>${ico("chevr")}</button>`));
+ return out.length?`<div class="dres">${out.join("")}</div>`:""}
 
 /* ================= MONEY ================= */
 let moneyTab="spend";
@@ -1085,21 +1256,21 @@ function renderMoney(){
   if(!xs.length)h+=`<div class="card empty">${emo("🧾")}<div><b style="color:var(--ink)">Зардал алга</b><br>Хэн нэг нь бүгдэд хамаатай зүйлд төлбөл энд нэмээрэй. Үлдэгдэл, тооцоо өөрөө бодогдоно.</div><button class="btn sun" type="button" data-addx>${ico("plus")}Эхний зардлаа нэмэх</button></div>`;
   else{h+=`<div class="card xlist">`;
    xs.forEach(x=>{const sp=(x.split&&x.split.length)?x.split:S.people.map(p=>p.id);
-    h+=`<div class="xrow"><span class="cat" aria-hidden="true">${CATS[x.cat]?.e||"📦"}</span><div style="min-width:0"><div style="font-weight:600">${esc(x.desc)}</div>
+    h+=`<div class="xrow"><span class="cat" aria-hidden="true">${ico(CATS[x.cat]?.i||"other")}</span><div style="min-width:0"><div style="font-weight:600">${esc(x.desc)}</div>
      <div class="who">${av(x.payer,"sm")} ${esc(person(x.payer)?.name||"?")} төлсөн${x.date?`, ${dlabel(x.date)}`:""} <span class="split">${sp.map(id=>av(id,"sm")).join("")}</span></div></div>
      <div class="amt">${money(x.amount,x.cur)}${x.cur!=="MNT"?`<small>${fmt(toMNT(x.amount,x.cur))} ₮</small>`:""}<button class="btn ghost" type="button" data-editx="${x.id}" style="padding:2px 0;font-size:12px;color:var(--violet)">Засах</button></div></div>`});
    h+=`</div>`}
  }
  if(moneyTab==="settle"){
   const max=Math.max(1,...Object.values(net).map(Math.abs));const tr=settle(net);
-  h+=`<div class="grid-2"><div class="card pad"><h3 style="font-size:14.5px">⚖️ Үлдэгдэл</h3>${S.people.map(p=>{const v=net[p.id];const w=Math.abs(v)/max*50;
+  h+=`<div class="grid-2"><div class="card pad"><h3 style="font-size:14.5px">Үлдэгдэл</h3>${S.people.map(p=>{const v=net[p.id];const w=Math.abs(v)/max*50;
    return `<div class="balrow">${av(p.id)}<div class="balbar"><i style="${v>=0?`left:50%;width:${w}%;background:var(--ok)`:`right:50%;width:${w}%;background:var(--sun)`}"></i></div><span class="num" style="color:${v>0.5?"var(--ok)":v<-0.5?"var(--sun)":"var(--muted)"}">${v>0.5?"+":""}${fmt(v)}</span></div>`}).join("")}
    <p class="muted" style="font-size:12.5px;margin:6px 0 0">Ногоон: хувиасаа илүү төлсөн. Улаан: бүлэгт өртэй. Бүгд ₮-өөр.</p></div>
-   <div class="card pad"><h3 style="font-size:14.5px">🔁 Хамгийн цөөн шилжүүлэг</h3>${tr.length?tr.map(t=>`<div class="transfer">${av(t.from)}<b>${esc(person(t.from).name)}</b><span class="arrow">→</span>${av(t.to)}<b>${esc(person(t.to).name)}</b><span class="amt">${fmt(t.amt)} ₮</span></div>`).join(""):`<div class="empty">${emo("🤝")}Бүгд тэнцүү.</div>`}</div></div>`;
+   <div class="card pad"><h3 style="font-size:14.5px">Хамгийн цөөн шилжүүлэг</h3>${tr.length?tr.map(t=>`<div class="transfer">${av(t.from)}<b>${esc(person(t.from).name)}</b><span class="arrow">→</span>${av(t.to)}<b>${esc(person(t.to).name)}</b><span class="amt">${fmt(t.amt)} ₮</span></div>`).join(""):`<div class="empty">${emo("🤝")}Бүгд тэнцүү.</div>`}</div></div>`;
  }
  if(moneyTab==="budget"){
   const a=S.actuals;const actTot=EST.reduce((s,e)=>s+(+a[e.id]?.usd||0),0);const max=Math.max(...EST.map(e=>Math.max(e.hi,+a[e.id]?.usd||0)))*1.1;
-  h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h3 style="font-size:14.5px">🎯 Нэг хүнд, ам.доллараар</h3><span class="muted" style="font-size:12px">Цэнхэр: тооцоолсон хүрээ, ягаан: бодит төлсөн</span></div>
+  h+=`<div class="card pad"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h3 style="font-size:14.5px">Нэг хүнд, ам.доллараар</h3><span class="muted" style="font-size:12px">Цэнхэр: тооцоолсон хүрээ, ягаан: бодит төлсөн</span></div>
   ${EST.map(e=>{const act=+a[e.id]?.usd||0;return `<div class="est"><div class="est-top"><span>${esc(e.n)}</span><span style="display:flex;gap:8px;align-items:center"><span class="muted num" style="font-size:12.5px">$${e.lo}–${e.hi}</span><input type="number" inputmode="decimal" placeholder="Бодит" value="${act||""}" data-act="${e.id}" aria-label="${esc(e.n)}: бодит зардал"></span></div>
    <div class="range"><div class="track"></div><div class="band" style="left:${e.lo/max*100}%;width:${(e.hi-e.lo)/max*100}%"></div>${act?`<div class="act" style="left:calc(${act/max*100}% - 2px)" title="$${act}"></div>`:""}</div></div>`}).join("")}
   <div class="est" style="font-weight:700"><div class="est-top"><span>Нэг хүнд нийт</span><span class="num">$${fmt(estLo)}–${fmt(estHi)}${actTot?`, бодит $${fmt(actTot)}`:""}</span></div>
@@ -1107,7 +1278,7 @@ function renderMoney(){
   <p class="muted" style="font-size:12px;margin:8px 0 0">Дунд түвшний үнэ, нэг өрөөнд 2 хүн, 2026 оны 11-р сард шалгасан. Үнийн санал биш: захиалахдаа бодит үнээ бичээрэй.</p></div>`;
  }
  if(moneyTab==="conv"){
-  h+=`<div class="card pad" style="max-width:520px"><h3 style="font-size:14.5px;margin-bottom:10px">💱 Валют хөрвүүлэгч</h3><div class="conv"><input type="number" inputmode="decimal" id="cv-a" value="${conv.a}" aria-label="Дүн"><select id="cv-c" aria-label="Валют">${CURS.map(c=>`<option ${c===conv.c?"selected":""}>${c}</option>`).join("")}</select></div>
+  h+=`<div class="card pad" style="max-width:520px"><h3 style="font-size:14.5px;margin-bottom:10px">Валют хөрвүүлэгч</h3><div class="conv"><input type="number" inputmode="decimal" id="cv-a" value="${conv.a}" aria-label="Дүн"><select id="cv-c" aria-label="Валют">${CURS.map(c=>`<option ${c===conv.c?"selected":""}>${c}</option>`).join("")}</select></div>
    <div class="conv-out" id="cv-out"></div><p class="muted" style="font-size:12px;margin:10px 0 0">Ханш: 1 USD = ${fmt(S.rates.USD)} ₮, 1 CNY = ${fmt(S.rates.CNY)} ₮, 1 THB = ${fmt(S.rates.THB)} ₮. Тохиргооноос өөрчилнө.</p></div>`;
  }
  $("#v-money").innerHTML=h;if(moneyTab==="conv")renderConv();
@@ -1128,7 +1299,7 @@ function expenseDialog(id){
   <div style="display:flex;align-items:baseline;gap:8px;border-bottom:2px solid var(--line);padding-bottom:4px"><span style="font-family:var(--f-display);font-size:28px;font-weight:700;color:var(--muted)">${SYM[st.cur]}</span><input class="amount-big" id="xa" type="number" inputmode="decimal" step="any" min="0" placeholder="0" value="${st.amount}" aria-label="Дүн" required></div>
   <div class="pick" role="group" aria-label="Валют">${CURS.map(c=>`<button type="button" class="txt" data-cur="${c}" aria-pressed="${c===st.cur}">${c}</button>`).join("")}</div>
   <label class="f">Юу байсан бэ?<input type="text" id="xd" value="${esc(st.desc)}" placeholder="ж.нь: Хөх хотын нисэх буудал руу такси" required maxlength="80"></label>
-  <div class="pick" role="group" aria-label="Ангилал">${Object.entries(CATS).map(([k,c])=>`<button type="button" class="txt" data-cat="${k}" aria-pressed="${k===st.cat}">${c.e} ${c.n}</button>`).join("")}</div>
+  <div class="pick" role="group" aria-label="Ангилал">${Object.entries(CATS).map(([k,c])=>`<button type="button" class="txt" data-cat="${k}" aria-pressed="${k===st.cat}">${ico(c.i)}${c.n}</button>`).join("")}</div>
   <div><div class="flabel" style="margin-bottom:6px">Хэн төлсөн бэ?</div><div class="pick" role="group" aria-label="Төлсөн">${S.people.map(p=>`<button type="button" data-payer="${p.id}" aria-pressed="${p.id===st.payer}">${av(p.id)}${esc(p.name)}</button>`).join("")}</div></div>
   <div><div class="flabel" style="margin-bottom:6px;display:flex;justify-content:space-between">Хэнд хуваах <span class="muted" id="xeach" style="font-weight:500">${each()}</span></div><div class="pick" role="group" aria-label="Хуваах">${S.people.map(p=>`<button type="button" data-split="${p.id}" aria-pressed="${st.split.includes(p.id)}">${av(p.id)}${esc(p.name)}</button>`).join("")}</div></div>
   <label class="f">Огноо<input type="date" id="xdate" value="${st.date}" min="2026-11-01" max="2027-01-31"></label>
@@ -1194,9 +1365,9 @@ function renderInfo(){
   <div class="card pad"><h3>${emo("🔌")}Залгуур</h3><dl class="kv"><dt>Монгол</dt><dd>C, E төрөл, 230 V</dd><dt>Хятад</dt><dd>A, C, I төрөл, 220 V</dd><dt>Тайланд</dt><dd>A, B, C, F, O төрөл, 220 V</dd></dl><p class="muted" style="font-size:12.5px;margin:8px 0 0">Хүн бүрт нэг олон төрлийн адаптер хангалттай.</p></div>
   <div class="card pad"><h3>${emo("🆘")}Яаралтай дугаар</h3><dl class="kv"><dt>Хятад</dt><dd><b>110</b> цагдаа, <b>120</b> түргэн тусламж, <b>119</b> гал</dd><dt>Тайланд</dt><dd><b>1155</b> жуулчны цагдаа (англиар), <b>1669</b> түргэн тусламж, <b>191</b> цагдаа</dd></dl></div>
   <div class="card pad"><h3>${emo("💬")}Хэрэгтэй үгс</h3>
-   <div class="flabel" style="margin:8px 0 2px">🇨🇳 Хятадаар</div>
+   <div class="flabel" style="margin:8px 0 2px">Хятадаар</div>
    ${[["你好","nǐ hǎo","Сайн байна уу"],["谢谢","xièxie","Баярлалаа"],["多少钱？","duōshao qián?","Хэд вэ?"],["不要辣","bú yào là","Халуун ногоогүй"],["买单","mǎidān","Тооцоо өгөөч"]].map(([a,b,c])=>`<div class="phr"><span class="nat">${a}</span><span class="en">${c}</span><span class="rom">${b}</span></div>`).join("")}
-   <div class="flabel" style="margin:12px 0 2px">🇹🇭 Тайгаар (эрэгтэй хүн khrap, эмэгтэй хүн kha гэж төгсгөнө)</div>
+   <div class="flabel" style="margin:12px 0 2px">Тайгаар (эрэгтэй хүн khrap, эмэгтэй хүн kha гэж төгсгөнө)</div>
    ${[["สวัสดี","sawasdee khrap / kha","Сайн байна уу"],["ขอบคุณ","khop khun khrap / kha","Баярлалаа"],["เท่าไหร่","tao rai?","Хэд вэ?"],["ไม่เผ็ด","mai phet","Халуун ногоогүй"],["เช็คบิล","check bin","Тооцоо өгөөч"]].map(([a,b,c])=>`<div class="phr"><span class="nat">${a}</span><span class="en">${c}</span><span class="rom">${b}</span></div>`).join("")}
   </div>
  </div>
@@ -1213,7 +1384,7 @@ function closeDialog(){if(dlg.open)dlg.close()}
 dlg.addEventListener("click",e=>{if(e.target===dlg||e.target.closest("[data-close]"))closeDialog()});
 
 /* ================= WHO AM I ================= */
-function whoDialog(first){openDialog(`<div class="dlg-h"><h2>${first?"👋 Тавтай морил! Та хэн бэ?":"Хүн солих"}</h2>${first?"":`<button class="icon-btn" data-close aria-label="Хаах">${ico("x")}</button>`}</div>
+function whoDialog(first){openDialog(`<div class="dlg-h"><h2>${first?"Тавтай морил! Та хэн бэ?":"Хүн солих"}</h2>${first?"":`<button class="icon-btn" data-close aria-label="Хаах">${ico("x")}</button>`}</div>
  <div class="dlg-b"><p style="margin:0" class="muted">Үүгээр анхдагч төлөгч, таны ачааны жагсаалт, үлдэгдэл тохирно. Зөвхөн энэ утсанд хадгалагдана.</p>
  <div class="whoami">${S.people.map(p=>`<button type="button" data-iam="${p.id}">${av(p.id,"lg")}${esc(p.name)}</button>`).join("")}</div>
  ${S.people.every(p=>/^(Найз|Friend) \d$/.test(p.name))?`<p class="muted" style="margin:0;font-size:12.5px">Нэрс «Найз 1–4» хэвээр үү? Тохиргооноос солиорой.</p>`:""}</div>
@@ -1231,19 +1402,19 @@ function mergeState(A,B){
  if(!B||B.v!==1)throw new Error("bad");const out=JSON.parse(JSON.stringify(A));
  out.people=A.people.map(p=>newer(p,(B.people||[]).find(q=>q.id===p.id)));
  out.rates=newer(A.rates,B.rates);
- ["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes"].forEach(k=>{const a=A[k]||{},b=B[k]||{};out[k]={};new Set([...Object.keys(a),...Object.keys(b)]).forEach(id=>out[k][id]=newer(a[id],b[id]))});
+ ["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res"].forEach(k=>{const a=A[k]||{},b=B[k]||{};out[k]={};new Set([...Object.keys(a),...Object.keys(b)]).forEach(id=>out[k][id]=newer(a[id],b[id]))});
  return out}
-function diffCount(A,B){let n=0;["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes"].forEach(k=>{const a=A[k]||{},b=B[k]||{};Object.keys(b).forEach(id=>{if(!a[id]||(b[id].ts||0)>(a[id].ts||0))n++})});
+function diffCount(A,B){let n=0;["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res"].forEach(k=>{const a=A[k]||{},b=B[k]||{};Object.keys(b).forEach(id=>{if(!a[id]||(b[id].ts||0)>(a[id].ts||0))n++})});
  (B.people||[]).forEach(q=>{const p=A.people.find(x=>x.id===q.id);if(p&&(q.ts||0)>(p.ts||0))n++});if((B.rates?.ts||0)>(A.rates?.ts||0))n++;return n}
 function applyIncoming(B,src){const n=diffCount(S,B);if(!n){toast("Аль хэдийн шинэчлэгдсэн байна");return}S=mergeState(S,B);save();if(SYNC.code)markAll();renderAllData();toast(`${n} өөрчлөлт нэгтгэлээ`)}
 
 function settingsDialog(){
- const body=()=>`<div class="dlg-h"><h2>⚙️ Тохиргоо</h2><button class="icon-btn" type="button" data-close aria-label="Хаах">${ico("x")}</button></div>
+ const body=()=>`<div class="dlg-h"><h2>Тохиргоо</h2><button class="icon-btn" type="button" data-close aria-label="Хаах">${ico("x")}</button></div>
  <div class="dlg-b">
-  <section class="sect"><h3 style="font-size:14.5px;display:flex;justify-content:space-between;align-items:center;gap:8px">🔄 Шууд синк ${syncPill()}</h3>
+  <section class="sect"><h3 style="font-size:14.5px;display:flex;justify-content:space-between;align-items:center;gap:8px">Шууд синк ${syncPill()}</h3>
   ${SYNC.code?`<p class="muted" style="margin:0;font-size:13.5px">Энэ утас бүлгийн аялалд холбогдсон. Өөрчлөлт бүр үүлэнд хадгалагдаж, хэдхэн секундэд бүх хүний утсанд гарна. Офлайн үеийн өөрчлөлт утсанд хүлээгдэж, сүлжээнд орохоор синк хийгдэнэ.</p>
    ${SYNC.state==="error"?`<p class="err" style="font-size:13.5px">${esc(SYNC.msg)}</p>`:""}
-   <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sun" type="button" data-invite>${ico("share")}Найзуудаа урих</button><button class="btn" type="button" data-copyinvite>Холбоос хуулах</button><button class="btn" type="button" data-syncnow>Одоо синк хийх</button></div>
+   <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn acc" type="button" data-invite>${ico("share")}Найзуудаа урих</button><button class="btn" type="button" data-copyinvite>Холбоос хуулах</button><button class="btn" type="button" data-syncnow>Одоо синк хийх</button></div>
    <p class="muted" style="margin:0;font-size:12.5px">Урилгын холбоостой хэн ч энэ аяллыг харж, засах боломжтой. Зөвхөн бүлэгтээ илгээгээрэй.</p>
    <details><summary class="muted" style="font-size:13px;cursor:pointer">Холболтын мэдээлэл</summary><dl class="kv"><dt>Төсөл</dt><dd style="font-size:12px;word-break:break-all">${esc(SYNC.url)}</dd><dt>Аяллын код</dt><dd style="font-size:12px">${esc(SYNC.code.slice(0,4))}••••••••••••</dd><dt>Илгээхээр хүлээгдэж буй</dt><dd>${outbox.size} өөрчлөлт</dd></dl>
     <button class="btn danger" type="button" data-disconnect style="margin-top:10px">Энэ утсыг салгах</button></details>`
@@ -1251,18 +1422,18 @@ function settingsDialog(){
    <label class="f">Supabase төслийн URL<input type="text" id="sbUrl" placeholder="https://abcdefgh.supabase.co" value="${esc(SYNC.url)}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
    <label class="f">Нийтийн API түлхүүр (anon эсвэл publishable)<input type="text" id="sbKey" placeholder="eyJ… эсвэл sb_publishable_…" value="${esc(SYNC.key)}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
    ${SYNC.msg&&SYNC.state==="error"?`<p class="err" style="font-size:13.5px">${esc(SYNC.msg)}</p>`:""}
-   <div><button class="btn sun" type="button" data-create>✨ Бүлгийн аяллыг үүсгэх</button></div>
-   <label class="f">Урилгын холбоос байгаа юу? Энд буулгана уу<textarea id="pasteLink" class="code" placeholder="https://…#join=…" style="min-height:60px"></textarea></label>
+   <div><button class="btn acc" type="button" data-create>Бүлгийн аяллыг үүсгэх</button></div>
+   <label class="f">Урилгын холбоос байгаа юу? Энд буулгана уу<textarea id="pasteLink" class="code-in" placeholder="https://…#join=…" style="min-height:60px"></textarea></label>
    <div><button class="btn" type="button" data-joinpaste>Аялалд нэгдэх</button></div>`}
   </section>
-  <section class="sect"><h3 style="font-size:14.5px">👥 Аялагчид</h3>
+  <section class="sect"><h3 style="font-size:14.5px">Аялагчид</h3>
    <div class="people-edit">${S.people.map((p,i)=>`<div class="r">${av(p.id)}<input type="text" value="${esc(p.name)}" data-pname="${p.id}" maxlength="20" aria-label="${i+1}-р хүний нэр"><div class="swatches">${COLORS.slice(0,6).map(c=>`<button type="button" style="background:${c}" data-pcol="${p.id}" data-c="${c}" aria-pressed="${p.color===c}" aria-label="Өнгө"></button>`).join("")}</div></div>`).join("")}</div>
   </section>
-  <section class="sect"><h3 style="font-size:14.5px">💱 Валютын ханш (1 нэгж = ₮)</h3>
+  <section class="sect"><h3 style="font-size:14.5px">Валютын ханш (1 нэгж = ₮)</h3>
    <div class="row2" style="grid-template-columns:repeat(3,1fr)">${["USD","CNY","THB"].map(c=>`<label class="f">${c}<input type="number" step="any" min="0" value="${S.rates[c]}" data-rate="${c}"></label>`).join("")}</div>
    <p class="muted" style="margin:0;font-size:12.5px">Анхдагч ханш нь 2026 оны 11-р сарын эхний ойролцоо утга. Явахаасаа өмнө банкны ханшийг шалгаарай.</p>
   </section>
-  <section class="sect"><h3 style="font-size:14.5px">💾 Нөөц</h3>
+  <section class="sect"><h3 style="font-size:14.5px">Нөөц</h3>
    <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" type="button" data-export>${ico("down")}Нөөц татах</button><label class="btn" style="cursor:pointer">${ico("up")}Файлаас сэргээх<input type="file" accept="application/json,.json" data-import class="sr"></label>${SYNC.code?"":`<button class="btn" type="button" data-share>Хуулбарын холбоос илгээх</button>`}<button class="btn danger" type="button" data-reset>Энэ утсыг цэвэрлэх</button></div>
   </section>
  </div>`;
@@ -1308,13 +1479,13 @@ const SYNC={url:ls.get("sts:sb:url")||CFG.supabaseUrl||"",key:ls.get("sts:sb:key
  client:null,ch:null,state:"off",msg:"",pushTimer:null,pulling:null,pushing:false,again:false};
 let outbox=(()=>{try{return new Set(JSON.parse(ls.get("sts:outbox")||"[]"))}catch(e){return new Set()}})();
 function saveOutbox(){ls.set("sts:outbox",JSON.stringify([...outbox]))}
-const KINDS=["people","rates","tasks","expenses","actuals","pack","extraPack","days","places","sights","votes"];
+const KINDS=["people","rates","tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res"];
 function getItem(kind,key){if(kind==="people")return S.people.find(p=>p.id===key);if(kind==="rates")return S.rates;return(S[kind]||{})[key]}
 function setItem(kind,key,data){if(kind==="people"){const i=S.people.findIndex(p=>p.id===key);if(i>=0)S.people[i]=data;return}
  if(kind==="rates"){S.rates=data;return}if(!S[kind])S[kind]={};S[kind][key]=data}
 function dirty(kind,key){if(!SYNC.code)return;outbox.add(kind+"|"+key);saveOutbox();schedulePush()}
 function markAll(){S.people.forEach(p=>outbox.add("people|"+p.id));outbox.add("rates|main");
- ["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes"].forEach(k=>Object.keys(S[k]||{}).forEach(id=>outbox.add(k+"|"+id)));saveOutbox();schedulePush()}
+ ["tasks","expenses","actuals","pack","extraPack","days","places","sights","votes","res"].forEach(k=>Object.keys(S[k]||{}).forEach(id=>outbox.add(k+"|"+id)));saveOutbox();schedulePush()}
 const syncLabel=()=>({off:"Синкгүй",syncing:"Синк…",live:"Шууд",offline:"Офлайн",error:"Синкийн алдаа"})[SYNC.state];
 const syncPill=()=>`<span class="sync ${SYNC.state}"><i></i><span>${syncLabel()}</span></span>`;
 function setSync(state,msg=""){SYNC.state=state;SYNC.msg=msg;const b=$("#syncBtn");
@@ -1390,7 +1561,7 @@ function checkJoin(){const inv=parseInvite(location.hash);if(!location.hash.star
  history.replaceState(null,"",location.pathname+"#"+view);
  if(!inv){$("#importBanner").innerHTML=`<div class="banner"><p>Энэ урилгын холбоос дутуу байна. Дахин аваад холбоосыг бүтнээр нь нээгээрэй.</p></div>`;return}
  if(SYNC.code===inv.c){if(!me)setTimeout(()=>whoDialog(true),400);return}
- $("#importBanner").innerHTML=`<div class="banner">${emo("💌")}<p><b>Таныг бүлгийн аялалд урьжээ.</b> Нэгдвэл бүх хүний захиалга, зардал, ачааг шууд харна.</p><button class="btn sun" type="button" id="joinYes">Аялалд нэгдэх</button><button class="btn" type="button" id="joinNo">Одоо биш</button></div>`;
+ $("#importBanner").innerHTML=`<div class="banner">${ico("share")}<p><b>Таныг бүлгийн аялалд урьжээ.</b> Нэгдвэл бүх хүний захиалга, зардал, ачааг шууд харна.</p><button class="btn acc" type="button" id="joinYes">Аялалд нэгдэх</button><button class="btn" type="button" id="joinNo">Одоо биш</button></div>`;
  $("#joinYes").onclick=async e=>{e.target.disabled=true;e.target.textContent="Нэгдэж байна…";await joinTrip(inv);$("#importBanner").innerHTML=""};
  $("#joinNo").onclick=()=>{$("#importBanner").innerHTML="";if(!me)whoDialog(true)}}
 $("#syncBtn").onclick=settingsDialog;
