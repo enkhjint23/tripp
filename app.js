@@ -46,7 +46,8 @@ const ICONS = {
  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
  refresh:'<path d="M20 11a8 8 0 0 0-14-4L4 9M4 4v5h5M4 13a8 8 0 0 0 14 4l2-2M20 20v-5h-5"/>',
- door:'<path d="M14 3H5v18h9M10 12h11M17 8l4 4-4 4"/>'
+ door:'<path d="M14 3H5v18h9M10 12h11M17 8l4 4-4 4"/>',
+ gift:'<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h14v-8M12 8v13M12 8c-2-4-7-4-6-1 .5 1.5 4 1.5 6 1zM12 8c2-4 7-4 6-1-.5 1.5-4 1.5-6 1z"/>'
 };
 const ico = (n, cls = "") => `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ICONS.spark}</svg>`;
 
@@ -121,12 +122,18 @@ const votesFor = id => S.people.filter(p => S.votes && S.votes[id + "." + p.id]?
 const mapsURL = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
 function tripPhase(t = now()) { if (t < T_DEPART.getTime()) return "before"; if (t < T_HOME.getTime()) return "during"; return "after"; }
 function defaultDay() { const ds = dayList(), t = todayISO(); if (ds.some(d => d.date === t)) return t; return t < ds[0].date ? ds[0].date : ds[ds.length-1].date; }
-const stepKey = (date, i) => "s:" + date + ":" + i;
-const stepDone = (date, i) => !!S.tasks[stepKey(date, i)]?.done;
+const stepKey = (date, i, t = "main") => "s:" + date + ":" + (t !== "main" ? t + ":" : "") + i;
+const stepDone = (date, i, t = "main") => !!S.tasks[stepKey(date, i, t)]?.done;
+/* Split days (e.g. City or Disney on 27 Dec): each person picks a track, saved as votes["trk.<date>.<person>"] */
+const trackKey = (date, pid) => `trk.${date}.${pid}`;
+const myTrack = (d, pid = me) => d.alt && pid && S.votes[trackKey(d.date, pid)]?.v === d.alt.id ? d.alt.id : "main";
+const viewTrack = {};
+const curTrack = d => d.alt ? (viewTrack[d.date] || myTrack(d)) : "main";
+const trackSteps = (d, t) => t !== "main" && d.alt ? (Array.isArray(d.alt.steps) ? d.alt.steps.filter(Array.isArray) : []) : stepsOf(d);
 const parseHM = s => { const m = String(s || "").match(/(\d{1,2}):(\d{2})/); return m ? (+m[1]) * 60 + (+m[2]) : null; };
 
 /* Bookings */
-const RT = {plane:["Нислэг","plane"], train:["Галт тэрэг","train"], bus:["Автобус","bus"], boat:["Завь","boat"], hotel:["Буудал","bed"]};
+const RT = {plane:["Нислэг","plane"], train:["Галт тэрэг","train"], bus:["Автобус","bus"], boat:["Завь","boat"], hotel:["Буудал","bed"], doc:["Баримт","doc"]};
 const resList = () => Object.entries(S.res || {}).filter(([, r]) => r && typeof r === "object" && !r.deleted && RT[r.type]).map(([id, r]) => ({id, ...r}));
 const legKey = l => `${l.d}|${l.a}|${l.b}`;
 function legItems() { const rs = resList(); return legs().map(l => ({l, key: legKey(l), r: rs.find(r => r.type !== "hotel" && r.leg === legKey(l))})); }
@@ -195,7 +202,7 @@ const openTasks = () => TASKS.filter(t => t.p && !S.tasks[t.id]?.done).length;
 function render() { renderTop(); renderNav(); const v = $("#view"); v.className = "view"; void v.offsetWidth; v.innerHTML = ({today: todayHTML, route: routeHTML, money: moneyHTML, crew: crewHTML})[view](); afterRender(); }
 function rerender() { renderTop(); renderNav(); const y = scrollY; $("#view").innerHTML = ({today: todayHTML, route: routeHTML, money: moneyHTML, crew: crewHTML})[view](); afterRender(); scrollTo({top: y}); }
 function afterRender() {
- renderCount();
+ renderCount(); hydrateFiles($("#view"));
  const d = $("#days [aria-pressed=true]"); if (d) d.scrollIntoView({inline: "center", block: "nearest"});
  if (view === "crew" && crewSeg === "crew") refreshNotif();
 }
@@ -204,7 +211,8 @@ function afterRender() {
 const syncLabel = () => ({off:"Синкгүй", syncing:"Синк…", live:"Шууд", offline:"Офлайн", error:"Алдаа"})[SYNC.state];
 function renderTop() {
  const m = person(me);
- $("#topR").innerHTML = `<button class="pill ${SYNC.state}" type="button" data-act="sync" title="${esc(SYNC.msg || syncLabel())}"><i></i>${syncLabel()}</button>
+ const nf = walletItems().reduce((a, x) => a + x.r.files.length, 0);
+ $("#topR").innerHTML = `<button class="iconbtn wallet-btn" type="button" data-act="wallet" aria-label="Тасалбарууд">${ico("ticket","sm")}${nf ? `<span class="badge">${nf}</span>` : ""}</button><button class="pill ${SYNC.state}" type="button" data-act="sync" title="${esc(SYNC.msg || syncLabel())}"><i></i>${syncLabel()}</button>
  <button class="me" type="button" data-act="who">${m ? av(me) + `<span>${esc(m.name)}</span>` : `<span class="av nobody">?</span><span>Та хэн бэ?</span>`}</button>`;
 }
 
@@ -251,8 +259,8 @@ function dayStrip(sel) {
   return `<button class="${cls}" type="button" data-day="${d.date}" aria-pressed="${d.date === sel}"><span class="dow">${dow(d.date)}</span><span class="num">${dnum(d.date)}</span><span class="city">${esc(city)}</span></button>`; }).join("")}</div>`;
 }
 /* The day's items: steps, with matching bookings shown on them */
-function dayItems(d) {
- const steps = stepsOf(d), mv = movesOf(d), rs = resList(), used = new Set();
+function dayItems(d, t = "main") {
+ const steps = trackSteps(d, t), mv = t === "main" ? movesOf(d) : [], rs = resList(), used = new Set();
  const items = steps.map((s, i) => ({i, kind: s[0], time: s[1] || "", text: s[2] || ""}));
  mv.forEach(([a, b, m, dep]) => {
   const key = `${d.date}|${a}|${b}`, r = rs.find(x => x.type !== "hotel" && x.leg === key);
@@ -260,16 +268,16 @@ function dayItems(d) {
   if (it) { used.add(it.i); it.leg = {a, b, m, key}; it.res = r; }
  });
  const firstNight = d.stay && dayList().find(x => x.stay === d.stay)?.date === d.date;
- if (firstNight) { const it = items.find(x => x.kind === "hotel"); if (it) { it.stay = d.stay; it.res = rs.find(x => x.type === "hotel" && x.stay === d.stay); } }
+ if (firstNight && t === "main") { const it = items.find(x => x.kind === "hotel"); if (it) { it.stay = d.stay; it.res = rs.find(x => x.type === "hotel" && x.stay === d.stay); } }
  return items;
 }
 function todayHTML() {
  const ds = dayList(); if (!selDay || !ds.some(d => d.date === selDay)) selDay = defaultDay();
  const d = ds.find(x => x.date === selDay), t = todayISO(), isToday = d.date === t;
- const items = dayItems(d);
+ const tr = curTrack(d), alt = tr !== "main" ? d.alt : null, items = dayItems(d, tr);
  let nowI = -1;
- if (isToday) { const mins = new Date().getHours() * 60 + new Date().getMinutes(); items.forEach((it, k) => { const m = parseHM(it.time); if (m != null && m <= mins) nowI = k; }); if (nowI < 0) nowI = items.findIndex(it => !stepDone(d.date, it.i)); }
- const doneN = items.filter(it => stepDone(d.date, it.i)).length;
+ if (isToday) { const mins = new Date().getHours() * 60 + new Date().getMinutes(); items.forEach((it, k) => { const m = parseHM(it.time); if (m != null && m <= mins) nowI = k; }); if (nowI < 0) nowI = items.findIndex(it => !stepDone(d.date, it.i, tr)); }
+ const doneN = items.filter(it => stepDone(d.date, it.i, tr)).length;
  const litTo = isToday ? Math.max(nowI, doneN - 1) : d.date < t ? items.length - 1 : doneN - 1;
  const lit = items.length > 1 ? Math.max(0, litTo) / (items.length - 1) * 100 : 0;
  const tz = tzText(d), city = endCity(d) || d.stay, p = place(city);
@@ -279,14 +287,16 @@ function todayHTML() {
  ${banner()}
  ${dayStrip(selDay)}
  ${heroHTML()}
+ ${santaHTML(false)}
  ${notifPrompt()}
  <div class="section" style="margin-top:var(--space-6)"><div class="dayhead grow"><div class="grow">
-  <h1 class="h1" style="margin:0">${esc(d.title || routeText(d))}</h1>
+  <h1 class="h1" style="margin:0">${esc(alt ? alt.title || alt.name : d.title || routeText(d))}</h1>
   <div class="meta"><span>Өдөр ${ds.indexOf(d) + 1}/${ds.length}</span>${routeText(d) ? `<span>${esc(routeText(d))}</span>` : ""}${tz ? `<span>${tz}</span>` : ""}${p && p.hi != null ? `<span>${sg(p.lo)}° … ${sg(p.hi)}°</span>` : ""}</div>
  </div><button class="iconbtn" type="button" data-act="editday" aria-label="Өдрийг засах">${ico("edit","sm")}</button></div></div>
- ${d.tip ? `<div class="tip">${ico("spark")}<span>${esc(d.tip)}</span></div>` : ""}
+ ${trackHTML(d, tr)}
+ ${(alt ? alt.tip : d.tip) ? `<div class="tip">${ico("spark")}<span>${esc(alt ? alt.tip : d.tip)}</span></div>` : ""}
  ${items.length ? `<div class="tl" style="--lit:${lit}%"><span class="tl-lit"></span>${items.map((it, k) => {
-  const done = stepDone(d.date, it.i), c = STEP_CAT[it.kind] || "activity";
+  const done = stepDone(d.date, it.i, tr), c = STEP_CAT[it.kind] || "activity";
   const cls = ["tl-item", "c-" + c, done ? "done" : "", k <= litTo ? "lit" : "", isToday && k === nowI && !done ? "now" : ""].join(" ");
   let extra = "";
   if (it.leg) extra = it.res ? `<span class="booked">${ico("check","sm")} Захиалсан${it.res.code ? ` · <span class="mono">${esc(it.res.code)}</span>` : ""}</span>` : `<span class="booked no">Захиалаагүй</span>`;
@@ -294,11 +304,19 @@ function todayHTML() {
   return `<div class="${cls}"><span class="tl-time">${esc(it.time)}</span><span class="tl-node"></span>
    <div class="stop"><div class="tile">${ico(STEP[it.kind]?.[1] || "spark")}</div>
    <button class="stop-body" type="button" style="background:none;border:0;padding:0;text-align:left" data-step="${it.i}" ${it.leg ? `data-leg="${esc(it.leg.key)}"` : ""} ${it.stay ? `data-stay="${esc(it.stay)}"` : ""}>${isToday && k === nowI && !done ? '<span class="live">ОДОО</span>' : ""}<div class="stop-title">${esc(it.text)}</div>${extra}</button>
+   ${it.res?.files?.length ? `<button class="tkt" type="button" data-showres="${it.res.id}" aria-label="Тасалбар харах">${ico("ticket")}</button>` : ""}
    <button class="check" type="button" data-check="${it.i}" aria-label="${done ? "Болоогүй болгох" : "Болсон"}" aria-pressed="${done}">${ico("check")}</button></div></div>`; }).join("")}</div>`
   : `<div class="card empty" style="margin-top:var(--space-4)"><b>Энэ өдөр хоосон байна</b>Юм нэмэх үү?</div>`}
  <div class="row" style="margin-top:var(--space-3)"><button class="btn ghost sm" type="button" data-act="addstep">${ico("plus","sm")} Алхам нэмэх</button></div>
  ${sights.length ? `<div class="section"><h2 class="h2">Энэ өдөр үзэх</h2><button class="link" data-go="route" data-rseg="see">Бүгд</button></div><div class="stack">${sights.map(sightCard).join("")}</div>` : ""}
  `;
+}
+function trackHTML(d, t) {
+ if (!d.alt) return "";
+ const tracks = [["main", d.mainName || "Үндсэн"], [d.alt.id, d.alt.name]];
+ return `<div class="tracks">${tracks.map(([id, n]) => { const who = S.people.filter(p => myTrack(d, p.id) === id);
+  return `<button class="track c-${id === "main" ? "cyan" : "magenta"}" type="button" data-track="${id}" aria-pressed="${id === t}"><span class="tn">${esc(n)}</span><span class="avs">${who.map(p => av(p.id, "sm")).join("") || '<span class="sub">Хэн ч алга</span>'}</span></button>`; }).join("")}</div>
+ ${me ? (myTrack(d) === t ? `<div class="sub" style="margin-top:8px;text-align:center">${ico("check","sm")} Та энэ төлөвлөгөөгөөр явна</div>` : `<button class="btn sm primary block" type="button" data-jointrack="${t}" style="margin-top:10px">Би энэ төлөвлөгөөгөөр явна</button>`) : ""}`;
 }
 function crewAvs() { const live = !!SYNC.code; return `<div class="avs">${S.people.map(p => av(p.id, live ? (PRES.on.has(p.id) ? "on" : !S.seen?.[p.id] ? "off" : "") : "")).join("")}</div>`; }
 
@@ -356,12 +374,18 @@ function citiesHTML() {
   const sub = c.nights.length ? `${ddot(c.nights[0])}–${ddot(addDays(c.nights.at(-1), 1))} · ${c.nights.length} шөнө` : c.dates.length ? `Дамжина · ${ddot(c.dates.at(-1))}` : "";
   return `<button class="cityrow c-${["cyan","tangerine","magenta","lime","lilac","gold"][i % 6]}" type="button" data-city="${c.k}"><span class="dot"></span><div class="grow"><div class="n">${esc(pname(c.k))}</div><div class="s">${sub} · ${tzs(p.tz)}</div></div>${p.hi != null ? `<span class="temp">${sg(p.hi)}°<br><span class="muted">${sg(p.lo)}°</span></span>` : ""}</button>`; }).join("")}</div>`;
 }
+function photoHTML(src, cls = "photo") {
+ if (!src) return "";
+ if (src.file) return `<div class="${cls}"><img data-file="${esc(src.file)}" alt=""></div>`;
+ return `<div class="${cls}"><img src="${esc(src.url)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"><span class="credit">Wikipedia</span></div>`;
+}
+const sightPhoto = s => s.photo ? {file: s.photo} : s.wiki && WIKI[s.wiki] ? {url: WIKI[s.wiki]} : null;
 function sightCard(s) {
  const k = SK[s.k] || SK.see, v = votesFor(s.id), mine = me && v.includes(me), dl = s.day ? dayList().find(d => d.date === s.day) : null;
- return `<div class="sight c-${k[2]}"><div class="tile">${ico(k[1])}</div><div style="min-width:0"><div class="t">${esc(s.n)}</div>${s.d ? `<div class="d">${esc(s.d)}</div>` : ""}
+ return `<div class="sightwrap">${photoHTML(sightPhoto(s))}<div class="sight c-${k[2]}"><div class="tile">${ico(k[1])}</div><div style="min-width:0"><div class="t">${esc(s.n)}</div>${s.d ? `<div class="d">${esc(s.d)}</div>` : ""}
   <div class="m">${dl ? `<span class="tag on">${ico("today","sm")}${ddot(s.day)}</span>` : ""}${s.cost ? `<span class="tag">${esc(s.cost)}</span>` : ""}<a class="tag" href="${mapsURL(s.n + " " + (place(s.city)?.en || ""))}" target="_blank" rel="noopener">${ico("pin","sm")}Газрын зураг</a><button class="tag" type="button" data-editsight="${s.id}">${ico("edit","sm")}Засах</button></div>
   ${v.length ? `<div class="avs" style="margin-top:8px">${v.map(id => av(id, "sm")).join("")}</div>` : ""}</div>
-  <button class="vote" type="button" data-vote="${s.id}" aria-pressed="${!!mine}" aria-label="Би явна">${ico("heart")}${v.length || ""}</button></div>`;
+  <button class="vote" type="button" data-vote="${s.id}" aria-pressed="${!!mine}" aria-label="Би явна">${ico("heart")}${v.length || ""}</button></div></div>`;
 }
 function seeHTML() {
  const cs = cityStays().filter(c => sightList().some(s => s.city === c.k) || c.nights.length).map(c => c.k);
@@ -383,7 +407,7 @@ function resLine(r) {
 }
 function bookCard({icon, c, title, sub, r, actions}) {
  return `<div class="card c-${c}" style="padding:var(--space-3)"><div class="row"><div class="tile">${ico(icon)}</div><div class="grow"><div class="h3">${title}</div><div class="sub">${sub}</div></div>${r ? `<span class="booked">${ico("check","sm")} Бэлэн</span>` : `<span class="booked no">Захиалаагүй</span>`}</div>
- ${r ? `<div class="sub" style="margin-top:8px;color:var(--ink)">${resLine(r)}</div>${r.code ? `<button class="tag on" style="margin-top:8px" type="button" data-copy="${esc(r.code)}">${ico("copy","sm")}<span class="mono">${esc(r.code)}</span></button>` : ""}${r.note ? `<div class="sub" style="margin-top:6px">${esc(r.note)}</div>` : ""}` : ""}
+ ${r ? `<div class="sub" style="margin-top:8px;color:var(--ink)">${resLine(r)}</div>${r.code ? `<button class="tag on" style="margin-top:8px" type="button" data-copy="${esc(r.code)}">${ico("copy","sm")}<span class="mono">${esc(r.code)}</span></button>` : ""}${r.note ? `<div class="sub" style="margin-top:6px">${esc(r.note)}</div>` : ""}${r.files?.length ? `<div class="thumbs" style="margin-top:10px">${r.files.map((f, i) => `<button class="thumb" type="button" data-viewfile="${r.id}|${i}"><img data-file="${esc(f.pages[0])}" alt=""><span class="tn">${f.pdf ? "PDF" : "Зураг"}</span></button>`).join("")}</div>` : ""}` : ""}
  <div class="chips" style="margin-top:10px">${actions}</div></div>`;
 }
 function bookHTML() {
@@ -394,8 +418,8 @@ function bookHTML() {
   actions: `<button class="chip noi" type="button" data-addleg="${esc(key)}">${r ? "Засах" : "Захиалга нэмэх"}</button>${r && safeURL(r.link) ? `<a class="chip noi" href="${esc(r.link)}" target="_blank" rel="noopener">Холбоос</a>` : ""}${!r ? searchLinks(l).map(([n, u]) => `<a class="chip noi" href="${u}" target="_blank" rel="noopener">${n}</a>`).join("") : ""}`})).join("")}</div>`;
  h += `<div class="section"><h2 class="h2">Буудал</h2></div><div class="stack">${si.map(({c, key, inD, outD, r}) => bookCard({icon: "bed", c: "stay", title: esc(pname(c.k)), sub: `${ddot(inD)} → ${ddot(outD)} · ${c.nights.length} шөнө`, r,
   actions: `<button class="chip noi" type="button" data-addstay="${esc(key)}">${r ? "Засах" : "Захиалга нэмэх"}</button>${r && safeURL(r.link) ? `<a class="chip noi" href="${esc(r.link)}" target="_blank" rel="noopener">Холбоос</a>` : ""}${r?.addr ? `<a class="chip noi" href="${mapsURL(r.addr)}" target="_blank" rel="noopener">Хаяг</a>` : ""}${!r ? hotelLinks(c.k, inD, outD).map(([n, u]) => `<a class="chip noi" href="${u}" target="_blank" rel="noopener">${n}</a>`).join("") : ""}`})).join("")}</div>`;
- h += `<div class="section"><h2 class="h2">Бусад захиалга</h2></div><div class="stack">${ex.map(r => bookCard({icon: RT[r.type][1], c: r.type === "hotel" ? "stay" : "transport", title: r.type === "hotel" ? esc(r.name || r.city || "Буудал") : `${esc(r.from || "?")} → ${esc(r.to || "?")}`, sub: `${RT[r.type][0]}${r.depD || r.inD ? " · " + ddot(r.depD || r.inD) : ""}`, r, actions: `<button class="chip noi" type="button" data-editres="${r.id}">Засах</button>`})).join("") || `<div class="muted" style="font-size:13px;padding:0 4px">Завь, аялал, концертын тасалбар гэх мэт.</div>`}</div>
- <button class="btn ghost block" type="button" data-act="newres" style="margin-top:var(--space-3)">${ico("plus","sm")} Захиалга нэмэх</button>`;
+ h += `<div class="filestat" data-filestatus style="margin-top:var(--space-3)">${fileStatusHTML()}</div><div class="section"><h2 class="h2">Бусад захиалга, баримт</h2></div><div class="stack">${ex.map(r => bookCard({icon: RT[r.type][1], c: r.type === "hotel" ? "stay" : r.type === "doc" ? "gold" : "transport", title: esc(resTitle(r)), sub: `${RT[r.type][0]}${r.depD || r.inD ? " · " + ddot(r.depD || r.inD) : ""}`, r, actions: `<button class="chip noi" type="button" data-editres="${r.id}">Засах</button>`})).join("") || `<div class="muted" style="font-size:13px;padding:0 4px">Даатгал, eSIM QR, Диснейн тасалбар, Пхи Пхи завь гэх мэт.</div>`}</div>
+ <button class="btn ghost block" type="button" data-act="newres" style="margin-top:var(--space-3)">${ico("plus","sm")} Захиалга / баримт нэмэх</button>`;
  return h;
 }
 
@@ -467,6 +491,7 @@ function when(t) { const d = new Date(t), z = n => String(n).padStart(2, "0"); r
 function crewMain() {
  const live = !!SYNC.code;
  let h = `<div id="notifCard">${notifCardHTML()}</div>
+ <div class="section"><h2 class="h2">Нууц Санта</h2><button class="link" type="button" data-act="wish">Хүслүүд</button></div>${santaHTML(true)}
  <div class="section"><h2 class="h2">Хүмүүс</h2><button class="link" type="button" data-act="names">Нэр засах</button></div><div class="stack">${S.people.map(p => {
   const on = PRES.on.has(p.id), seen = S.seen?.[p.id];
   return `<div class="owe">${av(p.id, live ? (on ? "on" : !seen ? "off" : "") : "")}<div class="grow"><div class="h3" style="font-size:15px">${esc(p.name)}${p.id === me ? ' <span class="muted" style="font-weight:500">· та</span>' : ""}</div><div class="sub">${live ? (on ? "Одоо онлайн" : seen ? "Сүүлд: " + when(seen.last) : "Хараахан нэгдээгүй") : "Синк унтраалттай"}</div></div></div>`; }).join("")}</div>
@@ -504,6 +529,7 @@ function infoHTML() {
  const W = routeCities().map(k => place(k)).filter(p => p && p.hi != null);
  const card = (i, t, body) => `<div class="card"><div class="row" style="gap:10px"><span class="tile c-${i[1]}" style="width:34px;height:34px">${ico(i[0], "sm")}</span><span class="h3">${t}</span></div>${body}</div>`;
  return `<div class="stack" style="margin-top:var(--space-3)">
+ ${RULES.map(([i, t, b], n) => card([i, ["magenta","cyan","gold","lilac"][n % 4]], t, `<p style="margin:8px 0 0;font-size:14px;line-height:21px">${esc(b)}</p>`)).join("")}
  ${card(["doc","gold"], "Нэвтрэх журам", `<dl class="kv"><dt>Хятад</dt><dd>Замын-Үүдээр автобусаар хил гарна. Монгол паспорттой визгүй нэвтрэх журмыг явахаасаа өмнө Хятадын ЭСЯ-наас лавлаарай. Буудлын захиалга, буцах тасалбараа утсандаа бэлэн байлга.</dd><dt>Тайланд</dt><dd>Монгол паспортоор 30 хоног визгүй. Ирэхээс 3 хоногийн дотор цахим ирэлтийн карт (TDAC) бөглөнө.</dd><dt>Паспорт</dt><dd>2027 оны 7-р сар хүртэл хүчинтэй байх.</dd></dl>`)}
  ${card(["sun","tangerine"], "12-р сарын сүүлийн цаг агаар", `<dl class="kv">${W.map(p => `<dt>${esc(p.n)}</dt><dd class="mono">${sg(p.lo)}° … ${sg(p.hi)}°</dd>`).join("")}</dl>`)}
  ${card(["clock","cyan"], "Цагийн бүс", `<dl class="kv"><dt>Монгол, Хятад</dt><dd>UTC+8</dd><dt>Тайланд</dt><dd>UTC+7 (1 цаг хоцорно)</dd></dl><div class="sub" style="margin-top:8px">12-р сарын 28-нд Пхукетэд газардахад цаг 1 цагаар хойшилно. Утас автоматаар солино.</div>`)}
@@ -540,8 +566,9 @@ function namesDialog() {
    save(); closeSheet(); rerender(); toast("Хадгаллаа"); };
  });
 }
-function stepDialog(date, i) {
- const d = dayList().find(x => x.date === date), st = i != null ? stepsOf(d)[i] : null;
+function stepDialog(date, i, tr = "main") {
+ const d = dayList().find(x => x.date === date), list = trackSteps(d, tr), st = i != null ? list[i] : null;
+ const store = steps => tr !== "main" && d.alt ? saveDay(date, {alt: {...d.alt, steps}}) : saveDay(date, {steps});
  openSheet(st ? "Алхам засах" : "Алхам нэмэх", `<form id="sf">
   ${field("Төрөл", `<select class="in" name="k">${opts(STEP, st?.[0] || "walk")}</select>`)}
   <div class="grid2"><div>${field("Цаг", `<input class="in" name="t" value="${esc(st?.[1] || "")}" placeholder="09:30 эсвэл Өглөө" maxlength="20">`)}</div><div>${field("Өдөр", `<input class="in" value="${ddot(date)}" disabled>`)}</div></div>
@@ -549,11 +576,11 @@ function stepDialog(date, i) {
   <div class="sheet-actions">${st ? `<button class="btn danger" type="button" data-delstep>Устгах</button>` : ""}<button class="btn primary" type="submit">${st ? "Хадгалах" : "Нэмэх"}</button></div></form>`, dd => {
   const f = dd.querySelector("#sf");
   f.onsubmit = e => { e.preventDefault(); const fd = new FormData(f), x = String(fd.get("x")).trim(); if (!x) return;
-   const steps = stepsOf(d).map(s => [...s]), row = [fd.get("k"), String(fd.get("t")).trim(), x];
+   const steps = list.map(s => [...s]), row = [fd.get("k"), String(fd.get("t")).trim(), x];
    if (st) steps[i] = row; else { steps.push(row); steps.sort((a, b) => (parseHM(a[1]) ?? 1e4) - (parseHM(b[1]) ?? 1e4)); }
-   saveDay(date, {steps}); closeSheet(); rerender(); if (!st) confetti({count: 60}); toast(st ? "Хадгаллаа" : "Нэмэгдлээ"); };
+   store(steps); closeSheet(); rerender(); if (!st) confetti({count: 60}); toast(st ? "Хадгаллаа" : "Нэмэгдлээ"); };
   dd.querySelector("[data-delstep]")?.addEventListener("click", ev => { const b = ev.currentTarget; if (!b.dataset.armed) { b.dataset.armed = 1; b.textContent = "Дахин дар"; return; }
-   saveDay(date, {steps: stepsOf(d).filter((_, k) => k !== i)}); closeSheet(); rerender(); toast("Устгагдлаа"); });
+   store(list.filter((_, k) => k !== i)); closeSheet(); rerender(); toast("Устгагдлаа"); });
  });
 }
 function saveDay(date, patch) { const d = dayList().find(x => x.date === date) || {date}; const {date: _, ...rest} = d; S.days[date] = {...rest, ...patch, ts: now()}; save(); dirty("days", date); }
@@ -584,10 +611,16 @@ function sightDialog(id) {
   <div class="grid2"><div>${field("Хот", `<select class="in" name="city">${cities.map(k => `<option value="${k}" ${k === (s?.city || seeCity || cities[0]) ? "selected" : ""}>${esc(pname(k))}</option>`).join("")}</select>`)}</div><div>${field("Төрөл", `<select class="in" name="k">${opts(SK, s?.k || "see")}</select>`)}</div></div>
   <div class="grid2"><div>${field("Өдөр", `<select class="in" name="day"><option value="">Сонгоогүй</option>${days.map(d => `<option value="${d.date}" ${d.date === s?.day ? "selected" : ""}>${ddot(d.date)} ${esc(d.stay ? pshort(d.stay) : "")}</option>`).join("")}</select>`)}</div><div>${field("Үнэ", `<input class="in" name="cost" value="${esc(s?.cost || "")}" maxlength="30" placeholder="Үнэгүй">`)}</div></div>
   ${field("Тайлбар", `<textarea class="in" name="d" maxlength="300">${esc(s?.d || "")}</textarea>`)}
+  <label class="f">Зураг</label><div id="gphoto">${photoHTML(sightPhoto(s || {}), "photo sm")}</div>
+  <label class="btn ghost sm filebtn">${ico("plus","sm")} Өөрийн зураг<input type="file" accept="image/*" hidden id="gfile"></label><span class="sub" id="gstat"></span>
   <div class="sheet-actions">${s ? `<button class="btn danger" type="button" data-delsight>Устгах</button>` : ""}<button class="btn primary" type="submit">${s ? "Хадгалах" : "Нэмэх"}</button></div></form>`, dd => {
-  const f = dd.querySelector("#gf");
+  const f = dd.querySelector("#gf"); let photo = s?.photo || "";
+  hydrateFiles(dd);
+  dd.querySelector("#gfile").onchange = async ev => { const file = ev.target.files[0]; if (!file) return; const st = dd.querySelector("#gstat");
+   try { st.textContent = " Хуулж байна…"; const e1 = await uploadAny(file, m => st.textContent = " " + m); photo = e1.pages[0]; dd.querySelector("#gphoto").innerHTML = photoHTML({file: photo}, "photo sm"); hydrateFiles(dd); st.textContent = " Бэлэн ✓"; }
+   catch (err) { st.textContent = " " + (err.message || "Алдаа"); } };
   f.onsubmit = e => { e.preventDefault(); const fd = new FormData(f), nid = id || "u-" + uid();
-   S.sights[nid] = {n: String(fd.get("n")).trim(), city: fd.get("city"), k: fd.get("k"), day: fd.get("day"), cost: String(fd.get("cost")).trim(), d: String(fd.get("d")).trim(), ts: now()};
+   S.sights[nid] = {n: String(fd.get("n")).trim(), city: fd.get("city"), k: fd.get("k"), day: fd.get("day"), cost: String(fd.get("cost")).trim(), d: String(fd.get("d")).trim(), wiki: s?.wiki || "", photo, ts: now()};
    save(); dirty("sights", nid); closeSheet(); rerender(); if (!id) confetti({count: 70}); toast(id ? "Хадгаллаа" : "Нэмэгдлээ"); };
   dd.querySelector("[data-delsight]")?.addEventListener("click", ev => { const b = ev.currentTarget; if (!b.dataset.armed) { b.dataset.armed = 1; b.textContent = "Дахин дар"; return; }
    S.sights[id] = {...(S.sights[id] || {}), deleted: true, ts: now()}; save(); dirty("sights", id); closeSheet(); rerender(); toast("Устгагдлаа"); });
@@ -623,53 +656,335 @@ function expenseDialog(id, preset) {
  });
 }
 function resDialog({leg, stay, id, kind}) {
- const old = id ? S.res[id] : leg ? resList().find(r => r.leg === leg && r.type !== "hotel") : stay ? resList().find(r => r.type === "hotel" && r.stay === stay) : null;
- const rid = old ? (id || resList().find(r => r === old || (r.leg === leg && leg) || (r.stay === stay && stay && r.type === "hotel"))?.id) : uid();
+ const found = id ? {id, ...S.res[id]} : leg ? resList().find(r => r.leg === leg && r.type !== "hotel") : stay ? resList().find(r => r.type === "hotel" && r.stay === stay) : null;
+ const old = found && !found.deleted ? found : null, rid = old ? old.id : uid();
  const li = leg ? legItems().find(x => x.key === leg) : null, si = stay ? stayItems().find(x => x.key === stay) : null;
- const isH = si ? true : li ? false : (old ? old.type === "hotel" : kind === "hotel");
- const r = old || {}, type = li ? li.l.m : (r.type || (isH ? "hotel" : "plane"));
- const t = li ? `${pname(li.l.a)} → ${pname(li.l.b)}` : si ? `${pname(si.c.k)} · буудал` : old ? (isH ? r.name || "Буудал" : `${r.from || ""} → ${r.to || ""}`) : "Шинэ захиалга";
+ const r = old || {}, kindOf = li ? li.l.m : si ? "hotel" : (r.type || kind || "plane");
+ const isH = kindOf === "hotel", isDoc = kindOf === "doc";
+ let files = Array.isArray(r.files) ? r.files.map(f => ({...f})) : [];
+ const t = li ? `${pname(li.l.a)} → ${pname(li.l.b)}` : si ? `${pname(si.c.k)} · буудал` : old ? resTitle(old) : isDoc ? "Шинэ баримт" : isH ? "Шинэ буудал" : "Шинэ захиалга";
+ const filesBox = () => files.length ? `<div class="thumbs">${files.map((f, i) => `<div class="thumb"><img data-file="${esc(f.pages[0])}" alt=""><span class="tn">${f.pdf ? "PDF · " : ""}${f.pages.length > 1 ? f.pages.length + " хуудас" : esc((f.n || "").slice(0, 18))}</span><button type="button" class="tx" data-rmfile="${i}" aria-label="Хасах">${ico("x","sm")}</button></div>`).join("")}</div>` : `<div class="sub">Тасалбар, QR код, баталгааны зураг эсвэл PDF. Сүлжээгүй үед ч харагдана.</div>`;
  openSheet(esc(t), `<form id="rf" autocomplete="off">
-  ${!li && !si && !isH ? `<div class="grid2"><div>${field("Хаанаас", `<input class="in" name="from" value="${esc(r.from || "")}" maxlength="40">`)}</div><div>${field("Хаашаа", `<input class="in" name="to" value="${esc(r.to || "")}" maxlength="40">`)}</div></div>${field("Төрөл", `<select class="in" name="type">${opts({plane: RT.plane, train: RT.train, bus: RT.bus, boat: RT.boat}, type)}</select>`)}` : ""}
+  <label class="f">${ico("ticket","sm")} Тасалбар, баталгаа</label>
+  <div id="rfiles">${filesBox()}</div>
+  <div class="row" style="margin-top:8px"><label class="btn sm primary filebtn">${ico("plus","sm")} Зураг / PDF нэмэх<input type="file" accept="image/*,application/pdf" multiple hidden id="rfin"></label><span class="sub grow" id="rfstat"></span></div>
+  ${isDoc ? `${field("Нэр", `<input class="in" name="name" value="${esc(r.name || "")}" maxlength="60" placeholder="Даатгал, eSIM QR, Диснейн тасалбар…" required>`)}${field("Огноо (хэрэв байвал)", `<input class="in" type="date" name="depD" value="${r.depD || ""}">`)}` : ""}
+  ${!li && !si && !isH && !isDoc ? `<div class="grid2"><div>${field("Хаанаас", `<input class="in" name="from" value="${esc(r.from || "")}" maxlength="40">`)}</div><div>${field("Хаашаа", `<input class="in" name="to" value="${esc(r.to || "")}" maxlength="40">`)}</div></div>${field("Төрөл", `<select class="in" name="type">${opts({plane: RT.plane, train: RT.train, bus: RT.bus, boat: RT.boat}, kindOf)}</select>`)}` : ""}
   ${isH ? `${field("Буудлын нэр", `<input class="in" name="name" value="${esc(r.name || "")}" maxlength="60">`)}${!si ? field("Хот", `<input class="in" name="city" value="${esc(r.city || "")}" maxlength="40">`) : ""}${field("Хаяг", `<input class="in" name="addr" value="${esc(r.addr || "")}" maxlength="120">`)}
    <div class="grid2"><div>${field("Орох", `<input class="in" type="date" name="inD" value="${r.inD || si?.inD || ""}">`)}</div><div>${field("Гарах", `<input class="in" type="date" name="outD" value="${r.outD || si?.outD || ""}">`)}</div></div>`
-  : `${field("Компани, дугаар", `<input class="in" name="carrier" value="${esc(r.carrier || "")}" maxlength="40" placeholder="Air China CA1234">`)}
+  : isDoc ? "" : `${field("Компани, дугаар", `<input class="in" name="carrier" value="${esc(r.carrier || "")}" maxlength="40" placeholder="Air China CA1234">`)}
    <div class="grid2"><div>${field("Хөдлөх", `<input class="in" type="date" name="depD" value="${r.depD || li?.l.d || ""}"><input class="in mono" style="margin-top:6px" name="depT" value="${esc(r.depT || li?.l.dep || "")}" placeholder="10:45">`)}</div><div>${field("Ирэх", `<input class="in" type="date" name="arrD" value="${r.arrD || (li ? (parseHM(li.l.arr) != null && parseHM(li.l.dep) != null && parseHM(li.l.arr) < parseHM(li.l.dep) ? addDays(li.l.d, 1) : li.l.d) : "")}"><input class="in mono" style="margin-top:6px" name="arrT" value="${esc(r.arrT || li?.l.arr || "")}" placeholder="23:45">`)}</div></div>`}
-  <div class="grid2"><div>${field("Захиалгын код", `<input class="in mono" name="code" value="${esc(r.code || "")}" maxlength="20" style="text-transform:uppercase">`)}</div><div>${field("Хэн захиалсан", `<select class="in" name="by"><option value="">—</option>${S.people.map(p => `<option value="${p.id}" ${(r.by || (!old ? me : "")) === p.id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>`)}</div></div>
-  <div class="grid2" style="grid-template-columns:1.4fr 1fr"><div>${field("Нийт үнэ", `<input class="in mono" name="price" type="number" inputmode="decimal" step="any" value="${r.price ?? ""}">`)}</div><div>${field("Валют", `<select class="in" name="cur">${CURS.map(c => `<option value="${c}" ${(r.cur || "MNT") === c ? "selected" : ""}>${SYM[c]} ${c}</option>`).join("")}</select>`)}</div></div>
-  ${field("Холбоос", `<input class="in" name="link" type="url" value="${esc(r.link || "")}" placeholder="https://">`)}
+  <div class="grid2"><div>${field("Захиалгын код", `<input class="in mono" name="code" value="${esc(r.code || "")}" maxlength="20" style="text-transform:uppercase">`)}</div><div>${field(isDoc ? "Хэнийх" : "Хэн захиалсан", `<select class="in" name="by"><option value="">—</option>${S.people.map(p => `<option value="${p.id}" ${(r.by || (!old ? me : "")) === p.id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>`)}</div></div>
+  ${isDoc ? "" : `<div class="grid2" style="grid-template-columns:1.4fr 1fr"><div>${field("Нийт үнэ", `<input class="in mono" name="price" type="number" inputmode="decimal" step="any" value="${r.price ?? ""}">`)}</div><div>${field("Валют", `<select class="in" name="cur">${CURS.map(c => `<option value="${c}" ${(r.cur || "MNT") === c ? "selected" : ""}>${SYM[c]} ${c}</option>`).join("")}</select>`)}</div></div>`}
   ${field("Тэмдэглэл", `<textarea class="in" name="note" maxlength="240">${esc(r.note || "")}</textarea>`)}
-  <label class="li" style="margin-top:var(--space-3)"><input type="checkbox" class="ck" name="exp" ${!old || S.expenses["r-" + rid] && !S.expenses["r-" + rid].deleted ? "checked" : ""}><span class="txt">Үнийг нийтийн зардалд нэмэх (4 хүнд хуваана)</span></label>
+  ${isDoc ? "" : `<label class="li" style="margin-top:var(--space-3)"><input type="checkbox" class="ck" name="exp" ${!old || S.expenses["r-" + rid] && !S.expenses["r-" + rid].deleted ? "checked" : ""}><span class="txt">Үнийг нийтийн зардалд нэмэх (${S.people.length} хүнд хуваана)</span></label>`}
   <div class="sheet-actions">${old ? `<button class="btn danger" type="button" data-delres>Устгах</button>` : ""}<button class="btn primary" type="submit">Хадгалах</button></div></form>`, dd => {
-  const f = dd.querySelector("#rf");
+  const f = dd.querySelector("#rf"), stat = dd.querySelector("#rfstat");
+  const redraw = () => { dd.querySelector("#rfiles").innerHTML = filesBox(); hydrateFiles(dd); };
+  const persistFiles = () => { if (!old) return; S.res[rid] = {...S.res[rid], files, ts: now()}; save(); dirty("res", rid); };
+  hydrateFiles(dd);
+  dd.querySelector("#rfin").onchange = async ev => {
+   const list = [...ev.target.files]; ev.target.value = "";
+   for (const [n, file] of list.entries()) { try { stat.textContent = `${n + 1}/${list.length} · хуулж байна…`; const e1 = await uploadAny(file, m => stat.textContent = `${n + 1}/${list.length} · ${m}`); files.push(e1); persistFiles(); redraw(); } catch (err) { stat.textContent = err.message || "Хуулж чадсангүй"; return; } }
+   stat.textContent = "Хадгалагдлаа ✓"; confetti({el: stat, count: 50});
+  };
+  dd.addEventListener("click", ev => { const b = ev.target.closest("[data-rmfile]"); if (!b) return; const i = +b.dataset.rmfile; const gone = files.splice(i, 1)[0]; persistFiles(); redraw(); if (gone) deleteFiles([...gone.pages, gone.pdf].filter(Boolean)); });
   f.onsubmit = e => { e.preventDefault(); const fd = new FormData(f), g = k => String(fd.get(k) ?? "").trim(), price = parseFloat(g("price"));
-   const rec = {type: isH ? "hotel" : (li ? li.l.m : g("type") || type), code: g("code").toUpperCase(), link: safeURL(g("link")), price: price > 0 ? price : null, cur: g("cur") || "MNT", by: g("by"), note: g("note"), created: old?.created || now(), ts: now()};
+   const rec = {type: isH ? "hotel" : isDoc ? "doc" : (li ? li.l.m : g("type") || kindOf), code: g("code").toUpperCase(), link: r.link || "", price: price > 0 ? price : null, cur: g("cur") || "MNT", by: g("by"), note: g("note"), files, created: old?.created || now(), ts: now()};
    if (isH) Object.assign(rec, {stay: si ? si.key : (r.stay || ""), city: si ? pname(si.key) : g("city"), name: g("name"), addr: g("addr"), inD: g("inD"), outD: g("outD")});
+   else if (isDoc) Object.assign(rec, {name: g("name"), depD: g("depD")});
    else Object.assign(rec, {leg: li ? li.key : (r.leg || ""), from: li ? pname(li.l.a) : g("from"), to: li ? pname(li.l.b) : g("to"), carrier: g("carrier"), depD: g("depD"), depT: g("depT"), arrD: g("arrD"), arrT: g("arrT")});
    S.res[rid] = rec; dirty("res", rid);
    const eid = "r-" + rid, ex = S.expenses[eid];
-   if (fd.get("exp") && rec.price) { S.expenses[eid] = {desc: isH ? `Буудал: ${rec.name || rec.city}` : `${RT[rec.type][0]}: ${rec.from} → ${rec.to}`, amount: rec.price, cur: rec.cur, payer: rec.by || me || S.people[0].id, split: S.people.map(p => p.id), cat: isH ? "stay" : "transport", date: (isH ? rec.inD : rec.depD) || todayISO(), created: ex?.created || now(), ts: now()}; dirty("expenses", eid); }
+   if (!isDoc && fd.get("exp") && rec.price) { S.expenses[eid] = {desc: isH ? `Буудал: ${rec.name || rec.city}` : `${RT[rec.type][0]}: ${rec.from} → ${rec.to}`, amount: rec.price, cur: rec.cur, payer: rec.by || me || S.people[0].id, split: S.people.map(p => p.id), cat: isH ? "stay" : "transport", date: (isH ? rec.inD : rec.depD) || todayISO(), created: ex?.created || now(), ts: now()}; dirty("expenses", eid); }
    else if (ex && !ex.deleted) { S.expenses[eid] = {...ex, deleted: true, ts: now()}; dirty("expenses", eid); }
-   save(); if (!old) confetti({el: e.submitter, count: 110}); closeSheet(); rerender(); toast(old ? "Хадгаллаа" : "Захиалга нэмэгдлээ!"); };
+   save(); if (!old) confetti({el: e.submitter, count: 110}); closeSheet(); rerender(); syncFiles(); toast(old ? "Хадгаллаа" : "Нэмэгдлээ!"); };
   dd.querySelector("[data-delres]")?.addEventListener("click", ev => { const b = ev.currentTarget; if (!b.dataset.armed) { b.dataset.armed = 1; b.textContent = "Дахин дар"; return; }
    S.res[rid] = {...S.res[rid], deleted: true, ts: now()}; dirty("res", rid); const ex = S.expenses["r-" + rid]; if (ex && !ex.deleted) { S.expenses["r-" + rid] = {...ex, deleted: true, ts: now()}; dirty("expenses", "r-" + rid); } save(); closeSheet(); rerender(); toast("Устгагдлаа"); });
  });
 }
+function newResMenu() {
+ openSheet("Юу нэмэх вэ?", `<div class="menu">
+  <button type="button" data-newkind="plane" class="c-transport"><span class="tile">${ico("plane")}</span>Тээвэр<small>Нислэг, галт тэрэг, автобус, завь</small></button>
+  <button type="button" data-newkind="hotel" class="c-stay"><span class="tile">${ico("bed")}</span>Буудал<small>Hotel, Airbnb</small></button>
+  <button type="button" data-newkind="doc" class="c-gold"><span class="tile">${ico("doc")}</span>Баримт, тасалбар<small>Даатгал, eSIM, Дисней, аялал</small></button>
+  <button type="button" data-newkind="boat" class="c-activity"><span class="tile">${ico("boat")}</span>Аялал<small>Пхи Пхи завь, ATV</small></button></div>`);
+}
 function addMenu() {
  openSheet("Юу нэмэх вэ?", `<div class="menu">
   <button type="button" data-add="exp" class="c-money"><span class="tile">${ico("wallet")}</span>Зардал<small>Хэн төлсөн, хэнд хуваах</small></button>
-  <button type="button" data-add="res" class="c-transport"><span class="tile">${ico("ticket")}</span>Захиалга<small>Нислэг, буудал, тасалбар</small></button>
+  <button type="button" data-add="res" class="c-transport"><span class="tile">${ico("ticket")}</span>Захиалга, тасалбар<small>Зураг, PDF хавсаргана</small></button>
   <button type="button" data-add="sight" class="c-activity"><span class="tile">${ico("heart")}</span>Үзэх газар<small>Найзууд санал өгнө</small></button>
   <button type="button" data-add="step" class="c-stay"><span class="tile">${ico("today")}</span>Өдөрт алхам<small>${selDay ? ddot(selDay) : "Сонгосон өдөр"}</small></button></div>`);
 }
 function citySheet(k) {
  const p = place(k), st = cityStays().find(c => c.k === k), ds = dayList().filter(d => d.stay === k || seqOf(d).includes(k)), sights = sightList().filter(s => s.city === k);
- openSheet(esc(pname(k)), `${CITY_NOTE[k] ? `<p style="margin:0 0 var(--space-3);font-size:14px;line-height:21px">${esc(CITY_NOTE[k])}</p>` : ""}
+ openSheet(esc(pname(k)), `${p.wiki && WIKI[p.wiki] ? photoHTML({url: WIKI[p.wiki]}, "photo") : ""}${CITY_NOTE[k] ? `<p style="margin:0 0 var(--space-3);font-size:14px;line-height:21px">${esc(CITY_NOTE[k])}</p>` : ""}
   <div class="stat2"><div class="card"><div class="k">Цаг агаар</div><div class="v">${p.hi != null ? `${sg(p.lo)}° … ${sg(p.hi)}°` : "—"}</div></div><div class="card"><div class="k">Цагийн бүс</div><div class="v">${tzs(p.tz)}</div></div></div>
   <div class="section" style="margin-top:var(--space-5)"><h2 class="h2">Өдрүүд</h2><span class="muted" style="font-size:13px">${st?.nights.length ? st.nights.length + " шөнө" : ""}</span></div>
   <div class="stack">${ds.map(d => `<button class="cityrow" type="button" data-openday="${d.date}"><span class="mono" style="font-weight:600;width:44px">${ddot(d.date)}</span><span class="grow"><span class="n" style="font-size:15px">${esc(d.title || routeText(d))}</span></span>${ico("arrow","sm")}</button>`).join("")}</div>
   ${sights.length ? `<div class="section"><h2 class="h2">Үзэх газрууд</h2><button class="link" type="button" data-seeof="${k}">${sights.length} газар</button></div>` : ""}
   <a class="btn block" style="margin-top:var(--space-4)" href="${mapsURL(p.en || p.n)}" target="_blank" rel="noopener">${ico("pin","sm")} Google Maps</a>`);
+}
+
+/* ================= PHOTOS (Wikipedia, cached for offline; Wikipedia is blocked in China) ================= */
+const WIKI_KEY = "tripp:wiki2";
+let WIKI = (() => { try { return JSON.parse(ls.get(WIKI_KEY) || "{}"); } catch(e) { return {}; } })();
+let wikiBusy = false;
+async function loadWiki() {
+ if (wikiBusy) return; wikiBusy = true;
+ try {
+  const want = [...new Set([...sightList().map(s => s.wiki), ...routeCities().map(k => place(k)?.wiki)].filter(Boolean))].filter(t => !(t in WIKI));
+  let got = false;
+  for (let i = 0; i < want.length && navigator.onLine; i += 20) {
+   const batch = want.slice(i, i + 20);
+   const r = await fetch("https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=thumbnail&pithumbsize=800&redirects=1&titles=" + encodeURIComponent(batch.join("|")));
+   if (!r.ok) break; const q = (await r.json()).query || {};
+   const back = {}; batch.forEach(t => back[t] = t);
+   const norm = t => t.replace(/_/g, " ");
+   batch.forEach(t => back[norm(t)] = t);
+   (q.normalized || []).forEach(n => back[n.to] = back[n.from] || n.from);
+   (q.redirects || []).forEach(n => back[n.to] = back[n.from] || n.from);
+   Object.values(q.pages || {}).forEach(pg => { const o = back[pg.title]; if (o) WIKI[o] = pg.thumbnail?.source || ""; });
+   batch.forEach(t => { if (!(t in WIKI)) WIKI[t] = ""; }); got = true;
+  }
+  if (got) { ls.set(WIKI_KEY, JSON.stringify(WIKI)); if (!dlg().open && (view === "route" || view === "today")) rerender(); }
+  warmWiki();
+ } catch(e) {} finally { wikiBusy = false; }
+}
+function warmWiki() { Object.values(WIKI).filter(Boolean).forEach(u => { const i = new Image(); i.referrerPolicy = "no-referrer"; i.src = u; }); }
+
+/* ================= FILES: tickets and photos, saved on every phone ================= */
+const FCACHE = "tripp-files-v1";
+const fkey = p => new URL("__file/" + p, location.href).href;
+const blobURLs = new Map();
+const FILES = {total: 0, saved: 0, busy: false};
+const fnURL = name => (SYNC.url || CFG.supabaseUrl) + "/functions/v1/" + name;
+async function filesFn(body) {
+ const r = await fetch(fnURL("tripp-files"), {method: "POST", headers: {"content-type": "application/json", apikey: SYNC.key || CFG.supabaseAnonKey}, body: JSON.stringify({code: SYNC.code, ...body})});
+ const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || "Сервер алдаа"); return j;
+}
+function allFilePaths() {
+ const out = new Set();
+ resList().forEach(r => (r.files || []).forEach(f => { (f.pages || []).forEach(p => out.add(p)); }));
+ sightList().forEach(s => { if (s.photo) out.add(s.photo); });
+ return [...out];
+}
+async function fileURL(path) {
+ if (blobURLs.has(path)) return blobURLs.get(path);
+ if (!("caches" in window)) return null;
+ const c = await caches.open(FCACHE); let res = await c.match(fkey(path));
+ if (!res && SYNC.code && navigator.onLine) { try { const u = (await filesFn({op: "urls", paths: [path]})).urls?.[path]; if (u) { const r2 = await fetch(u); if (r2.ok) { await c.put(fkey(path), r2.clone()); res = r2; } } } catch(e) {} }
+ if (!res) return null;
+ const url = URL.createObjectURL(await res.blob()); blobURLs.set(path, url); return url;
+}
+function hydrateFiles(root = document) {
+ root.querySelectorAll("img[data-file]:not([src])").forEach(img => {
+  img.setAttribute("src", "data:image/gif;base64,R0lGODlhAQABAAAAACw=");
+  fileURL(img.dataset.file).then(u => { if (u) img.src = u; else img.closest(".photo,.thumb,.vw-page")?.classList.add("missing"); });
+ });
+}
+let syncFilesT = null;
+function syncFiles() { clearTimeout(syncFilesT); syncFilesT = setTimeout(syncFilesNow, 800); }
+async function syncFilesNow() {
+ if (FILES.busy || !("caches" in window)) return; FILES.busy = true;
+ try {
+  const paths = allFilePaths(), c = await caches.open(FCACHE), missing = [];
+  for (const p of paths) if (!(await c.match(fkey(p)))) missing.push(p);
+  FILES.total = paths.length; FILES.saved = paths.length - missing.length; updateFileStatus();
+  if (missing.length && SYNC.code && navigator.onLine) {
+   try { navigator.storage?.persist?.(); } catch(e) {}
+   for (let i = 0; i < missing.length; i += 50) {
+    const urls = (await filesFn({op: "urls", paths: missing.slice(i, i + 50)})).urls || {};
+    for (const p of missing.slice(i, i + 50)) { if (!urls[p]) continue; try { const r = await fetch(urls[p]); if (r.ok) { await c.put(fkey(p), r); FILES.saved++; updateFileStatus(); } } catch(e) {} }
+   }
+  }
+ } catch(e) {} finally { FILES.busy = false; updateFileStatus(); }
+}
+function fileStatusHTML() { const {total, saved} = FILES; if (!total) return ""; return saved >= total ? `${ico("check","sm")} ${total} файл энэ утсанд хадгалагдсан, сүлжээгүй ч нээгдэнэ` : `${ico("refresh","sm")} ${saved}/${total} файл энэ утсанд хадгалагдсан${navigator.onLine ? " · татаж байна…" : " · сүлжээнд орохоор татна"}`; }
+function updateFileStatus() { document.querySelectorAll("[data-filestatus]").forEach(el => { el.innerHTML = fileStatusHTML(); el.classList.toggle("ok", FILES.saved >= FILES.total); }); }
+async function deleteFiles(paths) { for (const p of paths) { try { await filesFn({op: "delete", path: p}); const c = await caches.open(FCACHE); await c.delete(fkey(p)); } catch(e) {} } }
+
+/* Images are shrunk to ≤2200px JPEG; PDFs are kept and also turned into page images so they open offline everywhere */
+function loadScript(src) { return new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = src; sc.onload = res; sc.onerror = () => rej(new Error("Сан ачаалж чадсангүй")); document.head.appendChild(sc); }); }
+async function toJPEG(source, w, h, max = 2200) {
+ const k = Math.min(1, max / Math.max(w, h)), cv = document.createElement("canvas"); cv.width = Math.round(w * k); cv.height = Math.round(h * k);
+ const g = cv.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(source, 0, 0, cv.width, cv.height);
+ return await new Promise(r => cv.toBlob(r, "image/jpeg", .88));
+}
+async function prepImage(file) {
+ if (file.size < 1.2e6 && /^image\/(jpeg|png|webp)$/.test(file.type)) return {blob: file, type: file.type};
+ let bmp; try { bmp = await createImageBitmap(file); } catch(e) { const u = URL.createObjectURL(file); bmp = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("Зургийг уншиж чадсангүй")); i.src = u; }); }
+ return {blob: await toJPEG(bmp, bmp.width, bmp.height), type: "image/jpeg"};
+}
+async function pdfPages(file, onMsg) {
+ if (!window.pdfjsLib) { onMsg("PDF уншигч ачаалж байна…"); await loadScript("https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"); pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"; }
+ const pdf = await pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise, out = [];
+ for (let i = 1; i <= Math.min(pdf.numPages, 8); i++) {
+  onMsg(`Хуудас ${i}/${Math.min(pdf.numPages, 8)}…`);
+  const pg = await pdf.getPage(i), vp0 = pg.getViewport({scale: 1}), vp = pg.getViewport({scale: Math.min(2.5, 1800 / vp0.width)});
+  const cv = document.createElement("canvas"); cv.width = vp.width; cv.height = vp.height; await pg.render({canvasContext: cv.getContext("2d"), viewport: vp}).promise;
+  out.push(await new Promise(r => cv.toBlob(r, "image/jpeg", .9)));
+ }
+ return out;
+}
+async function putFile(blob, name, type) {
+ if (!SYNC.code) throw new Error("Эхлээд бүлгийн аялалд нэгдээрэй");
+ if (!navigator.onLine) throw new Error("Сүлжээ хэрэгтэй");
+ if (!SYNC.client) await connect();
+ const {path, token} = await filesFn({op: "upload", name, type});
+ const {error} = await SYNC.client.storage.from("tripp-files").uploadToSignedUrl(path, token, blob, {contentType: type});
+ if (error) throw error;
+ try { const c = await caches.open(FCACHE); await c.put(fkey(path), new Response(blob, {headers: {"content-type": type}})); } catch(e) {}
+ return path;
+}
+async function uploadAny(file, onMsg = () => {}) {
+ if (file.size > 15e6) throw new Error("15 MB-аас бага файл сонгоно уу");
+ if (file.type === "application/pdf" || /\.pdf$/i.test(file.name)) {
+  const pages = await pdfPages(file, onMsg), paths = [];
+  for (const [i, b] of pages.entries()) { onMsg(`Хуулж байна ${i + 1}/${pages.length}…`); paths.push(await putFile(b, `page${i + 1}.jpg`, "image/jpeg")); }
+  onMsg("PDF хадгалж байна…"); const pdf = await putFile(file, file.name || "file.pdf", "application/pdf");
+  return {id: uid(), n: file.name || "PDF", pages: paths, pdf, by: me || "", at: now()};
+ }
+ const {blob, type} = await prepImage(file); onMsg("Хуулж байна…");
+ return {id: uid(), n: file.name || "Зураг", pages: [await putFile(blob, file.name || "photo.jpg", type)], pdf: null, by: me || "", at: now()};
+}
+
+/* ================= WALLET + VIEWER ================= */
+const resTitle = r => r.type === "hotel" ? (r.name || r.city || "Буудал") : r.type === "doc" ? (r.name || "Баримт") : `${r.from || "?"} → ${r.to || "?"}`;
+const resDate = r => r.depD || r.inD || "";
+function walletItems() { return resList().filter(r => Array.isArray(r.files) && r.files.length).map(r => ({r, d: resDate(r)})).sort((a, b) => (a.d || "9").localeCompare(b.d || "9")); }
+function walletSheet() {
+ const it = walletItems(), t = todayISO();
+ const up = it.filter(x => !x.d || x.d >= t), past = it.filter(x => x.d && x.d < t);
+ const row = ({r}) => `<div class="card" style="padding:var(--space-3)"><div class="row"><div class="tile c-${r.type === "hotel" ? "stay" : r.type === "doc" ? "gold" : "transport"}">${ico(RT[r.type]?.[1] || "ticket")}</div><div class="grow"><div class="h3" style="font-size:15px">${esc(resTitle(r))}</div><div class="sub">${resDate(r) ? dlong(resDate(r)) : "Огноогүй"}${r.code ? ` · <span class="mono" style="color:var(--ink)">${esc(r.code)}</span>` : ""}</div></div></div>
+  <div class="thumbs" style="margin-top:10px">${r.files.map((f, i) => `<button class="thumb" type="button" data-viewfile="${r.id}|${i}"><img data-file="${esc(f.pages[0])}" alt=""><span class="tn">${f.pdf ? "PDF" : "Зураг"}${f.pages.length > 1 ? " · " + f.pages.length : ""}</span></button>`).join("")}</div></div>`;
+ openSheet(`${ico("ticket")} Тасалбарууд`, `<div class="filestat" data-filestatus>${fileStatusHTML()}</div>
+  ${it.length ? `<div class="stack">${up.map(row).join("")}</div>${past.length ? `<div class="datehead">Өнгөрсөн</div><div class="stack">${past.map(row).join("")}</div>` : ""}` : `<div class="card empty"><b>Одоохондоо тасалбар алга</b>Захиалга дээр дарж тасалбар, QR кодны зураг эсвэл PDF-ээ хавсарга. Сүлжээгүй үед ч эндээс шууд харуулна.</div>`}
+  <button class="btn ghost block" type="button" data-act="newres" style="margin-top:var(--space-3)">${ico("plus","sm")} Тасалбар / баримт нэмэх</button>`, d => hydrateFiles(d));
+ syncFiles();
+}
+function showRes(rid, only) {
+ const r = S.res[rid]; if (!r || !r.files?.length) return;
+ const fs = only != null ? [r.files[only]].filter(Boolean) : r.files;
+ const v = $("#viewer");
+ v.innerHTML = `<div class="vw-top"><div class="grow"><b>${esc(resTitle(r))}</b><div class="vw-sub">${resDate(r) ? ddot(resDate(r)) : ""}${r.code ? ` · <span class="mono">${esc(r.code)}</span>` : ""}</div></div>${fs.some(f => f.pdf) ? `<button class="btn sm" type="button" data-openpdf="${esc(fs.find(f => f.pdf).pdf)}">PDF</button>` : ""}<button class="iconbtn" type="button" data-closeviewer aria-label="Хаах">${ico("x","sm")}</button></div>
+ <div class="vw-pages">${fs.flatMap(f => f.pages).map(p => `<div class="vw-page"><img data-file="${esc(p)}" alt="Тасалбар"></div>`).join("")}</div>
+ <div class="vw-hint">${ico("sun","sm")} Дэлгэцийн гэрлээ ихэсгэвэл QR код амархан уншигдана</div>`;
+ if (!v.open) v.showModal(); hydrateFiles(v);
+}
+function closeViewer() { const v = $("#viewer"); if (v.open) v.close(); }
+async function openPdf(path) {
+ const c = await caches.open(FCACHE); let res = await c.match(fkey(path));
+ if (!res && navigator.onLine) { try { const u = (await filesFn({op: "urls", paths: [path]})).urls?.[path]; if (u) { const r2 = await fetch(u); if (r2.ok) { await c.put(fkey(path), r2.clone()); res = r2; } } } catch(e) {} }
+ if (!res) { toast("PDF энэ утсанд алга. Сүлжээнд орохоор татагдана"); return; }
+ const url = URL.createObjectURL(new Blob([await res.blob()], {type: "application/pdf"}));
+ const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ================= NOTIFICATION SCHEDULE + LOG ================= */
+async function pushFn(body) {
+ const r = await fetch(fnURL("tripp-push"), {method: "POST", headers: {"content-type": "application/json", apikey: SYNC.key || CFG.supabaseAnonKey}, body: JSON.stringify({code: SYNC.code, ...body})});
+ const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || "Сервер алдаа"); return j;
+}
+const KIND_IC = {cheer: ["spark","gold"], daily: ["today","cyan"], nye: ["party","magenta"], santa: ["gift","magenta"], expense: ["wallet","lime"], test: ["bell","lilac"]};
+const whenLocal = iso => { const d = new Date(iso), z = n => String(n).padStart(2, "0"); return `${WDL[d.getDay()]} ${d.getMonth() + 1}/${d.getDate()} · ${z(d.getHours())}:${z(d.getMinutes())}`; };
+let notifCache = null;
+function bubble(m, i, canSend) {
+ const k = KIND_IC[m.kind || m.type] || KIND_IC.cheer;
+ return `<div class="nbubble c-${k[1]}"><div class="nb-top"><img src="icons/icon-192.png" alt=""><span>TRIPP</span><span class="grow"></span><span class="mono">${m.at ? whenLocal(m.at) : ""}</span></div>
+  <div class="nb-t">${esc(m.title)}</div><div class="nb-b">${esc(m.body)}</div>
+  ${m.ok != null ? `<div class="nb-meta">${ico("check","sm")} ${m.ok} утсанд хүрсэн${m.fail ? ` · ${m.fail} алдаа` : ""}</div>` : ""}
+  ${canSend && i != null ? `<button class="tag" type="button" data-sendme="${i}">${ico("bell","sm")} Надад одоо илгээх</button>` : ""}</div>`;
+}
+async function notifSheet() {
+ if (!SYNC.code) { toast("Эхлээд бүлгийн аялалд нэгдээрэй"); syncDialog(); return; }
+ openSheet(`${ico("bell")} Мэдэгдлүүд`, `<div class="seg" role="group"><button type="button" data-nseg="up" aria-pressed="true">Удахгүй</button><button type="button" data-nseg="log" aria-pressed="false">Илгээсэн</button></div><div id="nbody"><div class="empty">Ачаалж байна…</div></div>`);
+ try {
+  const [pv, lg] = await Promise.all([pushFn({type: "preview"}), pushFn({type: "log"})]);
+  notifCache = {up: pv.items || [], log: lg.items || [], devices: lg.devices || 0};
+ } catch(e) { $("#nbody").innerHTML = `<div class="card empty"><b>Ачаалж чадсангүй</b>${navigator.onLine ? esc(e.message) : "Сүлжээ хэрэгтэй"}</div>`; return; }
+ drawNotifs("up");
+}
+function drawNotifs(seg) {
+ const n = notifCache, el = $("#nbody"); if (!n || !el) return;
+ document.querySelectorAll("[data-nseg]").forEach(b => b.setAttribute("aria-pressed", b.dataset.nseg === seg));
+ const can = notifState === "on";
+ const head = `<div class="filestat ${n.devices ? "ok" : ""}">${ico("phone","sm")} ${n.devices ? `${n.devices} утас мэдэгдэл авна` : "Одоохондоо хэн ч мэдэгдэл асаагаагүй байна"}${can ? "" : " · таных унтраалттай"}</div>`;
+ if (seg === "up") {
+  let last = "", h = head + `<p class="sub" style="margin:0 0 var(--space-3)">Яг энэ үг, энэ цагт бүх хүний утсанд очно (таны утасны цагаар). Найз зардал нэмэх бүрт «💸 … төлсөн» мэдэгдэл бусдад нь очно.</p>`;
+  n.up.forEach((m, i) => { const d = new Date(m.at), key = `${d.getMonth() + 1}/${d.getDate()}`; if (key !== last) { last = key; h += `<div class="datehead">${d.getMonth() + 1}-р сарын ${d.getDate()}, ${WDL[d.getDay()]}</div>`; } h += bubble(m, i, can); });
+  el.innerHTML = h || head + `<div class="card empty"><b>Илгээх мэдэгдэл алга</b></div>`;
+ } else {
+  el.innerHTML = head + (n.log.length ? n.log.map(m => bubble(m, null, false)).join("") : `<div class="card empty"><b>Одоохондоо юу ч илгээгээгүй</b>Эхний мэдэгдэл ${n.up[0] ? whenLocal(n.up[0].at) + "-д" : "удахгүй"} очно.</div>`);
+ }
+}
+async function sendMe(i, btn) {
+ const m = notifCache?.up?.[i], sub = await currentSub(); if (!m || !sub) { toast("Эхлээд мэдэгдлээ асаа"); return; }
+ btn.disabled = true; btn.textContent = "Илгээж байна…";
+ try { await pushFn({type: "test", endpoint: sub.endpoint, msg: {title: m.title, body: m.body}}); btn.textContent = "Илгээлээ ✓"; confetti({el: btn, count: 40}); } catch(e) { btn.textContent = "Чадсангүй"; }
+}
+
+/* ================= SECRET SANTA ================= */
+const SANTA_DRAW = new Date("2026-12-28T09:00:00+08:00"), SANTA_REVEAL = new Date("2027-01-01T00:00:00+07:00");
+const santaKey = () => { let k = ls.get("sts:santakey"); if (!k) { k = newCode() + newCode(); ls.set("sts:santakey", k); } return k; };
+const santaMine = () => SYNC.code && me ? ls.get(`sts:santa:${SYNC.code}:${me}`) : null;
+const santaCfg = () => ({budget: "≈ 50,000₮ / ฿500", when: "31.12, шинэ жилийн оройн хоол дээр", ...(S.votes["santa.cfg"] || {})});
+const wishOf = pid => S.votes["wish." + pid]?.text || "";
+const santaReady = pid => !!S.votes["santa.ready." + pid]?.v;
+let santaShow = false, santaPairs = null;
+function giftSVG(cls = "") {
+ return `<svg class="gift ${cls}" viewBox="0 0 120 120" aria-hidden="true"><g class="lid"><rect x="14" y="34" width="92" height="20" rx="5" fill="var(--magenta)"/><rect x="54" y="34" width="12" height="20" fill="var(--gold)"/><path d="M60 34c-6-14-26-18-24-6 1 6 14 7 24 6zM60 34c6-14 26-18 24-6-1 6-14 7-24 6z" fill="none" stroke="var(--gold)" stroke-width="5" stroke-linejoin="round"/></g><rect x="20" y="54" width="80" height="54" rx="6" fill="var(--magenta)"/><rect x="54" y="54" width="12" height="54" fill="var(--gold)"/><rect x="20" y="54" width="80" height="6" fill="rgba(0,0,0,.18)"/></svg>`;
+}
+function santaHTML(full) {
+ const t = now(), people = S.people, wishes = people.filter(p => wishOf(p.id)).length, ready = people.filter(p => santaReady(p.id)).length, cfg = santaCfg();
+ if (t > T_HOME.getTime() + 86400e3 && !full) return "";
+ let h = `<section class="santa">${giftSVG("bg")}<div class="eyebrow" style="color:var(--hero-ink-muted)">🎅 Нууц Санта</div>`;
+ if (t < SANTA_DRAW.getTime()) {
+  const d = Math.ceil((SANTA_DRAW - t) / 86400e3);
+  h += `<h3 class="santa-t">${d} өдрийн дараа сугална</h3><p class="santa-p">12-р сарын 28-ны 09:00-д апп хүн бүрт нэг найзыг нууцаар сугална. Бэлэгний хэмжээ: <b>${esc(cfg.budget)}</b>. Солилцох: <b>${esc(cfg.when)}</b>.</p>
+  <div class="row" style="flex-wrap:wrap"><button class="btn sm primary" type="button" data-act="wish">${ico("edit","sm")} ${me && wishOf(me) ? "Хүслээ засах" : "Хүслээ бичих"}</button><span class="santa-p" style="margin:0">${wishes}/${people.length} хүсэл бичсэн</span></div>`;
+ } else {
+  const mine = santaMine(), rec = mine && person(mine);
+  if (!rec) h += `<h3 class="santa-t">Сугалаа гарлаа!</h3><button class="giftbtn" type="button" data-act="santareveal" aria-label="Бэлэгний хайрцаг задлах">${giftSVG("shake")}<span>Дарж задал</span></button><p class="santa-p" style="text-align:center">Хэнд бэлэг бэлдэхээ ганцаараа хараарай 🤫</p>`;
+  else h += `<p class="santa-p" style="margin-top:6px">Та бэлэг бэлдэх хүн:</p>
+   <button class="santa-name ${santaShow ? "" : "blur"}" type="button" data-act="santashow">${av(rec.id)} <span>${esc(rec.name)}</span></button>
+   <p class="santa-p">${santaShow ? (wishOf(rec.id) ? `Хүсэл: «${esc(wishOf(rec.id))}»` : "Хүсэл бичээгүй байна. Сэтгэлээрээ!") : "Хажууд чинь хүн байвал болгоомжтой. Дарж харна."}</p>
+   <div class="row" style="flex-wrap:wrap"><label class="li" style="background:color-mix(in srgb,var(--hero-ink) 8%,transparent);color:var(--hero-ink);padding:8px 12px"><input type="checkbox" class="ck" data-santaready ${me && santaReady(me) ? "checked" : ""}><span class="txt">Бэлэг бэлэн</span></label><span class="santa-p" style="margin:0">${ready}/${people.length} бэлэн · ${esc(cfg.when)}</span></div>`;
+  if (t >= SANTA_REVEAL.getTime()) h += `<button class="btn sm" type="button" data-act="santaall" style="margin-top:var(--space-3)">${ico("spark","sm")} Хэн хэнийх байсныг харах</button>${santaPairs ? `<div class="stack" style="margin-top:var(--space-3)">${santaPairs.map(p => `<div class="row" style="gap:8px">${av(p.giver,"sm")}${ico("arrow","sm")}${av(p.receiver,"sm")}<span class="santa-p" style="margin:0">${esc(person(p.giver)?.name || "")} → ${esc(person(p.receiver)?.name || "")}</span></div>`).join("")}</div>` : ""}`;
+ }
+ if (full) h += `<button class="tag" type="button" data-act="santacfg" style="margin-top:var(--space-3);background:color-mix(in srgb,var(--hero-ink) 10%,transparent);color:var(--hero-ink)">${ico("gear","sm")} Хэмжээ, огноо</button>`;
+ return h + `</section>`;
+}
+function wishDialog() {
+ if (!me) { whoDialog(true); return; }
+ openSheet("🎁 Миний хүсэл", `<p class="sub" style="margin:0 0 var(--space-2)">Таныг сугалсан хүн л үүнийг уншиж бэлэг сонгоно. Бүгд харж болно, гэхдээ хэн чамд бэлэг өгөхийг мэдэхгүй.</p>
+  <form id="wf"><textarea class="in" name="w" maxlength="200" placeholder="Жишээ нь: амттан, жижиг чимэглэл, хөгжилтэй цамц…">${esc(wishOf(me))}</textarea><div class="sheet-actions"><button class="btn primary" type="submit">Хадгалах</button></div></form>
+  <div class="section"><h2 class="h2">Бусдын хүсэл</h2></div><div class="stack">${S.people.filter(p => p.id !== me).map(p => `<div class="owe">${av(p.id)}<div class="grow"><div class="h3" style="font-size:15px">${esc(p.name)}</div><div class="sub">${esc(wishOf(p.id) || "Хараахан бичээгүй")}</div></div></div>`).join("")}</div>`, d => {
+  d.querySelector("#wf").onsubmit = e => { e.preventDefault(); const k = "wish." + me; S.votes[k] = {v: true, text: String(new FormData(e.target).get("w")).trim(), ts: now()}; save(); dirty("votes", k); closeSheet(); rerender(); confetti({count: 60}); toast("Хүсэл хадгалагдлаа 🎁"); };
+ });
+}
+function santaCfgDialog() {
+ const c = santaCfg();
+ openSheet("🎅 Нууц Санта", `<form id="sf2">${field("Бэлэгний хэмжээ", `<input class="in" name="budget" value="${esc(c.budget)}" maxlength="40">`)}${field("Хэзээ солилцох", `<input class="in" name="when" value="${esc(c.when)}" maxlength="60">`)}<div class="sheet-actions"><button class="btn primary" type="submit">Хадгалах</button></div></form>`, d => {
+  d.querySelector("#sf2").onsubmit = e => { e.preventDefault(); const f = new FormData(e.target); S.votes["santa.cfg"] = {v: true, budget: String(f.get("budget")).trim(), when: String(f.get("when")).trim(), ts: now()}; save(); dirty("votes", "santa.cfg"); closeSheet(); rerender(); toast("Хадгаллаа"); };
+ });
+}
+async function santaReveal(btn) {
+ if (!SYNC.code) { toast("Эхлээд бүлгийн аялалд нэгдээрэй"); return; }
+ if (!me) { whoDialog(true); return; }
+ if (!navigator.onLine) { toast("Анх нээхэд сүлжээ хэрэгтэй"); return; }
+ const box = btn.querySelector(".gift"); box?.classList.add("opening");
+ try {
+  const [r] = await Promise.all([pushFn({type: "santa_mine", person: me, key: santaKey()}), new Promise(res => setTimeout(res, 900))]);
+  if (r.wait) { box?.classList.remove("opening"); toast("12-р сарын 28-ны 09:00-д сугална"); return; }
+  ls.set(`sts:santa:${SYNC.code}:${me}`, r.receiver); santaShow = true; box?.classList.add("open");
+  confetti({el: btn, count: 220, spread: "burst"}); setTimeout(() => confetti({count: 120, spread: "burst"}), 400);
+  setTimeout(rerender, 700);
+ } catch(e) {
+  box?.classList.remove("opening");
+  toast(/claimed/.test(e.message) ? "Энэ хүний Сантаг өөр утсан дээр нээсэн байна" : "Нээж чадсангүй: " + e.message);
+ }
 }
 
 /* ================= NOTIFICATIONS ================= */
@@ -688,14 +1003,15 @@ async function computeNotif() {
 async function refreshNotif() { notifState = await computeNotif(); const c = $("#notifCard"); if (c) c.innerHTML = notifCardHTML(); const p = $("#notifPrompt"); if (p) p.outerHTML = notifPrompt(); }
 function notifCardHTML() {
  const s = notifState;
+ const schedBtn = `<button class="btn sm" type="button" data-act="notifs">${ico("clock","sm")} Хуваарь, илгээсэн</button>`;
  const head = `<b class="t">${ico("bell","sm")} Мэдэгдэл</b>`;
  const sched = `Даваа, лхагва, баасан 09:00-д аялал хүртэл хэдэн хоног үлдсэнийг хөгжилтэй үгтэй нь (баасан гаригт «үдэшлэгт битгий яв, мөнгөө хадгал» 😅). Найз зардал нэмэхэд, шинэ жилийн мөчид, аяллын өглөө бүр өдрийн төлөвлөгөө.`;
- if (s === "on") return `<div class="notif">${head}<p>Асаалттай ✨ ${sched}</p><div class="row"><button class="btn sm primary" type="button" data-act="testpush">${ico("bell","sm")} Туршиж үзэх</button><button class="btn sm" type="button" data-act="pushoff">Унтраах</button></div></div>`;
- if (s === "ios") return `<div class="notif">${head}<p>iPhone дээр мэдэгдэл авахын тулд аппыг нүүр дэлгэцэндээ нэмнэ:</p><ol class="steps-ios"><li>Safari-ийн доод талын ${ico("share","sm")} товч</li><li>«Add to Home Screen» / «Нүүр дэлгэцэнд нэмэх»</li><li>Нүүр дэлгэцийн Tripp дүрсээр нээгээд энд «Асаах» дар</li></ol></div>`;
- if (s === "denied") return `<div class="notif">${head}<p>Мэдэгдлийг хаасан байна. Утасныхаа тохиргооноос энэ сайтад мэдэгдэл зөвшөөрөөд дахин оролдоорой.</p></div>`;
- if (s === "unsupported") return `<div class="notif">${head}<p>Энэ хөтөч мэдэгдэл дэмжихгүй байна. Android дээр Chrome, iPhone дээр нүүр дэлгэцэнд нэмсэн Tripp ашиглаарай.</p></div>`;
+ if (s === "on") return `<div class="notif">${head}<p>Асаалттай ✨ ${sched}</p><div class="row" style="flex-wrap:wrap"><button class="btn sm primary" type="button" data-act="testpush">${ico("bell","sm")} Туршиж үзэх</button>${schedBtn}<button class="btn sm" type="button" data-act="pushoff">Унтраах</button></div></div>`;
+ if (s === "ios") return `<div class="notif">${head}<p>iPhone дээр мэдэгдэл авахын тулд аппыг нүүр дэлгэцэндээ нэмнэ:</p><ol class="steps-ios"><li>Safari-ийн доод талын ${ico("share","sm")} товч</li><li>«Add to Home Screen» / «Нүүр дэлгэцэнд нэмэх»</li><li>Нүүр дэлгэцийн Tripp дүрсээр нээгээд энд «Асаах» дар</li></ol><div style="margin-top:var(--space-3)">${schedBtn}</div></div>`;
+ if (s === "denied") return `<div class="notif">${head}<p>Мэдэгдлийг хаасан байна. Утасныхаа тохиргооноос энэ сайтад мэдэгдэл зөвшөөрөөд дахин оролдоорой.</p>${schedBtn}</div>`;
+ if (s === "unsupported") return `<div class="notif">${head}<p>Энэ хөтөч мэдэгдэл дэмжихгүй байна. Android дээр Chrome, iPhone дээр нүүр дэлгэцэнд нэмсэн Tripp ашиглаарай.</p>${schedBtn}</div>`;
  if (s === "…") return `<div class="notif">${head}<p>Шалгаж байна…</p></div>`;
- return `<div class="notif">${head}<p>${sched}</p><button class="btn primary" type="button" data-act="pushon">${ico("bell","sm")} Мэдэгдэл асаах</button></div>`;
+ return `<div class="notif">${head}<p>${sched}</p><div class="row" style="flex-wrap:wrap"><button class="btn primary" type="button" data-act="pushon">${ico("bell","sm")} Мэдэгдэл асаах</button>${schedBtn}</div></div>`;
 }
 function notifPrompt() {
  if (tripPhase() === "after" || ls.get("sts:notifnag") === "no" || !["off", "ios"].includes(notifState)) return `<div id="notifPrompt"></div>`;
@@ -753,7 +1069,7 @@ async function pullRaw() {
   const loc = getItem(r.kind, r.key); if ((+r.ts || 0) > (loc?.ts || 0)) { if (r.kind === "seen" && !loc && SYNC.primed && r.key !== me && person(r.key)) fresh.push(person(r.key).name); setItem(r.kind, r.key, r.data); changed++; } });
  if (fresh.length) { toast(fresh.join(", ") + " аялалд нэгдлээ!"); confetti({count: 90}); }
  ls.set(cursorKey(), String(max));
- if (changed) { save(); if (!dlg().open) rerender(); }
+ if (changed) { save(); if (!dlg().open) rerender(); syncFiles(); }
  setSync(outbox.size ? "syncing" : "live"); return changed;
 }
 function pull() { if (!SYNC.client) return Promise.resolve(0); if (SYNC.pulling) return SYNC.pulling; SYNC.pulling = pullRaw().catch(e => { failed(e); return 0; }).finally(() => { SYNC.pulling = null; }); return SYNC.pulling; }
@@ -782,7 +1098,7 @@ async function connect() {
   if (!SYNC.ch) { try { SYNC.ch = SYNC.client.channel("trip-" + SYNC.code, {config: {broadcast: {self: false}, presence: {key: PRES.key}}})
    .on("broadcast", {event: "changed"}, () => pull()).on("presence", {event: "sync"}, presSync).on("presence", {event: "join"}, presJoin)
    .subscribe(st => { if (st === "SUBSCRIBED") { presTrack(); setTimeout(() => { PRES.ready = true; }, 1500); } }); } catch(e) { SYNC.ch = null; } }
-  await push(); return true; }
+  await push(); syncFiles(); return true; }
  catch(e) { failed(e); return false; }
 }
 function presTrack() { try { if (SYNC.ch && !document.hidden) SYNC.ch.track({me: me || null, t: Date.now()}); } catch(e) {} }
@@ -841,8 +1157,17 @@ document.addEventListener("click", async e => {
  if (ds.openday) { selDay = ds.openday; closeSheet(); go("today"); return; }
  if (ds.seeof) { seeCity = ds.seeof; routeSeg = "see"; closeSheet(); go("route"); return; }
  if (ds.pickme) { me = ds.pickme; ls.set(ME, me); closeSheet(); markSeen(); presTrack(); rerender(); toast("Сайн уу, " + person(me).name + "!"); if (notifState === "on") { const s = await currentSub(); if (s) saveSub(s).catch(() => {}); } return; }
- if (ds.check !== undefined) { const i = +ds.check, k = stepKey(selDay, i), done = !S.tasks[k]?.done; S.tasks[k] = {done, ts: now()}; save(); dirty("tasks", k); if (done) confetti({el: t, count: 70}); rerender(); return; }
- if (ds.step !== undefined) { if (ds.leg) { resDialog({leg: ds.leg}); return; } if (ds.stay) { resDialog({stay: ds.stay}); return; } stepDialog(selDay, +ds.step); return; }
+ if (ds.check !== undefined) { const i = +ds.check, k = stepKey(selDay, i, curTrack(dayList().find(x => x.date === selDay))), done = !S.tasks[k]?.done; S.tasks[k] = {done, ts: now()}; save(); dirty("tasks", k); if (done) confetti({el: t, count: 70}); rerender(); return; }
+ if (ds.step !== undefined) { if (ds.leg) { resDialog({leg: ds.leg}); return; } if (ds.stay) { resDialog({stay: ds.stay}); return; } stepDialog(selDay, +ds.step, curTrack(dayList().find(x => x.date === selDay))); return; }
+ if (ds.track) { viewTrack[selDay] = ds.track; rerender(); return; }
+ if (ds.jointrack) { if (!me) { whoDialog(true); return; } const k = trackKey(selDay, me); S.votes[k] = {v: ds.jointrack, ts: now()}; save(); dirty("votes", k); viewTrack[selDay] = ds.jointrack; confetti({el: t, count: ds.jointrack === "main" ? 60 : 160, spread: ds.jointrack === "main" ? "up" : "burst"}); rerender(); toast(ds.jointrack === "main" ? "Хотоор явна!" : "Дисней! 🏰"); return; }
+ if (ds.showres) { showRes(ds.showres); return; }
+ if (ds.viewfile) { const [rid, fi] = ds.viewfile.split("|"); showRes(rid, +fi); return; }
+ if (ds.openpdf) { openPdf(ds.openpdf); return; }
+ if (t.hasAttribute("data-closeviewer")) { closeViewer(); return; }
+ if (ds.nseg) { drawNotifs(ds.nseg); return; }
+ if (ds.sendme !== undefined) { sendMe(+ds.sendme, t); return; }
+ if (ds.newkind) { closeSheet(); setTimeout(() => resDialog({kind: ds.newkind}), 120); return; }
  if (ds.vote) { if (!me) { whoDialog(true); return; } const k = ds.vote + "." + me, on = !S.votes[k]?.v; S.votes[k] = {v: on, ts: now()}; save(); dirty("votes", k); if (on) confetti({el: t, count: 40}); rerender(); return; }
  if (ds.editsight) { sightDialog(ds.editsight); return; }
  if (ds.exp) { expenseDialog(ds.exp); return; }
@@ -858,16 +1183,23 @@ document.addEventListener("click", async e => {
  if (ds.settle) { const [from, to, amt] = ds.settle.split("|"), nid = uid();
   S.expenses[nid] = {desc: `Тооцоо: ${person(from).name} → ${person(to).name}`, amount: +amt, cur: "MNT", payer: from, split: [to], cat: "settle", date: todayISO(), created: now(), ts: now()};
   save(); dirty("expenses", nid); confetti({el: t, count: 150, spread: "burst"}); rerender(); toast("Тооцоо хаагдлаа!"); return; }
- if (ds.add) { const a = ds.add; closeSheet(); setTimeout(() => { if (a === "exp") expenseDialog(); if (a === "res") resDialog({kind: "plane"}); if (a === "sight") sightDialog(); if (a === "step") stepDialog(selDay || defaultDay(), null); }, 120); return; }
+ if (ds.add) { const a = ds.add; closeSheet(); setTimeout(() => { if (a === "exp") expenseDialog(); if (a === "res") newResMenu(); if (a === "sight") sightDialog(); if (a === "step") stepDialog(selDay || defaultDay(), null); }, 120); return; }
  const act = ds.act; if (!act) return;
  if (act === "who") whoDialog();
  if (act === "names") namesDialog();
  if (act === "sync") syncDialog();
  if (act === "fab") { if (view === "money") expenseDialog(); else addMenu(); }
  if (act === "editday") dayDialog(selDay);
- if (act === "addstep") stepDialog(selDay, null);
+ if (act === "addstep") stepDialog(selDay, null, curTrack(dayList().find(x => x.date === selDay)));
+ if (act === "wallet") walletSheet();
+ if (act === "notifs") notifSheet();
+ if (act === "wish") wishDialog();
+ if (act === "santacfg") santaCfgDialog();
+ if (act === "santareveal") santaReveal(t);
+ if (act === "santashow") { santaShow = !santaShow; rerender(); }
+ if (act === "santaall") { try { const r = await pushFn({type: "santa_all"}); if (r.wait) toast("Шинэ жилийн дараа харагдана"); else { santaPairs = r.pairs; rerender(); confetti({count: 200, spread: "burst"}); } } catch(e) { toast("Сүлжээ хэрэгтэй"); } }
  if (act === "addsight") sightDialog();
- if (act === "newres") resDialog({kind: "plane"});
+ if (act === "newres") newResMenu();
  if (act === "celebrate") { confetti({el: t, count: 180, spread: "burst"}); setTimeout(() => confetti({count: 120, spread: "burst"}), 500); }
  if (act === "pushon") pushOn(t);
  if (act === "pushoff") pushOff();
@@ -886,6 +1218,7 @@ document.addEventListener("change", e => {
  const t = e.target, ds = t.dataset;
  if (ds.task) { S.tasks[ds.task] = {...(S.tasks[ds.task] || {}), done: t.checked, ts: now()}; save(); dirty("tasks", ds.task); if (t.checked) confetti({el: t, count: 60}); rerender(); }
  if (ds.pk) { const pid = packFor || me || S.people[0].id, cur = S.pack[pid]?.items || {}; S.pack[pid] = {items: {...cur, [ds.pk]: t.checked}, ts: now()}; save(); dirty("pack", pid); if (t.checked) { const all = [...PACK.flatMap(g => g.k.map((k, i) => g.id + ":" + i)), ...(S.extraPack[pid]?.items || []).map(x => "x:" + x.id)]; if (all.every(k => S.pack[pid].items[k])) { confetti({count: 220, spread: "burst"}); toast("Ачаа бүрэн бэлэн! 🎉"); } } rerender(); }
+ if (t.hasAttribute("data-santaready")) { const k = "santa.ready." + me; if (!me) return; S.votes[k] = {v: t.checked, ts: now()}; save(); dirty("votes", k); if (t.checked) confetti({el: t, count: 80}); rerender(); }
  if (ds.actUsd) { const v = parseFloat(t.value); S.actuals[ds.actUsd] = {usd: v > 0 ? v : null, ts: now()}; save(); dirty("actuals", ds.actUsd); rerender(); }
  if (ds.rate) { const v = parseFloat(t.value); if (v > 0) { S.rates = {...S.rates, [ds.rate]: v, ts: now()}; save(); dirty("rates", "main"); rerender(); } }
  if (t.matches("[data-conv-c]")) { conv.c = t.value; rerender(); }
@@ -907,5 +1240,7 @@ checkJoin();
 go(view, false);
 setInterval(renderCount, 1000);
 if (SYNC.code) connect(); else setSync("off");
+setTimeout(loadWiki, 1500); syncFiles();
+addEventListener("online", () => { loadWiki(); syncFiles(); });
 if (!me && !pendingInvite) setTimeout(() => { if (!dlg().open) whoDialog(true); }, 500);
 if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").then(() => refreshNotif()).catch(() => refreshNotif()); else refreshNotif();

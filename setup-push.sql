@@ -101,3 +101,11 @@ $$;
 drop trigger if exists tripp_expense_push on public.trip_items;
 create trigger tripp_expense_push after insert on public.trip_items
   for each row when (new.kind = 'expenses') execute function public.tripp_on_expense();
+
+-- Added 2026-11-15: sent-message log and Secret Santa (applied).
+create table if not exists public.push_log (id bigserial primary key, at timestamptz not null default now(), trip_code text, type text not null, title text, body text, ok int not null default 0, fail int not null default 0, gone int not null default 0);
+alter table public.push_log enable row level security;
+create table if not exists public.santa (trip_code text not null, giver text not null, receiver text not null, key_hash text, drawn_at timestamptz not null default now(), primary key (trip_code, giver));
+alter table public.santa enable row level security;
+-- tripp_santa_draw(p_code): one random cycle through the trip's people (service role only).
+-- cron: tripp-santa  0 1 28 12 *  (09:00 Shanghai, 28 Dec)
