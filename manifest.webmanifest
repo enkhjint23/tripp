@@ -1,15 +1,17 @@
 {
-  "name": "Тал нутгаас Самуй руу",
-  "short_name": "Самуй 2027",
-  "description": "Шинэ жилийн аяллын төлөвлөгөө: Улаанбаатар → Эрээн → Хөх хот → Шанхай → Ко Самуй → Бангкок.",
+  "name": "Tripp · Шинэ жилийн аялал",
+  "short_name": "Tripp",
+  "description": "Шинэ жилийн аялал: Улаанбаатар → Замын-Үүд → Хөх хот → Шанхай → Пхукет → Бангкок.",
   "lang": "mn",
-  "start_url": "./",
+  "start_url": "./#today",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#F4F5F7",
-  "theme_color": "#F4F5F7",
+  "background_color": "#080915",
+  "theme_color": "#080915",
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }
