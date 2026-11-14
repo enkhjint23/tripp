@@ -892,7 +892,7 @@ const whenLocal = iso => { const d = new Date(iso), z = n => String(n).padStart(
 let notifCache = null;
 function bubble(m, i, canSend) {
  const k = KIND_IC[m.kind || m.type] || KIND_IC.cheer;
- return `<div class="nbubble c-${k[1]}"><div class="nb-top"><img src="icons/icon-192.png" alt=""><span>TRIPP</span><span class="grow"></span><span class="mono">${m.at ? whenLocal(m.at) : ""}</span></div>
+ return `<div class="nbubble c-${k[1]}"><div class="nb-top"><img src="icon-192.png" alt=""><span>TRIPP</span><span class="grow"></span><span class="mono">${m.at ? whenLocal(m.at) : ""}</span></div>
   <div class="nb-t">${esc(m.title)}</div><div class="nb-b">${esc(m.body)}</div>
   ${m.ok != null ? `<div class="nb-meta">${ico("check","sm")} ${m.ok} утсанд хүрсэн${m.fail ? ` · ${m.fail} алдаа` : ""}</div>` : ""}
   ${canSend && i != null ? `<button class="tag" type="button" data-sendme="${i}">${ico("bell","sm")} Надад одоо илгээх</button>` : ""}</div>`;
@@ -921,8 +921,8 @@ function drawNotifs(seg) {
 }
 async function sendMe(i, btn) {
  const m = notifCache?.up?.[i], sub = await currentSub(); if (!m || !sub) { toast("Эхлээд мэдэгдлээ асаа"); return; }
- btn.disabled = true; btn.textContent = "Илгээж байна…";
- try { await pushFn({type: "test", endpoint: sub.endpoint, msg: {title: m.title, body: m.body}}); btn.textContent = "Илгээлээ ✓"; confetti({el: btn, count: 40}); } catch(e) { btn.textContent = "Чадсангүй"; }
+ btn.disabled = true; btn.textContent = "6 секундын дараа…"; if (isIOS) toast("Одоо Home руу гараад хүлээгээрэй 📱");
+ try { await pushFn({type: "test", endpoint: sub.endpoint, delay: 6, msg: {title: m.title, body: m.body}}); btn.textContent = "Илгээлээ ✓"; confetti({el: btn, count: 40}); } catch(e) { btn.textContent = "Чадсангүй"; }
 }
 
 /* ================= SECRET SANTA ================= */
@@ -992,13 +992,15 @@ const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform 
 const standalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 const b64u = s => { const p = "=".repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(b, c => c.charCodeAt(0)); };
-async function swReg() { if (!("serviceWorker" in navigator)) return null; try { return await Promise.race([navigator.serviceWorker.ready, new Promise(r => setTimeout(() => r(null), 4000))]); } catch(e) { return null; } }
+async function swReg() { if (!("serviceWorker" in navigator)) return null; try { return await Promise.race([navigator.serviceWorker.ready, new Promise(r => setTimeout(() => r(null), 12000))]); } catch(e) { return null; } }
 async function currentSub() { const r = await swReg(); try { return r ? await r.pushManager.getSubscription() : null; } catch(e) { return null; } }
 async function computeNotif() {
  if (isIOS && !standalone()) return "ios";
  if (!pushSupported() || !CFG.vapidPublicKey) return "unsupported";
  if (Notification.permission === "denied") return "denied";
- return (await currentSub()) ? "on" : "off";
+ if (await currentSub()) return "on";
+ if (Notification.permission === "granted" && ls.get("sts:push") === "1") { healed = false; await healPush(); return (await currentSub()) ? "on" : "off"; }
+ return "off";
 }
 async function refreshNotif() { notifState = await computeNotif(); const c = $("#notifCard"); if (c) c.innerHTML = notifCardHTML(); const p = $("#notifPrompt"); if (p) p.outerHTML = notifPrompt(); }
 function notifCardHTML() {
@@ -1032,12 +1034,28 @@ async function pushOn(btn) {
   testPush(true);
  } catch(e) { console.error(e); toast("Асааж чадсангүй: " + (e.message || e)); await refreshNotif(); }
 }
-async function saveSub(sub) { if (!SYNC.client) await connect(); const {error} = await SYNC.client.rpc("push_subscribe", {p_code: SYNC.code, p_sub: sub.toJSON(), p_person: me || null, p_ua: navigator.userAgent.slice(0, 200)}); if (error) throw error; }
+const deviceId = () => { let d = ls.get("sts:device"); if (!d) { d = newCode(); ls.set("sts:device", d); } return d; };
+async function saveSub(sub) { if (!SYNC.code) return; if (!SYNC.client) await connect(); const {error} = await SYNC.client.rpc("push_subscribe", {p_code: SYNC.code, p_sub: sub.toJSON(), p_person: me || null, p_ua: navigator.userAgent.slice(0, 200), p_device: deviceId()}); if (error) throw error; }
+/* Keep this phone's subscription alive: re-save it on every start, and quietly make a new one if iOS dropped it */
+let healed = false;
+async function healPush() {
+ if (healed || !SYNC.code || !pushSupported() || Notification.permission !== "granted" || ls.get("sts:push") !== "1") return;
+ healed = true;
+ try {
+  const reg = await navigator.serviceWorker.ready; let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64u(CFG.vapidPublicKey)});
+  await saveSub(sub); notifState = "on"; const c = $("#notifCard"); if (c) c.innerHTML = notifCardHTML();
+ } catch(e) { healed = false; }
+}
 async function pushOff() { const sub = await currentSub(); if (sub) { try { if (SYNC.client) await SYNC.client.rpc("push_unsubscribe", {p_code: SYNC.code, p_endpoint: sub.endpoint}); } catch(e) {} await sub.unsubscribe(); } ls.del("sts:push"); await refreshNotif(); toast("Мэдэгдэл унтарлаа"); }
+/* iPhone shows no banner while the app is open, so the test arrives after a short delay: go to the Home Screen and wait */
 async function testPush(quiet) {
- const sub = await currentSub(); if (!sub) return;
- try { const r = await fetch(SYNC.url + "/functions/v1/tripp-push", {method: "POST", headers: {"content-type": "application/json", apikey: SYNC.key}, body: JSON.stringify({type: "test", code: SYNC.code, endpoint: sub.endpoint})});
-  if (!quiet) toast(r.ok ? "Илгээлээ! Хэдэн секундэд ирнэ" : "Илгээж чадсангүй"); } catch(e) { if (!quiet) toast("Илгээж чадсангүй"); }
+ const sub = await currentSub(); if (!sub) { toast("Мэдэгдэл унтарсан байна. Дахин асаана уу"); refreshNotif(); return; }
+ try { await saveSub(sub); } catch(e) {}
+ const delay = quiet ? 0 : 6;
+ if (!quiet) toast(isIOS ? "6 секундын дараа ирнэ. Одоо Home руу гараад хүлээгээрэй 📱" : "6 секундын дараа ирнэ");
+ try { const r = await fetch(SYNC.url + "/functions/v1/tripp-push", {method: "POST", headers: {"content-type": "application/json", apikey: SYNC.key}, body: JSON.stringify({type: "test", code: SYNC.code, endpoint: sub.endpoint, delay}), keepalive: true});
+  if (!r.ok && !quiet) toast("Илгээж чадсангүй. Дахин асаагаад үзээрэй"); } catch(e) { if (!quiet) toast("Илгээж чадсангүй"); }
 }
 
 /* ================= SYNC (unchanged protocol) ================= */
@@ -1098,7 +1116,7 @@ async function connect() {
   if (!SYNC.ch) { try { SYNC.ch = SYNC.client.channel("trip-" + SYNC.code, {config: {broadcast: {self: false}, presence: {key: PRES.key}}})
    .on("broadcast", {event: "changed"}, () => pull()).on("presence", {event: "sync"}, presSync).on("presence", {event: "join"}, presJoin)
    .subscribe(st => { if (st === "SUBSCRIBED") { presTrack(); setTimeout(() => { PRES.ready = true; }, 1500); } }); } catch(e) { SYNC.ch = null; } }
-  await push(); syncFiles(); return true; }
+  await push(); syncFiles(); healPush(); return true; }
  catch(e) { failed(e); return false; }
 }
 function presTrack() { try { if (SYNC.ch && !document.hidden) SYNC.ch.track({me: me || null, t: Date.now()}); } catch(e) {} }
@@ -1243,4 +1261,10 @@ if (SYNC.code) connect(); else setSync("off");
 setTimeout(loadWiki, 1500); syncFiles();
 addEventListener("online", () => { loadWiki(); syncFiles(); });
 if (!me && !pendingInvite) setTimeout(() => { if (!dlg().open) whoDialog(true); }, 500);
-if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").then(() => refreshNotif()).catch(() => refreshNotif()); else refreshNotif();
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+ navigator.serviceWorker.register("sw.js", {updateViaCache: "none"}).then(r => { r.update().catch(() => {}); refreshNotif(); }).catch(() => refreshNotif());
+ navigator.serviceWorker.addEventListener("message", e => {
+  if (e.data?.type === "push" && document.visibilityState === "visible") toast("🔔 " + e.data.title);
+  if (e.data?.type === "resub") { healed = false; healPush(); }
+ });
+} else refreshNotif();

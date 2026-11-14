@@ -1,11 +1,12 @@
 // Tripp service worker: works offline (trains, planes, roaming in China) and shows push notifications.
 // Trip data itself syncs through Supabase and is never cached here.
-const CACHE = "tripp-v4";
-const SHELL = ["./", "./index.html", "./app.css?v=4", "./app.js?v=4", "./data.js?v=4", "./config.js?v=4", "./manifest.webmanifest", "./icons/icon.svg", "./icons/icon-192.png", "./icons/badge-96.png"];
+const CACHE = "tripp-v5";
+const SHELL = ["./", "./index.html", "./app.css?v=5", "./app.js?v=5", "./data.js?v=5", "./config.js?v=5", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./badge-96.png"];
 const STATIC_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com", "cdn.jsdelivr.net", "upload.wikimedia.org"];
 
+// A missing file must never stop the install: an old worker without the push handler would keep running.
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => Promise.all(SHELL.map(u => c.add(u).catch(() => null)))).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys()
@@ -40,15 +41,23 @@ self.addEventListener("fetch", e => {
 self.addEventListener("push", e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data && e.data.text() }; }
-  e.waitUntil(self.registration.showNotification(d.title || "Tripp", {
+  const tell = self.clients.matchAll({ type: "window", includeUncontrolled: true })
+    .then(list => list.forEach(c => c.postMessage({ type: "push", title: d.title || "Tripp", body: d.body || "" })));
+  e.waitUntil(Promise.all([tell, self.registration.showNotification(d.title || "Tripp", {
     body: d.body || "",
     tag: d.tag || undefined,
-    renotify: !!d.tag,
-    icon: "icons/icon-192.png",
-    badge: "icons/badge-96.png",
+    icon: "icon-192.png",
+    badge: "badge-96.png",
     data: { url: d.url || "./" },
     vibrate: [80, 40, 80]
-  }));
+  })]));
+});
+// The browser replaced our subscription: make a new one and let the app save it.
+self.addEventListener("pushsubscriptionchange", e => {
+  const opts = e.oldSubscription && e.oldSubscription.options;
+  e.waitUntil((opts ? self.registration.pushManager.subscribe(opts) : Promise.resolve(null)).catch(() => null)
+    .then(() => self.clients.matchAll({ type: "window", includeUncontrolled: true }))
+    .then(list => list.forEach(c => c.postMessage({ type: "resub" }))));
 });
 self.addEventListener("notificationclick", e => {
   e.notification.close();
