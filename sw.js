@@ -1,7 +1,7 @@
 // Tripp service worker: works offline (trains, planes, roaming in China) and shows push notifications.
 // Trip data itself syncs through Supabase and is never cached here.
-const CACHE = "tripp-v5";
-const SHELL = ["./", "./index.html", "./app.css?v=5", "./app.js?v=5", "./data.js?v=5", "./config.js?v=5", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./badge-96.png"];
+const CACHE = "tripp-v6";
+const SHELL = ["./", "./index.html", "./app.css?v=6", "./app.js?v=6", "./data.js?v=6", "./config.js?v=6", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./badge-96.png"];
 const STATIC_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com", "cdn.jsdelivr.net", "upload.wikimedia.org"];
 
 // A missing file must never stop the install: an old worker without the push handler would keep running.

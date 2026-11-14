@@ -1144,8 +1144,13 @@ async function joinTrip(inv) {
 }
 let pendingInvite = null;
 function banner() {
- if (!pendingInvite) return "";
- return `<div class="banner"><p><b>Таныг бүлгийн аялалд урьжээ!</b> Нэгдвэл бүх хүний төлөвлөгөө, захиалга, зардлыг шууд харна.</p><div class="row"><button class="btn primary" type="button" data-act="joinyes">Аялалд нэгдэх</button><button class="btn" type="button" data-act="joinno">Одоо биш</button></div></div>`;
+ if (pendingInvite && isIOS && !standalone()) return `<div class="banner"><p><b>Таныг аялалд урьжээ!</b> iPhone дээр эхлээд Tripp-ийг нүүр дэлгэцэндээ нэмье:</p>
+  <ol class="steps-ios" style="color:var(--ink)"><li><b>Холбоосыг хуулах</b> товчийг дар</li><li>Safari-ийн ${ico("share","sm")} товч → <b>Add to Home Screen</b> → <b>Add</b></li><li>Нүүр дэлгэцийн <b>Tripp</b>-ийг нээгээд <b>Урилга буулгах</b> дар</li></ol>
+  <div class="row"><button class="btn primary" type="button" data-act="copyinvite">${ico("copy","sm")} Холбоосыг хуулах</button><button class="btn" type="button" data-act="joinyes">Safari-д нэгдэх</button></div>
+  <p class="sub">Messenger, Instagram дотор нээгдсэн бол ••• цэс → «Open in Safari».</p></div>`;
+ if (pendingInvite) return `<div class="banner"><p><b>Таныг бүлгийн аялалд урьжээ!</b> Нэгдвэл бүх хүний төлөвлөгөө, захиалга, зардлыг шууд харна.</p><div class="row"><button class="btn primary" type="button" data-act="joinyes">Аялалд нэгдэх</button><button class="btn" type="button" data-act="joinno">Одоо биш</button></div></div>`;
+ if (!SYNC.code) return `<div class="banner"><p><b>Аялалд нэгдэх</b> Найзаасаа авсан урилгын холбоосоо хуулсан бол доорх товчийг дар. Бүх зүйл шууд синк хийгдэнэ.</p><div class="row"><button class="btn primary" type="button" data-act="pasteinvite">${ico("link","sm")} Урилга буулгах</button><button class="btn" type="button" data-act="sync">Гараар оруулах</button></div></div>`;
+ return "";
 }
 function checkJoin() { if (!location.hash.startsWith("#join=")) return; const inv = parseInvite(location.hash); history.replaceState(null, "", location.pathname + "#" + view);
  if (!inv) { toast("Урилгын холбоос дутуу байна"); return; } if (SYNC.code === inv.c) { if (!me) setTimeout(() => whoDialog(true), 400); return; } pendingInvite = inv; }
@@ -1230,6 +1235,10 @@ document.addEventListener("click", async e => {
  if (act === "create") { t.disabled = true; t.textContent = "Үүсгэж байна…"; const ok = await createTrip(); closeSheet(); rerender(); if (ok) { confetti({count: 160, spread: "burst"}); toast("Бэлэн! Одоо найзуудаа урь"); } else toast(SYNC.msg || "Үүсгэж чадсангүй"); }
  if (act === "joinpaste") { const inv = parseInvite($("#invIn")?.value); if (!inv) { toast("Холбоос буруу байна"); return; } closeSheet(); await joinTrip(inv); rerender(); }
  if (act === "joinyes") { t.disabled = true; t.textContent = "Нэгдэж байна…"; const inv = pendingInvite; pendingInvite = null; await joinTrip(inv); rerender(); }
+ if (act === "copyinvite" && pendingInvite) { const u = location.origin + location.pathname + "#join=" + b64e(pendingInvite); try { await navigator.clipboard.writeText(u); toast("Хуулагдлаа! Одоо Share → Add to Home Screen"); confetti({el: t, count: 50}); } catch(e) { prompt("Хуулаарай:", u); } }
+ if (act === "pasteinvite") { let txt = ""; try { txt = await navigator.clipboard.readText(); } catch(e) {} const inv = parseInvite(txt);
+  if (!inv) { toast("Хуулсан урилга олдсонгүй. Холбоосоо дахин хуулаад оролдоорой"); syncDialog(); return; }
+  t.disabled = true; t.textContent = "Нэгдэж байна…"; await joinTrip(inv); rerender(); }
  if (act === "joinno") { pendingInvite = null; rerender(); if (!me) whoDialog(true); }
 });
 document.addEventListener("change", e => {
@@ -1260,7 +1269,7 @@ setInterval(renderCount, 1000);
 if (SYNC.code) connect(); else setSync("off");
 setTimeout(loadWiki, 1500); syncFiles();
 addEventListener("online", () => { loadWiki(); syncFiles(); });
-if (!me && !pendingInvite) setTimeout(() => { if (!dlg().open) whoDialog(true); }, 500);
+if (!me && !pendingInvite && SYNC.code) setTimeout(() => { if (!dlg().open) whoDialog(true); }, 500);
 if ("serviceWorker" in navigator && location.protocol === "https:") {
  navigator.serviceWorker.register("sw.js", {updateViaCache: "none"}).then(r => { r.update().catch(() => {}); refreshNotif(); }).catch(() => refreshNotif());
  navigator.serviceWorker.addEventListener("message", e => {
